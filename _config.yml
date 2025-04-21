@@ -1,0 +1,43 @@
+title: Juncture
+
+description: >
+  Juncture Website Framework.
+
+author:
+  name: Ron Snyder
+  email: ron@snyderjr.com
+
+collections:
+  components:
+    output: true
+    permalink: /:collection/:path/
+  docs:
+    output: true
+    permalink: /:collection/:path/
+  examples:
+    output: true
+    permalink: /:collection/:path/
+
+nav_pages:
+  - index.md
+  - about.md
+  - _docs/index.md
+  - _examples/index.md
+  - blog.md
+
+max-width: 1000px
+
+blog:
+  enabled: true
+  show_excerpts: true
+  show_rss_feed: true
+
+footer:
+  show_github_link: true
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+contentSelector: main.post-content, div.post-content

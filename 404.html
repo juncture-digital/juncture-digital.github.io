@@ -1,0 +1,93 @@
+---
+layout: minimal
+contentSelector: main
+---
+
+<script>
+  const moved = new Set('audio header image map youtube'.split(' '))
+  const pathRoot = location.pathname.split('/')[1]
+  if (moved.has(pathRoot)) location.pathname = `/components/${pathRoot}`
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-attrs@4.3.1/markdown-it-attrs.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-footnote@4.0.0/dist/markdown-it-footnote.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-deflist@3.0.0/dist/markdown-it-deflist.min.js"></script>
+<script type="module">
+
+  const getGhFile = async (acct, repo, branch, path) => {
+    let url = `https://api.github.com/repos/${acct}/${repo}/contents/${path}?ref=${branch}`
+    let resp = await fetch(url, {cache: 'no-cache'})
+    if (resp.ok) {
+      let payload = await resp.json()
+      let content = decodeURIComponent(escape(atob(payload.content)))
+      return {status: resp.status, content}
+    } else if (resp.status === 403 || resp.status === 401) { // access problem, possibly api rate limit exceeded
+      url = `https://raw.githubusercontent.com/${acct}/${repo}/${branch}/${path}`
+      resp = await fetch(url)
+      if (resp.ok) {
+        let content = await resp.text()
+        return {status: resp.status, content}
+      } else {
+        return {status: resp.status, content: null}
+      }
+    } else {
+      return {status: resp.status, content: null}
+    }
+  }
+
+  const getMarkdown = async (owner, repo, branch, path) => {
+    let extension = path.slice(-3) === '.md' ? 'md' : ''
+    // console.log(`getMarkdown: owner=${owner}, repo=${repo}, branch=${branch}, path=${path}, extension=${extension}`)
+    if (extension === 'md') {
+      let resp = await getGhFile(owner, repo, branch, path)
+      return resp.content
+    } else {
+      return await Promise.all([
+        getGhFile(owner, repo, branch, `${path}.md`),
+        getGhFile(owner, repo, branch, `${path}/README.md`),
+        getGhFile(owner, repo, branch, `${path}/index.md`)
+      ]).then(resp => { 
+        let found = resp.find(r => r?.status === 200)
+        return found?.content || ''
+      })
+    }
+  }
+
+  let main = document.querySelector('main')
+
+  let [owner, repo, ...path] = location.pathname.slice(window.jekyll?.site.baseurl.length || 0).split('/').filter(Boolean)
+  let branch = new URLSearchParams(location.search).get('branch') || 'main'
+  let markdown = await getMarkdown(owner, repo, branch, path.join('/'))
+  if (markdown) {
+    const fmRegex = /^---\s*[\r\n]+([\s\S]*?)[\r\n]+---[\r\n]+/;
+
+    // Match the front matter using the regex.
+    const match = markdown.match(fmRegex);
+    let frontMatter = {};
+
+    if (match) {
+      // Convert the captured front matter (YAML) into a JavaScript object.
+      frontMatter = jsyaml.load(match[1]);
+      // Remove the front matter block from the Markdown text.
+      markdown = markdown.replace(fmRegex, '');
+    }
+
+    const md = markdownit()
+      .use(markdownItAttrs, {leftDelimiter: '{:', rightDelimiter: '}'})
+      .use(markdownitFootnote);
+    main.setAttribute('style', 'opacity:0; padding:0 1em;' + (frontMatter['max-width'] ? ` max-width:${frontMatter['max-width']}; margin:0 auto;` : ''))
+    main.innerHTML = md.render(markdown)
+    let ifcScript = document.createElement('script')
+    ifcScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.www.www.juncture-digital.io'}/js/index.js`
+    ifcScript.type = 'module'
+    document.body.appendChild(ifcScript)
+  } else {
+    main.innerHTML = `<div class="container">
+      <h1>404</h1>
+      <p><strong>Page not found :(</strong></p>
+      <p>The requested page could not be found.</p>
+    </div>`
+  }
+</script>

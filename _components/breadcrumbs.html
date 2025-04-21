@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/themes/light.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
+    main {  display: flex; flex-direction: column; width: 100%; }
+    figure { display: grid; grid-template-rows: 1fr auto; margin: 0; }
+    figcaption { display:none; padding: 6px; font-size: 1em; align-items: center; gap: 0.5em; height: 100%; justify-content: center; font-weight: 500; }
+    .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    audio { width: 100%; }
+  </style>
+</head>
+<body>
+  
+  <main></main>
+
+  <script type="module">
+
+    import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/breadcrumb/breadcrumb.js';
+    import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/breadcrumb-item/breadcrumb-item.js';
+
+    const props = Object.fromEntries( // Convert URLSearchParams to object
+      Array.from(new URLSearchParams(location.search).entries())
+      .map(([key, value]) => [key, (value === 'true' || !value) ? true : value === 'false' ? false : value])
+    )
+
+    const main = document.querySelector('main');
+
+    const setBreadcrumbs = (path) => {
+      // let pathElems = [...['home'], ...path.split('/').filter(Boolean).map(item => item.replace(/\.html$/, ''))]
+      let pathElems = path.split('/').filter(Boolean).map(item => item.replace(/\.html$/, ''))
+      let breadcrumb = document.createElement('sl-breadcrumb');
+      pathElems.forEach((item, index) => {
+        let breadcrumbItem = document.createElement('sl-breadcrumb-item');
+        breadcrumbItem.textContent = item;
+        breadcrumbItem.addEventListener('click', () => {
+          console.log('Clicked:', item);
+          let url = `/${pathElems.slice(0, index + 1).join('/')}`;
+          console.log('URL:', url);
+          window.parent.postMessage({ type: 'openLink', url }, '*');
+        });
+        breadcrumbItem.setAttribute('aria-current', index === path.length - 1 ? 'page' : 'false');
+        breadcrumb.appendChild(breadcrumbItem);
+      });
+      main.appendChild(breadcrumb);  
+    }
+  
+    window.addEventListener('message', (event) => {
+      let eventData = JSON.parse(event.data)
+      console.log(eventData)
+      if (eventData.event === 'path') {
+        setBreadcrumbs(eventData.path)
+      }
+    });
+    window.parent.postMessage({ type: 'getPath'}, '*');
+    
+  </script>
+  
+</body>
+</html>
