@@ -159,7 +159,7 @@ Go to: `https://juncture-digital.io/<GitHub username>/<repository name>/<path to
 
 For example, if your GitHub username is `jane-doe` and your file is `example.md` in a repo called `my-juncture-site`, your page will be: `https://juncture-digital.io/jane-doe/my-juncture-site/example
 
-If you used the basic example your page should look like <a href="https://juncture-digital.io/rsnyder/ifc/_examples/demo?branch=simple" target="_blank">this</a>.
+If you used the basic example your page should look like <a href="https://juncture-digital.io/juncture-digital/juncture-digital.github.io/_examples/demo?branch=simple" target="_blank">this</a>.
 
 ### 6. **Edit, preview, repeat**
 Any time you want to make changes:

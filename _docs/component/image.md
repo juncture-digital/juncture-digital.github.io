@@ -139,15 +139,15 @@ In this example the classes `medium` and `center` are used to display the image 
 #### GitHub example
 {: .example}
 
-In this example a GitHub hosted image is used and the `gh:` short-hand prefix is used in the `src` property.  The image is hosted in the `ifc` repository in the `rsnyder` GitHub account.  It is in the `main` branch and is located at the `docs/components/monument-valley.jpg` path.  The full `src` value is `gh:rsnyder/ifc/main/docs/components/monument-valley.jpg`.
+In this example a GitHub hosted image is used and the `gh:` short-hand prefix is used in the `src` property.  The image is hosted in the `juncture-digital.github.io` repository in the `juncture-digital` GitHub account.  It is in the `main` branch and is located at the `docs/components/monument-valley.jpg` path.  The full `src` value is `gh:juncture-digital/juncture-digital.github.io/main/docs/components/monument-valley.jpg`.
 
 In this example the positioning properties `medium` and `center` are used to display the image in the center of the window at 50% of the window width. The `shadow` class is also set to add a subtle box shadow effect to the component.
 
 ```juncture
-`image src=gh:rsnyder/ifc/main/docs/components/monument-valley.jpg .medium .center .shadow`
+`image src=gh:juncture-digital/juncture-digital.github.io/main/docs/components/monument-valley.jpg .medium .center .shadow`
 ```
 ---
-`image src=gh:rsnyder/ifc/main/docs/components/monument-valley.jpg .medium .center .shadow`
+`image src=gh:juncture-digital/juncture-digital.github.io/main/docs/components/monument-valley.jpg .medium .center .shadow`
 
 ### Annotations 
 

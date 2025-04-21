@@ -48,8 +48,8 @@ const parseCodeEl = (el) => {
   return parsed
 }
 
-const ifcPrefix = location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://www.juncture-digital.io'
-// const ifcPrefix = 'https://juncture-digital.io'
+const juncturePrefix = location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://www.juncture-digital.io'
+// const juncturePrefix = 'https://juncture-digital.io'
 const makeIframe = (code) => {
   let iframe = document.createElement('iframe')
   iframe.setAttribute('loading', 'lazy')
@@ -66,7 +66,7 @@ const makeIframe = (code) => {
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`), ...(code.booleans || [])
     ].join('&')
 
-  iframe.src = code.tag === 'iframe' ? code.kwargs.src : `${ifcPrefix}/components/${code.tag}?${args}`
+  iframe.src = code.tag === 'iframe' ? code.kwargs.src : `${juncturePrefix}/components/${code.tag}?${args}`
 
   let isOnlyChild = code.el.parentElement?.children.length === 1 && code.el.parentElement?.children[0] === code.el
   if (isOnlyChild) code.el.parentElement.replaceWith(iframe)

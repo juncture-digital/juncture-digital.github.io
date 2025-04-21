@@ -79,10 +79,10 @@ contentSelector: main
       .use(markdownitFootnote);
     main.setAttribute('style', 'opacity:0; padding:0 1em;' + (frontMatter['max-width'] ? ` max-width:${frontMatter['max-width']}; margin:0 auto;` : ''))
     main.innerHTML = md.render(markdown)
-    let ifcScript = document.createElement('script')
-    ifcScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.www.www.juncture-digital.io'}/js/index.js`
-    ifcScript.type = 'module'
-    document.body.appendChild(ifcScript)
+    let junctureScript = document.createElement('script')
+    junctureScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.www.www.juncture-digital.io'}/js/index.js`
+    junctureScript.type = 'module'
+    document.body.appendChild(junctureScript)
   } else {
     main.innerHTML = `<div class="container">
       <h1>404</h1>

@@ -187,10 +187,10 @@
         let branch = window.jekyll.site.github.source.branch
         window.ghbase = `${owner}/${repo}/${branch}`
       }      
-      let ifcScript = document.createElement('script')
-      ifcScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.juncture-digital.io'}/js/index.js`
-      ifcScript.type = 'module'
-      document.body.appendChild(ifcScript)
+      let junctureScript = document.createElement('script')
+      junctureScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.juncture-digital.io'}/js/index.js`
+      junctureScript.type = 'module'
+      document.body.appendChild(junctureScript)
 
       maxWidth = maxWidth || '{{ site.max-width }}'
       if (maxWidth) {

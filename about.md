@@ -51,7 +51,7 @@ If you want to publish online and prefer simplicity with creative control, Junct
 
 ### Open and Community-Driven
 
-Juncture is freely available under an open license.  We welcome your ideas, contributions, and feedback. To learn more or get involved, visit the [GitHub repository](https://github.com/juncture-digital/ifc) or explore the [component documentation](/).
+Juncture is freely available under an open license.  We welcome your ideas, contributions, and feedback. To learn more or get involved, visit the [GitHub repository](https://github.com/juncture-digital/juncture-digital.github.io) or explore the [component documentation]({{ site.baseurl }}/docs).
 
 ### The Juncture Vision
 

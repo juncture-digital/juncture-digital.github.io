@@ -30,7 +30,7 @@ With Juncture, you write your pages in simple Markdown format. Each page becomes
 
 For example, a file called `index.md` becomes your homepage.
 
-## 3. Add Juncture IFC Tags
+## 3. Add Juncture Tags
 Inside your Markdown files, you can use Juncture’s custom tags (like `` `map` ``, `` `image` ``, etc.) to embed interactive content.
 
 ## 4. Publish Using GitHub Pages
@@ -51,5 +51,5 @@ Juncture is designed to work seamlessly with GitHub Pages, making it easy for an
 |------------------------|-------------------------------------------|
 | **GitHub**            | Free file hosting and version control     |
 | **Markdown**          | Easy-to-learn syntax for writing content  |
-| **Juncture IFC**      | Add maps, images, videos with 1 line      |
+| **Juncture**          | Add maps, images, videos with 1 line      |
 | **GitHub Pages**      | Free website hosting with no coding needed|
