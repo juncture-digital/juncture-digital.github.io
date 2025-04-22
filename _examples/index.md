@@ -4,6 +4,19 @@ title: Examples
 permalink: /examples
 ---
 
+# Juncture Examples
+{: .cards}
+
+## Monument Valley
+
+[]({{ site.baseurl }}/examples/monument-valley)
+
+![](wc:Monument_Valley_Aussichtspunkt.JPG)
+
+An essay on the Monument Valley demonstrating the use of a header, footnotes, an interactive image and map, entity info popups, and YouTube videos.
+
+
+{%- comment -%} 
 <ul>
 {% assign posts = site['examples'] %}
 {% for post in posts %}
@@ -23,3 +36,4 @@ permalink: /examples
     </li>
 {% endfor %}
 </ul>
+{%- endcomment -%}

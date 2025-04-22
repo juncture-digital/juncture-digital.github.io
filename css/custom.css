@@ -203,6 +203,10 @@ iframe[src*="google-book"] {
 
 @media (min-width: 600px) {
 
+  sl-card {
+    max-width: 300px;
+  }
+
   .fill {
     width: 100% !important;
     height: 100% !important;
