@@ -6,7 +6,7 @@ category: guides
 
 # What is Wikimedia Commons?
 
-[Wikimedia Commons](https://commons.wikimedia.org) is a massive online library of freely usable media—including images, audio, and video—contributed by people all over the world. It’s part of the Wikimedia Foundation, the same organization behind Wikipedia, and is designed to support free knowledge by making media openly available for anyone to use, remix, and share.
+<a href="https://commons.wikimedia.org" target="_blank">Wikimedia Commons</a> is a massive online library of freely usable media—including images, audio, and video—contributed by people all over the world. It’s part of the Wikimedia Foundation, the same organization behind Wikipedia, and is designed to support free knowledge by making media openly available for anyone to use, remix, and share.
 
 In addition to being a rich source of open-access media, Wikimedia Commons is also a great place for anyone to contribute. Whether it’s a photo of a historical site, a diagram you created, or a recording of local birdsong, uploading your content can help others learn, teach, and create.
 

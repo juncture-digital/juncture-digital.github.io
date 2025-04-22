@@ -490,8 +490,8 @@ sl-copy-button {
 }
 
 .token.component {
-  color: #d81b60; /* pink */
-  font-weight: bold;
+  color: #791917;
+  font-weight: 600;
 }
 
 .token.attr-name {
