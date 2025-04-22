@@ -357,6 +357,17 @@
       return url
     }
 
+    const wdImage = async (qid) => {
+      const query = `SELECT ?image WHERE { wd:${qid} wdt:P18 ?image. } LIMIT 1 `;    
+      const url = 'https://query.wikidata.org/sparql?query=' + encodeURIComponent(query);
+      const headers = { 'Accept': 'application/sparql-results+json' };
+      const response = await fetch(url, { headers });
+      if (!response.ok) { throw new Error(`SPARQL query failed: ${response.status}`); }
+      const json = await response.json();
+      const image = json?.results?.bindings?.[0]?.image?.value;
+      return image?.replace(/Special:FilePath\//, 'File:').split('File:').pop() || null;
+    }
+
     const initViewer = async () => {
       if (viewer) return viewer
       if (iiifManifest) {
@@ -447,6 +458,13 @@
       } else if (props.src.indexOf('gh:') === 0) {
         props.manifest = `https://iiif.mdpress.io/${props.src}/manifest.json`
         loadImage(`https://raw.githubusercontent.com/${props.src.slice(3)}`)
+      } else if (props.src.indexOf('wd:') === 0 || /^Q[0-9]+$/.test(props.src)) {
+        const qid = props.src.replace(/^wd:/, '')
+        wdImage(qid).then(mwFile => {
+          props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
+          loadImage(mwImage(mwFile, main.clientWidth))
+          setCaption()
+        })
       } else { // TODO: verify this
         props.manifest = `https://iiif.mdpress.io${props.base}${props.src}/manifest.json`
         loadImage(`https://raw.githubusercontent.com/${props.ghbase}${props.src[0] === '/' ? '' : '/'}${props.src}`)

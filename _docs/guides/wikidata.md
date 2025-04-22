@@ -46,7 +46,44 @@ For example:
 
 This one line of Markdown creates an interactive map of the Eiffel Tower, complete with a marker and info popup—all powered by Wikidata.
 
+# Using Wikidata with the Image Component
+
+In addition to supporting maps and entity popups, Juncture also allows you to use **Wikidata QIDs directly with the `image` component** by prefixing them with `wd:`.
+
+When you use a QID in this way, Juncture automatically:
+
+- Queries Wikidata for the image associated with the entity
+- Retrieves the full-resolution image from **Wikimedia Commons**
+- Displays the image with all of Juncture’s viewer features: **zooming, panning, cropping**, and more
+- Loads **metadata** (title, description, rights info) to populate the viewer’s caption and sidebar
+
+---
+
+## Example
+
+```juncture
+`image src=wd:Q243`
+```
+
+This line will display the image of the Eiffel Tower (`Q243`) as defined in Wikidata, using the full image from Wikimedia Commons.
+
+This makes it incredibly easy to include richly described, properly attributed images in your pages—just by referencing a QID.
+
+---
+
+This approach builds on Juncture’s goal of simplifying content creation while supporting open, linked data and responsible reuse of shared media.
+
+#
+
 **See the use of Wikidata in action**
+
+- An image
+
+    ```juncture
+    `image src=wd:Q243`
+    ```
+    ---
+    `image src=wd:Q243`
 - A map
 
     ```juncture
