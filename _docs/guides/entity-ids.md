@@ -23,7 +23,7 @@ Each topic, or **entity**, in Wikidata is assigned a unique identifier known as 
 
 - `Q42` for **Douglas Adams**
 - `Q90` for **Paris**
-- `Q1444` for **Monument Valley**
+- `Q192017` for **Monument Valley**
 
 These identifiers are language-neutral and stable, making them perfect for referencing entities across different components in Juncture.
 
@@ -40,7 +40,7 @@ Using a QID in Juncture allows you to:
 You can add a QID to:
 
 - **Text** to enable entity popups  
-- **Map tags** to automatically center on a place (e.g., `map location=Q1444`)  
+- **Map tags** to automatically center on a place (e.g., `map location=Q192017`)  
 - **Annotations** in images to define what an area of an image depicts
 
 ---
@@ -53,7 +53,7 @@ To find a QID for a person, place, or thing:
 2. **Enter a search term** (e.g., “Monument Valley” or “Jane Austen”) in the search box
 3. **Select the correct result**
 4. Look at the URL or the page title—it will include the QID.  
-   Example: `https://www.wikidata.org/wiki/Q1444` → QID = `Q1444`
+   Example: `https://www.wikidata.org/wiki/Q192017` → QID = `Q192017`
 
 ### Tip:
 If you're on a related Wikipedia page, look in the "Wikidata item" link in the left sidebar (on desktop) or use the [Wikidata Bridge browser extension](https://www.wikidata.org/wiki/Wikidata:Wikidata_Bridge) to jump directly to the entity.
@@ -67,7 +67,7 @@ Here are a few examples of how to use QIDs in Juncture:
 ### Entity Info Popup (Inline)
 
 ```juncture
-This was famously photographed in [Monument Valley](Q1444).
+This was famously photographed in [Monument Valley](Q192017).
 ```
 
 → Creates a link, that when clicked will show a popup window with info about Monument Valley.
@@ -75,7 +75,7 @@ This was famously photographed in [Monument Valley](Q1444).
 ### Map Centered on a QID Location
 
 ```juncture
-`map location=Q1444 caption="Monument Valley" marker`
+`map location=Q192017 caption="Monument Valley" marker`
 ```
 
 → Displays a map centered on Monument Valley with a caption and marker.
