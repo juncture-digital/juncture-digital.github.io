@@ -4,6 +4,8 @@ layout: docs
 category: guides
 ---
 
+# Styling Content Using Classes
+
 ## Component Classes
 
 .shadow
