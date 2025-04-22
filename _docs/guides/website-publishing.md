@@ -21,11 +21,10 @@ This guide walks you through the steps to create and publish a rich, interactive
 
 ## Step 2: Create a New Website Repository
 
-1. Go to the **[juncture-digital/template](https://github.com/juncture-digital/template)** repository
-2. Click the green **Use this template** button
-3. Choose **Create a new repository**
-4. Name your new repository (e.g. `my-website`)
-5. Click **Create repository from template**
+Create a Juncture-enabled GitHub repository using this link - [https://github.com/juncture-digital/template/generate](https://github.com/juncture-digital/template/generate)
+  - Add a repository name and (optional) description
+  - Ensure **Public** is selected for repository visibility
+  = Click the green **Create repository** button
 
 This sets up a new site with a working Jekyll + Juncture configuration.
 

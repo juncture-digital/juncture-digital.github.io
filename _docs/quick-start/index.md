@@ -70,7 +70,7 @@ If a value contains **spaces**, wrap it in **quotes**:
 
 Let’s say you want to show a map centered on Savannah, Georgia.  Here’s the Markdown to accomplish this.
 
-```
+```juncture
 `map location=32.051,-81.104,8 caption="Savannah, Georgia" marker`
 ```
 
@@ -91,7 +91,7 @@ This one line creates a responsive, interactive map viewer—right inside your p
 
 Want to add a video? Just specify the `youtube` component in the Juncture tag and include a YouTube ID (using the `vid` property).  Here’s the Markdown to accomplish this. 
 
-```
+```juncture
 `youtube vid=dQw4w9WgXcQ large center`
 ```
 
