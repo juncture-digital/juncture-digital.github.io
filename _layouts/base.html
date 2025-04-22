@@ -19,7 +19,7 @@
       <div class="wrapper">
 
         {%- comment -%} {% include search-lunr.html %} {%- endcomment -%}
-        <a class="site-title" rel="author" href="{{ '/' | relative_url }}">{{ site.title | escape }}</a>
+        <a class="site-title" rel="author" href="{{ '/' | relative_url }}"><img src="/favicon.ico"> {{ site.title | escape }}</a>
 
         {% capture nav_items_string %}
           {% for nav_path in site.nav_pages %}
@@ -84,10 +84,18 @@
               {% if url and title %}
                 {%- if title == 'Blog' %}
                   {% if site.blog.enabled %}
-                    <a class="nav-item" href="{{ url | relative_url }}">{{ title | escape }}</a>
+                    {% if page.url == url %}
+                      <a class="nav-item active" href="{{ url | relative_url }}">{{ title | escape }}</a>
+                    {% else %}
+                      <a class="nav-item" href="{{ url | relative_url }}">{{ title | escape }}</a>
+                    {%- endif -%}
                   {%- endif -%}
                 {% else %}
-                  <a class="nav-item" href="{{ url | relative_url }}">{{ title | escape }}</a>
+                  {% if page.url == url %}
+                    <a class="nav-item active" href="{{ url | relative_url }}">{{ title | escape }}</a>
+                  {% else %}
+                    <a class="nav-item" href="{{ url | relative_url }}">{{ title | escape }}</a>
+                  {%- endif -%}
                 {%- endif -%}
               {% endif %}
             {% endfor %}

@@ -529,3 +529,29 @@ dd {
   margin: 0 0 0.5em 1em;
   color: #555;
 }
+
+nav .slab .active {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: #791917;
+  text-decoration-thickness: 3px;
+  cursor: pointer;
+  background-color: inherit;
+}
+
+.site-header {
+  border-top: 5px solid #791917;
+}
+
+a.site-title {
+  display: flex;
+  align-items: center;
+}
+a.site-title {
+  font-size: 2em;
+  font-weight: 500;
+}
+a.site-title img {
+  height: 1.2em;
+  margin-right: 0.3em;
+}
