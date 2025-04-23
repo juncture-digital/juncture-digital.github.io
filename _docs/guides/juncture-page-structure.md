@@ -17,3 +17,26 @@ But this structure does more than just organize content—it’s the foundation 
 - **[Grid-style cards and galleries]({{ site.baseurl }}/docs/layout/cards)**
 
 And the best part? **This all happens automatically**. You don’t need to do anything special—the structure is created for you, just by using headings.
+
+The example below illustrates the hierarchical document structure that Juncture applies based on the Markdown headings.
+<style>
+    .demo section { margin: 1em; padding: 0 0.5em; }
+    .demo.section1 { border: 1px solid #444; background-color: #eee; }
+    .demo .section2 { border: 1px solid #444; background-color: #ccc; }
+    .demo .section3 { border: 1px solid #444; background-color: #aaa; }
+</style>
+
+# Heading 1
+{: .demo}
+
+## Heading 1.1
+
+### Heading 1.1.1
+
+### Heading 1.1.2
+
+## Heading 1.2
+
+### Heading 1.2.1
+
+### Heading 1.2.2

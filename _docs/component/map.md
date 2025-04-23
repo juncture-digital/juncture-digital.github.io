@@ -8,8 +8,8 @@ category: component
 
 The `map` tag displays an interactive map centered on a specified location.  This map component uses the [Leaflet](https://leafletjs.com/).  Leaflet is a tool that lets websites show interactive maps. You can zoom in, zoom out, and move around the map, just like you would with Google Maps. It’s lightweight, fast, and works on phones, tablets, and computers. Many websites use Leaflet to help people explore locations, see points of interest, or display custom map data.
 
-## Properties
-{: .properties}
+## Attributes
+{: .attributes}
 
 **[caption](#basic-examples)** (_string_): Defines the text to use for a caption that is displayed below the map.
 
@@ -18,8 +18,8 @@ The `map` tag displays an interactive map centered on a specified location.  Thi
 **[marker](##basic-examples)** (_boolean_):  If set, a marker will be displayed at the `location` coordinates
 
 Notes:
-- Boolean properties are specified using the property name only, for instance - `marker`.
-- Non-boolean properties are specified using property=value syntax (i.e., `caption=Example`).  If the value includes spaces the value must be quoted (i.e., `caption="An Example Map"`).
+- Boolean attributes are specified using the property name only, for instance - `marker`.
+- Non-boolean attributes are specified using property=value syntax (i.e., `caption=Example`).  If the value includes spaces the value must be quoted (i.e., `caption="An Example Map"`).
 
 ## Zoom levels
 

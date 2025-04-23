@@ -146,6 +146,7 @@ const restructureMarkdownToSections = (contentEl) => {
             node.removeAttribute(attr);
           }
         });
+        section.classList.add(`section${headingLevel}`)
 
         // Add "Back to top" link to section heading
         // if (section.id) node.innerHTML = '<a href="#top" title="Back to top" style="font-size:80%; text-decoration: none;">⬆</a> ' + node.innerHTML

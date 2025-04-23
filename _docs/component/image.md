@@ -6,7 +6,7 @@ category: component
 
 # Image
 
-The `image` tag creates an image viewer displaying the image found at the URL specified in the `src` tag.  Additional properties, such as label, may optionally be provided for display in the image metadata and caption bar.
+The `image` tag creates an image viewer displaying the image found at the URL specified in the `src` tag.  Additional attributes, such as label, may optionally be provided for display in the image metadata and caption bar.
 
 ## Quick Start
 
@@ -21,10 +21,10 @@ The most basic use of the `image` tag is to specify the URL of the image to be d
 ---
 `image src=wc:Sunflower_sky_backdrop.jpg center medium`
 
-## Properties
-{: .properties}
+## Attributes
+{: .attributes}
 
-Many of the image-specific properties used in the ve-image viewer are based on the [IIIF Image API](https://iiif.io/api/image/2.1/).  The property values are often directly passed to the IIIF server hosting the images.  For detailed explanations of the properties and possible values, the [IIIF image request parameters](https://iiif.io/api/image/2.1/#image-request-parameters) documentation should be consulted.
+Many of the image-specific attributes used in the ve-image viewer are based on the [IIIF Image API](https://iiif.io/api/image/2.1/).  The property values are often directly passed to the IIIF server hosting the images.  For detailed explanations of the attributes and possible values, the [IIIF image request parameters](https://iiif.io/api/image/2.1/#image-request-parameters) documentation should be consulted.
 
 **[alt](#basic-examples)** (_string_):  The text to use in the _alt_ tag used by screen readers.  If not provided an _alt_ tag is automatically generated from the manifest label property.
 
@@ -40,7 +40,7 @@ Many of the image-specific properties used in the ve-image viewer are based on t
 
 **[nocaption](#basic-examples)** (_boolean_):  This property inhibits the display of the caption at the bottom of the image.
 
-**[options](#basic-examples)** (_string_):  The _options_ property combines the `region`, `size`, `rotation`, `quality`, and `format` properties into a single value.  
+**[options](#basic-examples)** (_string_):  The _options_ property combines the `region`, `size`, `rotation`, `quality`, and `format` attributes into a single value.  
 
 **[quality](#basic-examples)** (_string_):  The quality property determines whether the image is delivered in color, grayscale or black and white.  Recognized values for this property are `color`, `gray`, `bitonal`, `default`.  The default value used by the Juncture IIIF image server is `color`.
 
@@ -100,7 +100,7 @@ Many of the image-specific properties used in the ve-image viewer are based on t
 | Form | Description |
 | -------- | ---------------------------------------- |
 | full  | The image or region is not scaled, and is returned at its full size. |
-| max   | The image or region is returned at the maximum size available, as indicated by maxWidth, maxHeight, maxArea in the profile description. This is the same as full if none of these properties are provided. |
+| max   | The image or region is returned at the maximum size available, as indicated by maxWidth, maxHeight, maxArea in the profile description. This is the same as full if none of these attributes are provided. |
 | w,    | The image or region should be scaled so that its width is exactly equal to w, and the height will be a calculated value that maintains the aspect ratio of the extracted region. |
 | ,h    | The image or region should be scaled so that its height is exactly equal to h, and the width will be a calculated value that maintains the aspect ratio of the extracted region. |
 | pct:n |   The width and height of the returned image is scaled to n% of the width and height of the extracted region. The aspect ratio of the returned image is the same as that of the extracted region. |
@@ -141,7 +141,7 @@ In this example the classes `medium` and `center` are used to display the image 
 
 In this example a GitHub hosted image is used and the `gh:` short-hand prefix is used in the `src` property.  The image is hosted in the `juncture-digital.github.io` repository in the `juncture-digital` GitHub account.  It is in the `main` branch and is located at the `docs/components/monument-valley.jpg` path.  The full `src` value is `gh:juncture-digital/juncture-digital.github.io/main/docs/components/monument-valley.jpg`.
 
-In this example the positioning properties `medium` and `center` are used to display the image in the center of the window at 50% of the window width. The `shadow` class is also set to add a subtle box shadow effect to the component.
+In this example the positioning attributes `medium` and `center` are used to display the image in the center of the window at 50% of the window width. The `shadow` class is also set to add a subtle box shadow effect to the component.
 
 ```juncture
 `image src=gh:juncture-digital/juncture-digital.github.io/main/docs/components/monument-valley.jpg .medium .center .shadow`

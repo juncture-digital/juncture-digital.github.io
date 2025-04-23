@@ -60,8 +60,8 @@ Juncture provides a simple extension to the basic Markdown tagging, enabling ima
 ```
 
 - The **first word** is always the component type: `image`, `map`, `audio`, `youtube`, or `header`.
-- After that come any number of **properties**, each defined with `key=value`.
-- For **boolean properties**, you just use the key—no `=true` needed.  
+- After that come any number of **attributes**, each defined with `key=value`.
+- For **boolean attributes**, you just use the key—no `=true` needed.  
   > Example: `marker` is the same as `marker=true`.
 
 If a value contains **spaces**, wrap it in **quotes**:
@@ -106,7 +106,7 @@ This plays the video in a viewer that:
 - Scales to 75% of the screen (`large`)
 - Is centered on the page (`center`)
 
-Notice that `large` and `center` are boolean properties. You don’t need to write `large=true`—just listing the property name is enough.
+Notice that `large` and `center` are boolean attributes. You don’t need to write `large=true`—just listing the property name is enough.
 
 ---
 

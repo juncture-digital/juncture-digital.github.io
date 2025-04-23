@@ -8,7 +8,7 @@ category: guides
 
 <a href="https://www.wikidata.org" target="_blank">Wikidata</a> is a free, collaborative knowledge base maintained by the Wikimedia Foundation. It contains structured data about millions of real-world entities—like people, places, events, and concepts—that can be read by both humans and machines.
 
-Each entity has a unique identifier (called a QID, such as `Q243` for the Eiffel Tower) and includes properties like labels (titles), descriptions, links to Wikipedia, images, and—especially useful for mapping—**latitude and longitude coordinates**.
+Each entity has a unique identifier (called a QID, such as `Q243` for the Eiffel Tower) and includes attributes like labels (titles), descriptions, links to Wikipedia, images, and—especially useful for mapping—**latitude and longitude coordinates**.
 
 Wikidata is also open for anyone to contribute. Whether you're fixing a typo, adding a new fact, or linking an image, your edits help enrich a global pool of free knowledge.
 

@@ -18,8 +18,8 @@ Juncture provides a simple extension to the basic Markdown tagging, enabling ima
 ```
 
 - The **first word** is always the component type: `image`, `map`, `audio`, `youtube`, or `header`.
-- After that come any number of **properties**, each defined with `key=value`.
-- For **boolean properties**, you just use the key—no `=true` needed.  
+- After that come any number of **attributes**, each defined with `key=value`.
+- For **boolean attributes**, you just use the key—no `=true` needed.  
   > Example: `marker` is the same as `marker=true`.
 
 If a value contains **spaces**, wrap it in **quotes**:
@@ -27,8 +27,6 @@ If a value contains **spaces**, wrap it in **quotes**:
 ## Defining Juncture Components: Attributes, IDs, and Classes
 
 Juncture components (like `image`, `map`, or `video`) can be customized using **attributes**, **IDs**, and **class names**. These options let you control the behavior, appearance, and interactivity of each component.
-
-> 📝 Attributes may sometimes be referred to as *properties*. To stay consistent with HTML and Markdown conventions, we will refer to them as **attributes**.
 
 ---
 

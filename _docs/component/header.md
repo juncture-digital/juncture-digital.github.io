@@ -17,8 +17,8 @@ If a title is specified a title bar will be positioned at the bottom of the head
 If navigation links are specified a navigation bar will be positioned at the top of the header with a background color defined by `background` property and text color defined by the `color` property.
 
 
-## Properties
-{: .properties}
+## Attributes
+{: .attributes}
 
 **[alpha](#examples)** (_float_):  The opacity level of the title bar when a background image is used.  The value is a number between 0 (no opacity) and 1.0 (full opacity). The default is 0.3.
 
@@ -45,8 +45,8 @@ If navigation links are specified a navigation bar will be positioned at the top
 **[top](#examples)** (_boolean_):  The top of the background image is aligned with the top of the header.
 
 Notes:
-- Boolean properties are specified using the property name only, for instance - `center`.
-- Non-boolean properties are specified using property=value syntax (i.e., `title=Example`).  If the value includes spaces the value must be quoted (i.e., `title="An Example"`).
+- Boolean attributes are specified using the property name only, for instance - `center`.
+- Non-boolean attributes are specified using property=value syntax (i.e., `title=Example`).  If the value includes spaces the value must be quoted (i.e., `title="An Example"`).
 - The URL value for the `img` property may be a full URL or a short form using recognized prefixes like `wc:` (for Wikimedia Commons hosted images) or `gh` (for GitHub hosted images).  If neither a full URL or prefixed value is used a relative URL is formed using the source Markdown file as the root.
 
 ## Examples
