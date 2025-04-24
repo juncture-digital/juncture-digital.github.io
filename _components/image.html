@@ -323,11 +323,13 @@
     const showAnnotations = () => annoLayer.style.visibility = 'visible'
     const hideAnnotations = () => annoLayer.style.visibility = 'hidden'
     const enableAnnotations = () => {
-      annotorious.readOnly = false
-      showAnnotations()
-      annosIcon.style.display = 'none'
-      annosEditIcon.style.display = 'inline'
-      drawer.open = false
+      initViewer().then(resp => {
+        annotorious.readOnly = false
+        showAnnotations()
+        annosIcon.style.display = 'none'
+        annosEditIcon.style.display = 'inline'
+        drawer.open = false
+      })
     }
     const toggleAnnotations = () => { 
       if (annoLayer) {
@@ -676,7 +678,6 @@
     }
 
     const getAnnosUrl = () => {
-      console.log(window.jekyll)
       let annosUrl
       const itemInfo = findItem({type:'Annotation', motivation:'painting'}, iiifManifest, props.seq)?.body
       const annosFileName = `${decodeURIComponent((itemInfo?.id || img.src).split('/').pop().split('.')[0]).replace(/^\d+px-/,'')}.json`
@@ -687,10 +688,8 @@
         } else {
           annosUrl = props.annos[props.annos.length-1] === '/' ? `${props.annos}${annosFileName}` : props.annos
         }
-      } else if (props.base) {
-        annosUrl = `${props.base}${annosFileName}`
       } else if (props.ghbase) {
-        annosUrl = `https://raw.githubusercontent.com/${props.ghbase}/${annosFileName}`
+        annosUrl = location.hostname === 'localhost' ? `/${props.ghbase.split('/').slice(3,-1).join('/').replace(/^_/,'')}/${annosFileName}` : `https://raw.githubusercontent.com/${props.ghbase}/${annosFileName}`
       } else if (props.src) {
         if (props.src.indexOf('gh:') === 0) {
           let [acct, repo, branch, ...path] = props.src.slice(3).split('/')
@@ -773,7 +772,7 @@
       annotorious.on('updateAnnotation', () => annotationsChanged())
       annotorious.on('deleteAnnotation', () => annotationsChanged())
       annotorious.on('selectAnnotation', async (anno) => { if (navigator.clipboard) navigator.clipboard.writeText(anno.id.split('-')[0].slice(1)) })
-
+      
       annoLayer = osd.querySelector('.a9s-annotationlayer')
       annoLayer.style.visibility = 'hidden'
       if (props.showannos) showAnnotations()
