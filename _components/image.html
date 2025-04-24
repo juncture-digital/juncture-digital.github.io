@@ -689,7 +689,7 @@
           annosUrl = props.annos[props.annos.length-1] === '/' ? `${props.annos}${annosFileName}` : props.annos
         }
       } else if (props.ghbase) {
-        annosUrl = location.hostname === 'localhost' ? `/${props.ghbase.split('/').slice(3,-1).join('/').replace(/^_/,'')}/${annosFileName}` : `https://raw.githubusercontent.com/${props.ghbase}/${annosFileName}`
+        annosUrl = location.hostname === 'localhost' ? `/${props.ghbase.split('/').slice(3).join('/').replace(/^_/,'')}/${annosFileName}` : `https://raw.githubusercontent.com/${props.ghbase}/${annosFileName}`
       } else if (props.src) {
         if (props.src.indexOf('gh:') === 0) {
           let [acct, repo, branch, ...path] = props.src.slice(3).split('/')
