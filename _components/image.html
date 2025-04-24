@@ -676,6 +676,7 @@
     }
 
     const getAnnosUrl = () => {
+      console.log(window.jekyll)
       let annosUrl
       const itemInfo = findItem({type:'Annotation', motivation:'painting'}, iiifManifest, props.seq)?.body
       const annosFileName = `${decodeURIComponent((itemInfo?.id || img.src).split('/').pop().split('.')[0]).replace(/^\d+px-/,'')}.json`

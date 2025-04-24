@@ -45,6 +45,9 @@ const parseCodeEl = (el) => {
   //   parsed.kwargs.data = encodeURIComponent(parent.nextElementSibling.outerHTML.trim().replace(/\n/g, '').replace(/ data=\"\" style=\"display:none;\"/, ''))
 
   // console.log(parsed)
+  console.log(window.jekyll)
+  console.log(window.ghbase)
+  console.log('{{ site.ghbase }}')
   return parsed
 }
 
