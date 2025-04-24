@@ -443,7 +443,7 @@
         iiifManifest = manifest
         setCaption()
         updateManifestPanel()
-        if (!img.src) loadImage(staticImgUrl())
+        if (!img.src) loadImage(staticImageUrl())
       })
       return iiifManifest
     }
@@ -485,6 +485,7 @@
       }
     
     } else if (props.manifest) {
+      props.manifest = props.manifest.startsWith('http') ? props.manifest : `https://iiif.mdpress.io/${props.manifest}/manifest.json`
       initViewer()
     }
 
@@ -575,7 +576,7 @@
         .replace(/\/info\.json$/,'')}/info.json`
         if (iiifManifest.requiredStatement) {
           let rs = iiifManifest.requiredStatement
-          parsed.requiredStatement = {label: valueOf(rs.label)[0], value: valueOf(rs.value)}
+          // parsed.requiredStatement = {label: valueOf(rs.label)[0], value: valueOf(rs.value)}
         }
   
       if (iiifManifest.homepage) {

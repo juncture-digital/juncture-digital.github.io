@@ -71,14 +71,22 @@ contentSelector: main
       // Convert the captured front matter (YAML) into a JavaScript object.
       frontMatter = jsyaml.load(match[1]);
       // Remove the front matter block from the Markdown text.
-      markdown = markdown.replace(fmRegex, '');
+      markdown = markdown.replace(fmRegex, '').replace(/\{#paragraph[0-9]+\}/g, '');
     }
+    markdown = markdown.replace(/{#paragraph\d+}/g, '')
 
-    const md = markdownit()
+    const md = markdownit({ html: true })
       .use(markdownItAttrs, {leftDelimiter: '{:', rightDelimiter: '}'})
       .use(markdownitFootnote);
+    
+    let tmp = new DOMParser().parseFromString(md.render(markdown), 'text/html').querySelector('body')
+     // remove "editor" and "view as" buttons
+     Array.from(tmp.querySelectorAll('a > img'))
+      .find(img => img.src.indexOf('ve-button') > -1 || img.parentElement.href.indexOf('juncture-digital.org') > 0)
+      ?.parentElement?.parentElement?.remove()
+
     main.setAttribute('style', 'opacity:0; padding:0 1em;' + (frontMatter['max-width'] ? ` max-width:${frontMatter['max-width']}; margin:0 auto;` : ''))
-    main.innerHTML = md.render(markdown)
+    main.innerHTML = tmp.innerHTML
     let junctureScript = document.createElement('script')
     junctureScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.juncture-digital.io'}/js/index.js`
     junctureScript.type = 'module'

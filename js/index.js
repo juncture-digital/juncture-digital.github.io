@@ -66,7 +66,7 @@ const makeIframe = (code) => {
   iframe.setAttribute('loading', 'lazy')
   iframe.setAttribute('allowfullscreen', '')
   iframe.setAttribute('allow', 'clipboard-write')
-  if (code.kwargs.height) iframe.setAttribute('width', code.kwargs.width)
+  if (code.kwargs.width) iframe.setAttribute('width', code.kwargs.width)
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
   if (code.tag === 'audio') iframe.setAttribute('allow', 'autoplay')
   if (code.id) iframe.id = code.id
@@ -86,6 +86,21 @@ const makeIframe = (code) => {
     if (!nonCodeElements) code.el.parentElement.classList.add('iframe-container')
       code.el.replaceWith(iframe)
   }
+}
+
+const iframeFromParam = (param) => {
+  const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
+  console.log(tag)
+  let iframe = document.createElement('iframe')
+  iframe.setAttribute('loading', 'lazy')
+  iframe.setAttribute('allowfullscreen', '')
+  iframe.setAttribute('allow', 'clipboard-write')
+  if (param.id) iframe.id = param.id
+  // if (param.classes.length > 0) iframe.className = param.classes.join(' ')
+  let args = `manifest=${param.getAttribute('manifest')}`
+  iframe.src = `${juncturePrefix}/components/${tag}?${args}`
+  console.log(iframe.src)
+  param.replaceWith(iframe)
 }
 
 /**
@@ -585,6 +600,9 @@ const makeEntityPopups = () => {
 ////////// End Wikidata Entity functions //////////
 
 const processPage = (content) => {
+  content.querySelectorAll('param[ve-image][manifest]').forEach(param => {
+    iframeFromParam(param)
+  })
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
 
