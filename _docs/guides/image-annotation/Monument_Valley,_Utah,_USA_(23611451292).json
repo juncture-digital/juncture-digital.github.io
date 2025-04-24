@@ -1,0 +1,22 @@
+[
+  {
+    "@context": "http://www.w3.org/ns/anno.jsonld",
+    "type": "Annotation",
+    "body": [
+      {
+        "type": "TextualBody",
+        "value": "test",
+        "purpose": "commenting"
+      }
+    ],
+    "target": {
+      "source": "https://www.juncture-digital.io/components/undefined",
+      "selector": {
+        "type": "FragmentSelector",
+        "conformsTo": "http://www.w3.org/TR/media-frags/",
+        "value": "xywh=pixel:847.312744140625,1029.2806396484375,1097.835693359375,936.197265625"
+      }
+    },
+    "id": "#303502f0-d44c-4056-a5d1-9299eb435c13"
+  }
+]
