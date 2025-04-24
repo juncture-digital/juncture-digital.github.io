@@ -702,6 +702,7 @@
     }
 
     let annosUrl = getAnnosUrl()
+    console.log(annosUrl)
     if (annosUrl) fetch(annosUrl).then(resp => resp.ok && resp.json())
       .then(annos => {
         annotations = annos
