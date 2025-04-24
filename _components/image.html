@@ -614,8 +614,19 @@
 
     const updateAnnos = () => {
       let annosDiv = document.querySelector('#annos')
-      annosDiv.innerHTML = `<div>URL: ${getAnnosUrl()}</div>`
       const annos = Array.from(annotorious.getAnnotations())
+      
+      annosDiv.innerHTML = `<div>URL: ${getAnnosUrl()}</div>`
+      
+      let [owner, repo, branch, ...path] = props.ghbase.split('/')
+      path = path.join('/')
+
+      navigator.clipboard.writeText(JSON.stringify(annotorious.getAnnotations(), null, 2))
+      let annosUpdateUrl = annosFound
+        ? `https://github.com/${owner}/${repo}/edit/${branch}/${path}/${annosUrl.split('/').pop()}`
+        : `https://github.com/${owner}/${repo}/new/${branch}/?filename=${path}/${annosUrl.split('/').pop()}`
+      annosDiv.innerHTML += `<div><a href="${annosUpdateUrl}" target="_blank">Update</a></div>`
+      
       annos.forEach(anno => {
         let id = anno.id.split('-')[0].slice(1)
         let text = anno.body.map(b => b.value).join(' ')
@@ -702,12 +713,17 @@
     }
 
     let annosUrl = getAnnosUrl()
-    console.log(annosUrl)
-    if (annosUrl) fetch(annosUrl).then(resp => resp.ok && resp.json())
-      .then(annos => {
-        annotations = annos
-        setCaption()
-      })
+    let annosFound = false
+    if (annosUrl) fetch(annosUrl).then(resp => {
+      if (resp.ok) {
+        resp.json()
+          .then(annos => {
+            annosFound = true
+            annotations = annos
+            setCaption()
+          })
+      }
+    })
 
     const initOsd = async (tileSources) => {
       // create the OpenSeadragon viewer
