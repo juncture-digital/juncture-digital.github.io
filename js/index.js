@@ -55,7 +55,7 @@ const parseCodeEl = (el) => {
     let dir = window.jekyll.page?.path ? `/${window.jekyll.page.path.split('/').slice(0,-1).join('/')}` : ''
     parsed.kwargs.ghbase = `${ghbase}${dir}`
   }
-  console.log(parsed)
+  // console.log(parsed)
   return parsed
 }
 
