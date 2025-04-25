@@ -7,7 +7,7 @@ order: 6
 
 ## Technologies Used by Juncture
 
-Juncture is built on a modular architecture that combines modern web technologies with the simplicity of Markdown. Below is a list of the key libraries, services, and technologies that power the Juncture IFC system.
+Juncture is built on a modular architecture that combines modern web technologies with the simplicity of Markdown. Below is a list of the key libraries, services, and technologies that power Juncture.
 
 ---
 
@@ -24,12 +24,6 @@ Juncture is built on a modular architecture that combines modern web technologie
 
 - **[Shoelace](https://shoelace.style/)**  
   Web component UI library used for drawers, tabs, buttons, etc.
-
-- **[Marked](https://marked.js.org/)**  
-  Markdown-to-HTML parsing inside iframe components.
-
-- **[js-md5](https://github.com/emn178/js-md5)**  
-  Used to generate MD5 hashes, especially for Wikimedia Commons image URLs.
 
 ---
 
@@ -54,11 +48,11 @@ Juncture is built on a modular architecture that combines modern web technologie
 - **Iframe-based Component Embeds**  
   Each component is rendered in its own iframe for modularity and encapsulation.
 
-- **Markdown Extensions**  
-  Juncture introduces custom inline tags (e.g., \`image\`, \`map\`, \`audio\`) that translate to rich interactive components.
+- **Custom Markdown Extensions**  
+  Juncture provides custom inline tags (e.g., \`image\`, \`map\`, \`audio\`) that translate to rich interactive components.
 
 - **No Build Tools Required**  
-  All components are written using native JavaScript, ES modules, and web standards—no bundlers or transpilers needed.
+  All components are written using native JavaScript and web standards—no bundlers or transpilers needed.
 
 - **Static Site Generators**  
   Compatible with static site workflows (e.g., Jekyll + GitHub Pages), allowing easy hosting and deployment without a CMS.

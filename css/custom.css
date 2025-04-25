@@ -479,7 +479,8 @@ section:has(> iframe.right), section:has(> iframe.left),
   clear: both;
 }
 
-div.highlight {
+div.highlight,
+pre.language-juncture {
   position: relative;
 }
 

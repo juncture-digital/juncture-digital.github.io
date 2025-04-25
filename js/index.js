@@ -99,7 +99,6 @@ const iframeFromParam = (param) => {
   // if (param.classes.length > 0) iframe.className = param.classes.join(' ')
   let args = `manifest=${param.getAttribute('manifest')}`
   iframe.src = `${juncturePrefix}/components/${tag}?${args}`
-  console.log(iframe.src)
   param.replaceWith(iframe)
 }
 
@@ -311,11 +310,12 @@ const makeTabs = (rootEl) => {
 const makeDetails = (rootEl) => {
   rootEl.querySelectorAll('.details, .example').forEach(el => {
     let details = document.createElement('details')
-    details.setAttribute('markdown', '1')
+    // details.setAttribute('markdown', '1')
     if (el.className.indexOf('example') >= 0) details.classList.add('example')
     if (el.tagName === 'SECTION') {
       details.innerHTML = el.innerHTML
-        .replace(/h[1-6]>/g,'summary>')
+        .replace(/<h[1-6]>/,'<summary>')
+        .replace(/<\/h[1-6]>/,'</summary>')
         .replace(/<\/summary>/, '</summary><div class="details-content">')
         + '</div>'
       el.replaceWith(details)
@@ -332,11 +332,12 @@ const makeDetails = (rootEl) => {
     }
   })
   // Add sl-copy-button to each example
-  rootEl.querySelectorAll('.details pre.highlight, .example pre.highlight').forEach((el, idx) => {
+  rootEl.querySelectorAll('details pre.language-juncture, .example pre.language-juncture').forEach((el, idx) => {
+    console.log(el)
     el.id = `cb-${idx}`
     let cb = document.createElement('sl-copy-button')
     cb.setAttribute('from', el.id)
-    el.parentElement.appendChild(cb)
+    el.appendChild(cb)
   })
 }
 
@@ -624,6 +625,7 @@ const processPage = (content) => {
     })
 
   makeDetails(content)
+
   makeCards(content)
   makeTabs(content)
   makeEntityPopups()
