@@ -8,6 +8,8 @@ category: guides
 
 The Juncture `image` component supports **interactive image annotations** using [Annotorious](https://recogito.github.io/annotorious/) with [OpenSeadragon](https://openseadragon.github.io/). This allows authors to highlight and comment on specific regions of an image.
 
+`image #image src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg caption="Monument Valley" cover .right .shadow`
+
 ### Enabling Annotation Mode
 
 Annotations can be created and managed directly within the viewer. To begin:

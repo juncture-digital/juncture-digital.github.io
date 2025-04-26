@@ -31,13 +31,17 @@
     #annosIcon, #annosEditIcon { display: none; }
     .annos svg { width: 1.3em; height: 1.3em; fill: #777; margin-right: 10px; }
     #annosIcon { cursor: pointer; }
+    #annos ul { list-style-type: none; padding: 0; margin: 0; }
+    #annos ul li { display: flex; align-items: center; gap: 0.5em; padding: 0.2em 0; }
     .annos sl-badge { position: absolute; top: 0; left: 16px; }
     .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     /* sl-drawer::part(base) { height: calc(100% - 32px); } */
-    sl-drawer::part(body) { padding: 0; margin: 3px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; }
+    sl-drawer::part(base) { box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; }
+    sl-drawer::part(body) { padding: 0; margin: 3px; }
+    sl-drawer::part(footer) { padding: 0.5em; border-top: 1px solid #ccc; }
     sl-tab::part(base) { padding: 0.5em 1em; }
     sl-tab-panel::part(base) { padding: 0.5em; }
-    .drawerToggle { width: 1.3em; height: 1.3em; cursor: pointer; }
+    .drawer-toggle { width: 1.3em; height: 1.3em; cursor: pointer; }
     pre { white-space: pre-wrap; word-wrap: break-word; }
     .wrap { overflow-wrap: break-word; word-wrap: break-word; -ms-word-break: break-all; word-break: break-all; word-break: break-word; }
     .coords { font-size: .8em; opacity: 0; position: absolute; top: 0; right: 0; background-color: white; border: 1px solid #ccc; padding: 0.5em; z-index: 10; transition: all 0.5s ease-out; }
@@ -51,6 +55,10 @@
     .pageid { cursor: copy; }
     .thumbnail { cursor: move; width: 100%; }
     img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    #annos, sl-tab-panel[name="annotations"] { display: flex; flex-direction: column; }
+    #annos > *, sl-tab-panel[name="annotations"] > * { margin-bottom: 0.5em; }
+    ul.annosList li img { height: 50px; width: auto; }
+    ul.annosList li span { margin-right: 0.5em }
   </style>
 </head>
 <body>
@@ -95,20 +103,23 @@
             <div class="summary"></div>
             <div class="required"></div>
             <div class="rights"></div>
-            <div class="source"></div>
+            <div class="source wrap"></div>
+            <!--
             <div style="display:flex;align-items: center;gap:0.5em;">
               <span>Page:</span>
               <span id=pageId></span>
               <sl-copy-button></sl-copy-button>
             </div>
+            -->
           </div>
         </sl-tab-panel>
         <sl-tab-panel name="annotations">
-          <sl-button id="copyAnnos">Copy annotations to clipboard</sl-button>
-          <sl-button id="showAnnos">Enable annotator</sl-button>
+          <!-- <sl-button id="copyAnnos">Copy annotations to clipboard</sl-button> -->
+          <sl-button id="showAnnos" size="small">Enable annotator</sl-button>
           <div id="annos"></div>
         </sl-tab-panel>
       </sl-tab-group>
+      <sl-button slot="footer" variant="primary" size="small" class="close">Close</sl-button>
     </sl-drawer>  
 
     <div class="captionBar" style="display: none;">
@@ -272,9 +283,13 @@
         .find(c => (c.label[props.language] || c.label.none || Object.values(c.label))?.[0] === pageId))
     }
 
+    const toggleDrawerOpen = () => drawer.open = !drawer.open
+
     // const drawer = document.querySelector('.drawer')
     const drawerButton = caption.querySelector('.drawer-toggle')
-    drawerButton.addEventListener('click', e => drawer.open = !drawer.open)
+    drawerButton.addEventListener('click', e => toggleDrawerOpen())
+  
+    document.querySelector('.drawer sl-button.close').addEventListener('click', e => toggleDrawerOpen())
 
     // recursive helper for finding items in a IIIF manifest
     const findItems = (toMatch, current, found) => {
@@ -298,14 +313,14 @@
     }
     let annotations = []
 
-    const staticImageUrl = (width) => {
+    const staticImageUrl = (width, crop) => {
       let itemInfo = iiifManifest && findItem({type:'Annotation', motivation:'painting'}, iiifManifest, props.seq).body
       if (!itemInfo) return ''
       if (!imageAspect) imageAspect = itemInfo.width/itemInfo.height
       let url
       let [region, size, rotation, rest] = props.options?.split('/') || []
       let [quality, format] = rest?.split('.') || []
-      region = props.region || region || 'full'
+      region = crop, props.region || region || 'full'
       size = width
         ? width === 'max'
           ? 'max'
@@ -323,6 +338,7 @@
     const showAnnotations = () => annoLayer.style.visibility = 'visible'
     const hideAnnotations = () => annoLayer.style.visibility = 'hidden'
     const enableAnnotations = () => {
+      document.querySelector('#showAnnos').style.display = 'none'
       initViewer().then(resp => {
         annotorious.readOnly = false
         showAnnotations()
@@ -430,7 +446,6 @@
     }
 
     const loadManifest = (manifestUrl) => {
-      // console.log(`loadManifest: ${manifestUrl}`)
       return fetch(manifestUrl).then(resp => resp.json())
       .then( async manifest => {
         const contexts = Array.isArray(manifest['@context']) ? manifest['@context'] : [manifest['@context']]
@@ -444,6 +459,7 @@
         setCaption()
         updateManifestPanel()
         if (!img.src) loadImage(staticImageUrl())
+        updateAnnos()
       })
       return iiifManifest
     }
@@ -483,6 +499,7 @@
         props.manifest = `https://iiif.mdpress.io${props.base}${props.src}/manifest.json`
         loadImage(`https://raw.githubusercontent.com/${props.ghbase}${props.src[0] === '/' ? '' : '/'}${props.src}`)
       }
+      loadManifest(props.manifest)
     
     } else if (props.manifest) {
       props.manifest = props.manifest.startsWith('http') ? props.manifest : `https://iiif.mdpress.io/${props.manifest}/manifest.json`
@@ -597,6 +614,15 @@
       if (parsed.requiredStatement) document.querySelector('.manifest .required').innerHTML = `<span><b>Attribution:</b></span> <span>${parsed.requiredStatement.value.join(' ')}</span>`
       if (parsed.rights) document.querySelector('.manifest .rights').innerHTML = `<span><b>Reuse rights:</b></span><a href="${parsed.rights.url}">${parsed.rights.code}</a>` + (parsed.rights.badge || '')
       if (parsed.sourceUrl) document.querySelector('.manifest .source').innerHTML = `<span><b>Source:</b></span> <a href="${parsed.sourceUrl}">${parsed.sourceUrl}</a>`
+    
+      drawer.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', e => {
+          e.stopPropagation()
+          e.preventDefault()
+          window.parent.postMessage({ type: 'openLink', url: a.href, newtab: true }, '*');
+        })
+      })
+
     }
 
     let annotorious
@@ -613,30 +639,37 @@
       }
     }
 
+    const regionThumbnail = (region, width) => {
+      return staticImageUrl(width || 100, region)
+    }
+
     const updateAnnos = () => {
+      
       let annosDiv = document.querySelector('#annos')
-      const annos = Array.from(annotorious.getAnnotations())
-      
-      annosDiv.innerHTML = `<div>URL: ${getAnnosUrl()}</div>`
-      
+
       let [owner, repo, branch, ...path] = props.ghbase.split('/')
       path = path.join('/')
+      let annosUpdateUrl = `https://github.com/${owner}/${repo}/${annosFound ? 'edit' : 'new'}/${branch}/${path}/${annosUrl.split('/').pop()}`
 
-      navigator.clipboard.writeText(JSON.stringify(annotorious.getAnnotations(), null, 2))
-      let annosUpdateUrl = annosFound
-        ? `https://github.com/${owner}/${repo}/edit/${branch}/${path}/${annosUrl.split('/').pop()}`
-        : `https://github.com/${owner}/${repo}/new/${branch}/?filename=${path}/${annosUrl.split('/').pop()}`
-      annosDiv.innerHTML += `<div><a href="${annosUpdateUrl}" target="_blank">Update</a></div>`
+      // console.log(annotations)
+
+      // const annos = Array.from(annotorious.getAnnotations())
       
-      annos.forEach(anno => {
+      if (annotorious) navigator.clipboard.writeText(JSON.stringify(annotorious.getAnnotations(), null, 2))
+      
+      let html = `<div class="annosLoc wrap">URL: ${getAnnosUrl()}</div>\n<div class="annosUpdateLink"><a href="${annosUpdateUrl}" target="_blank">Update</a></div><ul class="annosList">\n`
+      
+      annotations.forEach(anno => {
         let id = anno.id.split('-')[0].slice(1)
         let text = anno.body.map(b => b.value).join(' ')
         let [x,y,w,h] = anno.target.selector.value.split('pixel:')[1].split(',').map(v => Math.round(parseFloat(v)))
         let region = `${x},${y},${w},${h}`
-        let annoDiv = document.createElement('div')
-        annoDiv.innerHTML = `<div>${id}</div><div>${text}</div><div>${region}</div>`
-        annosDiv.appendChild(annoDiv)
+        // console.log(regionThumbnail(region))
+        html+= `    <li><img src="${regionThumbnail(region)}"><div class="wrap"><span>${text}</span><span>${id}</span><div></li>\n`
       })
+      html += `  </ul>`
+      // console.log(html)
+      annosDiv.innerHTML = html
     }
 
     const parseRegionString = (region) => {
@@ -715,12 +748,14 @@
 
     let annosUrl = getAnnosUrl()
     let annosFound = false
+
     if (annosUrl) fetch(annosUrl).then(resp => {
       if (resp.ok) {
         resp.json()
           .then(annos => {
             annosFound = true
             annotations = annos
+            updateAnnos()
             setCaption()
           })
       }

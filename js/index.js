@@ -1,10 +1,60 @@
 import 'https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js'
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/card/card.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/copy-button/copy-button.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/dropdown/dropdown.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab/tab.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-group/tab-group.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-panel/tab-panel.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/card/card.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/carousel/carousel.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/carousel-item/carousel-item.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/copy-button/copy-button.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/dropdown/dropdown.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/tab/tab.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/tab-group/tab-group.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/tab-panel/tab-panel.js';
+
+
+const paramToIframe = (param) => {
+  const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
+  if (tag === 'image') {
+    let iframe = document.createElement('iframe')
+    iframe.setAttribute('loading', 'lazy')
+    iframe.setAttribute('allowfullscreen', '')
+    iframe.setAttribute('allow', 'clipboard-write')
+    if (param.id) iframe.id = param.id
+    // if (param.classes.length > 0) iframe.className = param.classes.join(' ')
+    let args = `manifest=${param.getAttribute('manifest')}`
+    iframe.src = `${juncturePrefix}/components/${tag}?${args}`
+    // param.replaceWith(iframe)
+    return iframe
+  }
+}
+
+// Restructure legacy (v1) content
+const v1Convert = () => {
+  Array.from(content.querySelectorAll('p + param'))
+    .filter(param => Array.from(param.attributes).find(attr => attr.name.startsWith('ve-')))
+    .forEach(param => {
+      let para = param.previousElementSibling
+      let wrapper = document.createElement('div')
+      wrapper.className = 'v1-wrapper'
+      let carousel = document.createElement('sl-carousel')
+      carousel.setAttribute('pagination', '')
+      carousel.setAttribute('navigation', '')
+      wrapper.appendChild(para.cloneNode(true))
+      wrapper.appendChild(carousel)
+      para.replaceWith(wrapper)
+
+      let toRemove = []
+      do {
+        toRemove.push(param)
+        let iframe = paramToIframe(param.cloneNode())
+        if (iframe) {
+          let carouselItem = document.createElement('sl-carousel-item')
+          carouselItem.appendChild(iframe)
+          carousel.appendChild(carouselItem)
+        }
+        param = param.nextElementSibling
+        if (param?.tagName !== 'PARAM') break
+      } while (true)
+      toRemove.forEach(param => param.remove())
+    })
+}  
 
 // const classes = new Set('small medium large left right center shadow'.split(' '))
 const parseCodeEl = (el) => {
@@ -86,20 +136,6 @@ const makeIframe = (code) => {
     if (!nonCodeElements) code.el.parentElement.classList.add('iframe-container')
       code.el.replaceWith(iframe)
   }
-}
-
-const iframeFromParam = (param) => {
-  const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
-  console.log(tag)
-  let iframe = document.createElement('iframe')
-  iframe.setAttribute('loading', 'lazy')
-  iframe.setAttribute('allowfullscreen', '')
-  iframe.setAttribute('allow', 'clipboard-write')
-  if (param.id) iframe.id = param.id
-  // if (param.classes.length > 0) iframe.className = param.classes.join(' ')
-  let args = `manifest=${param.getAttribute('manifest')}`
-  iframe.src = `${juncturePrefix}/components/${tag}?${args}`
-  param.replaceWith(iframe)
 }
 
 /**
@@ -333,7 +369,6 @@ const makeDetails = (rootEl) => {
   })
   // Add sl-copy-button to each example
   rootEl.querySelectorAll('details pre.language-juncture, .example pre.language-juncture').forEach((el, idx) => {
-    console.log(el)
     el.id = `cb-${idx}`
     let cb = document.createElement('sl-copy-button')
     cb.setAttribute('from', el.id)
@@ -601,9 +636,8 @@ const makeEntityPopups = () => {
 ////////// End Wikidata Entity functions //////////
 
 const processPage = (content) => {
-  content.querySelectorAll('param[ve-image][manifest]').forEach(param => {
-    iframeFromParam(param)
-  })
+  // v1Convert()
+
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
 

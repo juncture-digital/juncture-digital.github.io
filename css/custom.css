@@ -560,3 +560,20 @@ a.site-title img {
   height: 1.2em;
   margin-right: 0.3em;
 }
+
+.v1-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.v1-wrapper > * {
+  flex: 1 1 50%;
+  box-sizing: border-box;
+  padding: 1em;
+}
+
+@media (max-width: 600px) {
+  .v1-wrapper > * {
+    flex: 1 1 100%;
+  }
+}
