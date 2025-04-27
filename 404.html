@@ -59,6 +59,8 @@ contentSelector: main
 
   let [owner, repo, ...path] = location.pathname.slice(window.jekyll?.site.baseurl.length || 0).split('/').filter(Boolean)
   let branch = new URLSearchParams(location.search).get('branch') || 'main'
+  window.ghbase = `${owner}/${repo}/${branch}`
+
   let markdown = await getMarkdown(owner, repo, branch, path.join('/'))
   if (markdown) {
     const fmRegex = /^---\s*[\r\n]+([\s\S]*?)[\r\n]+---[\r\n]+/;
