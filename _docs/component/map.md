@@ -56,7 +56,7 @@ Displays a map with a caption and marker.  The location consists of comma-separa
 `map location=32.051,-81.104,12 caption="Savannah, GA" marker`
 ```
 ---
-`map location=32.051,-81.104,3 caption="Savannah, GA" marker`
-`map location=32.051,-81.104,6 caption="Savannah, GA" marker`
-`map location=32.051,-81.104,9 caption="Savannah, GA" marker`
-`map location=32.051,-81.104,12 caption="Savannah, GA" marker`
+`map location=32.051,-81.104,3 caption="Savannah, GA (zoom level 3)" marker`
+`map location=32.051,-81.104,6 caption="Savannah, GA (zoom level 6)" marker`
+`map location=32.051,-81.104,9 caption="Savannah, GA (zoom level 9)" marker`
+`map location=32.051,-81.104,12 caption="Savannah, GA (zoom level 12" marker`

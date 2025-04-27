@@ -153,6 +153,9 @@ This starter example uses **Markdown**, a lightweight text format that lets you 
 Scroll to the bottom and click the green **“Commit new file”** button. This saves your changes to the repository.
 
 ### 5. **View your new web page!**
+
+[🔗 View in Juncture](javascript:(function(){var url=window.location.href;window.location.href=‘https://juncture-digital.io/?github=’+encodeURIComponent(url);})())
+
 Now comes the magic ✨  
 
 Go to: `https://juncture-digital.io/<GitHub username>/<repository name>/<path to your file>`

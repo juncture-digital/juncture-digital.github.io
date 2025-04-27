@@ -689,3 +689,30 @@ if (content) {
   })
   observer.observe(document.body, { childList: true, subtree: true })
 }
+
+// Handle drag-and-drop and copy/paste URLs from GitHub.  This provides a convenient way to view Juncture pages using a GitHub source.
+const processGitHubUrl = (url) => {
+  if (new URL(url.trim()).hostname !== 'github.com') return
+  let [owner, repo, branch, ...path] = url.split('/').slice(3).filter(p => p !== 'blob' && p !== 'tree')
+  path = path.filter(p => p !== 'README.md' && p !== 'index.md').map(p => p.replace(/\.md$/, '')).join('/')
+  location.href = `${location.origin}/${owner}/${repo}${branch === 'main' ? '' : ('/' + branch)}/${path}`
+}
+
+const githubSearchArg = new URLSearchParams(window.location.search).get('github');
+if (githubSearchArg) {
+  processGitHubUrl(githubSearchArg);
+}
+
+// Attach event listeners
+document.addEventListener('drop', (e) => {
+  e.preventDefault();
+  processGitHubUrl(e.dataTransfer.getData('text/plain'));
+});
+document.addEventListener('paste', () => {
+  navigator.clipboard.readText().then((text) => {
+    processGitHubUrl(text);
+  });
+});
+
+// Prevent default browser behavior on dragover to allow drop
+document.addEventListener('dragover', (e) => e.preventDefault());
