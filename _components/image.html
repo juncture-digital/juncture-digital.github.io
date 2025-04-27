@@ -653,7 +653,9 @@
         navigator.clipboard.writeText(JSON.stringify(annotorious.getAnnotations(), null, 2))
         let [owner, repo, branch, ...path] = props.ghbase.split('/')
         path = path.join('/')
-        let annosUpdateUrl = `https://github.com/${owner}/${repo}/${annosFound ? 'edit' : 'new'}/${branch}/${path}/${annosUrl.split('/').pop()}`  
+        let annosUpdateUrl = annosFound
+          ? `https://github.com/${owner}/${repo}/edit/${branch}/${path}/${annosUrl.split('/').pop()}`  
+          : `https://github.com/${owner}/${repo}/new/${branch}/?filename=${path}/${annosUrl.split('/').pop()}`
         html = `<div class="annosUpdateLink"><a href="${annosUpdateUrl}" target="_blank">Update</a></div><ul class="annosList">\n`
       } else {
         html = `<ul class="annosList">\n`
