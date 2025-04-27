@@ -160,7 +160,7 @@ Go to: `https://juncture-digital.io/<GitHub username>/<repository name>/<path to
 
 For example, if your GitHub username is `jane-doe` and your file is `example.md` in a repo called `my-juncture-site`, your page will be: `https://juncture-digital.io/jane-doe/my-juncture-site/example
 
-If you used the basic example your page should look like <a href="https://juncture-digital.io/juncture-digital/juncture-digital.github.io/_examples/demo?branch=simple" target="_blank">this</a>.
+If you used the basic example your page should look like <a href="https://juncture-digital.io/juncture-digital/juncture-digital.github.io/_examples/demo" target="_blank">this</a>.
 
 > **For added convenience...**  
 Drag this link your bookmarks bar - [🔗 View in Juncture](javascript:(function()%7Bwindow.location.href%3D%22https%3A%2F%2Fjuncture-digital.io%3Fgithub%3D%22%2Bdocument.URL%7D)()%3B)  
