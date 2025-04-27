@@ -154,8 +154,6 @@ Scroll to the bottom and click the green **“Commit new file”** button. This 
 
 ### 5. **View your new web page!**
 
-[🔗 View in Juncture](javascript:(function(){var url=window.location.href;window.location.href=‘https://juncture-digital.io/?github=’+encodeURIComponent(url);})())
-
 Now comes the magic ✨  
 
 Go to: `https://juncture-digital.io/<GitHub username>/<repository name>/<path to your file>`
@@ -163,6 +161,10 @@ Go to: `https://juncture-digital.io/<GitHub username>/<repository name>/<path to
 For example, if your GitHub username is `jane-doe` and your file is `example.md` in a repo called `my-juncture-site`, your page will be: `https://juncture-digital.io/jane-doe/my-juncture-site/example
 
 If you used the basic example your page should look like <a href="https://juncture-digital.io/juncture-digital/juncture-digital.github.io/_examples/demo?branch=simple" target="_blank">this</a>.
+
+> **For added convenience...**  
+Drag this link your bookmarks bar - [🔗 View in Juncture](javascript:(function()%7Bwindow.location.href%3D%22https%3A%2F%2Fjuncture-digital.io%3Fgithub%3D%22%2Bdocument.URL%7D)()%3B)  
+Then, when you're on a GitHub page you can simply click the bookmark to view the Juncture-rendered version of the page.
 
 ### 6. **Edit, preview, repeat**
 Any time you want to make changes:
