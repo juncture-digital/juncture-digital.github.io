@@ -99,7 +99,7 @@ const parseCodeEl = (el) => {
     let owner = window.jekyll.site.github.owner_name
     let repo = window.jekyll.site.github.repository_name
     let branch = window.jekyll.site.github.source.branch
-    ghbase = `${owner}/${repo}/${branch}${dir}`
+    ghbase = `${owner}/${repo}/${branch}`
   }
   if (ghbase && window.jekyll.page.path) {
     let dir = window.jekyll.page?.path ? `/${window.jekyll.page.path.split('/').slice(0,-1).join('/')}` : ''
