@@ -95,7 +95,11 @@ const parseCodeEl = (el) => {
   //   parsed.kwargs.data = encodeURIComponent(parent.nextElementSibling.outerHTML.trim().replace(/\n/g, '').replace(/ data=\"\" style=\"display:none;\"/, ''))
 
   let ghbase = window.ghbase
-  if (!ghbase && window.jekyll.site.github.owner_name) {
+  if (location.hostname === 'juncture-digital.io') {
+    let [owner, repo, ...path] = location.pathname.split('/').slice(1).filter(p => p !== '')
+    console.log(owner, repo, path)
+    // TODO
+  } else if (!ghbase && window.jekyll.site.github.owner_name) {
     let owner = window.jekyll.site.github.owner_name
     let repo = window.jekyll.site.github.repository_name
     let branch = window.jekyll.site.github.source.branch
