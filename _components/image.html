@@ -235,8 +235,7 @@
         let action = eventData.action?.toLowerCase()
         let args = eventData.args
         if (action === 'zoomto') {
-          let region = args[0]
-          zoomto(region)
+          zoomto(args[0])
         } else if (action === 'gotopage') {
           gotopage(parseInt(args[0]))
         } else if (action === 'gotopageid') {
@@ -335,7 +334,9 @@
       return url
     }
 
-    const showAnnotations = () => annoLayer.style.visibility = 'visible'
+    const showAnnotations = () => {
+      annoLayer.style.visibility = 'visible'
+    }
     const hideAnnotations = () => annoLayer.style.visibility = 'hidden'
     const enableAnnotations = () => {
       document.querySelector('#showAnnos').style.display = 'none'
@@ -345,15 +346,16 @@
         annosIcon.style.display = 'none'
         annosEditIcon.style.display = 'inline'
         drawer.open = false
+        updateAnnos()
       })
     }
-    const toggleAnnotations = () => { 
+    const toggleAnnotations = () => {
       if (annoLayer) {
         if (annoLayer.style.visibility === 'hidden') showAnnotations(); else hideAnnotations() 
         annosBadge.style.visibility = annotations.length ? annoLayer.style.visibility === 'hidden' ? 'visible' : 'hidden' : 'hidden'
       } else {
         initViewer().then(viewer => {
-          if (annoLayer.style.visibility === 'hidden') showAnnotations(); else hideAnnotations() 
+          if (annoLayer.style.visibility === 'hidden' || props.showannos) showAnnotations(); else hideAnnotations() 
           annosBadge.style.visibility = annotations.length ? annoLayer.style.visibility === 'hidden' ? 'visible' : 'hidden' : 'hidden'
         })
       }
@@ -499,7 +501,9 @@
         props.manifest = `https://iiif.mdpress.io${props.base}${props.src}/manifest.json`
         loadImage(`https://raw.githubusercontent.com/${props.ghbase}${props.src[0] === '/' ? '' : '/'}${props.src}`)
       }
-      loadManifest(props.manifest)
+      
+      if (props.showannos) toggleAnnotations()
+      else loadManifest(props.manifest)
     
     } else if (props.manifest) {
       props.manifest = props.manifest.startsWith('http') ? props.manifest : `https://iiif.mdpress.io/${props.manifest}/manifest.json`
@@ -647,31 +651,37 @@
       
       let annosDiv = document.querySelector('#annos')
       
-      let html = ''
-
-      if (annotorious) {
-        navigator.clipboard.writeText(JSON.stringify(annotorious.getAnnotations(), null, 2))
+      if (annotorious && document.querySelector('#showAnnos').style.display === 'none') {
         let [owner, repo, branch, ...path] = props.ghbase.split('/')
         path = path.join('/')
         let annosUpdateUrl = annosFound
           ? `https://github.com/${owner}/${repo}/edit/${branch}/${path}/${annosUrl.split('/').pop()}`  
           : `https://github.com/${owner}/${repo}/new/${branch}/?filename=${path}/${annosUrl.split('/').pop()}`
-        html = `<div class="annosUpdateLink"><a href="${annosUpdateUrl}" target="_blank">Update</a></div><ul class="annosList">\n`
-      } else {
-        html = `<ul class="annosList">\n`
+        
+        let annosUpdateLink = document.createElement('div')
+        annosUpdateLink.innerHTML = `<a href="${annosUpdateUrl}">Save annotations</a>`
+        annosUpdateLink.className = 'annosUpdateLink'
+        annosUpdateLink.addEventListener('click', (e) => {
+          navigator.clipboard.writeText(JSON.stringify(annotorious.getAnnotations(), null, 2))
+          window.parent.postMessage({ type: 'openLink', url: annosUpdateUrl, newtab: true }, '*');
+        })
+        annosDiv.appendChild(annosUpdateLink)
       }
-            
+
+      let annosList = annosDiv.querySelector('ul.annosList')
+      if (annosList) annosList.remove()
+      annosList = document.createElement('ul')
+      annosList.className = 'annosList'
       annotations.forEach(anno => {
         let id = anno.id.split('-')[0].slice(1)
         let text = anno.body.map(b => b.value).join(' ')
         let [x,y,w,h] = anno.target.selector.value.split('pixel:')[1].split(',').map(v => Math.round(parseFloat(v)))
         let region = `${x},${y},${w},${h}`
-        // console.log(regionThumbnail(region))
-        html+= `    <li><img src="${regionThumbnail(region)}"><div class="wrap"><span>${text}</span><sl-copy-button value="${id}"></sl-copy-button><div></li>\n`
+        let annosListItem = document.createElement('li')
+        annosListItem.innerHTML = `<img src="${regionThumbnail(region)}"><div class="wrap"><span>${text}</span><sl-copy-button value="${id}"></sl-copy-button><div>`
+        annosList.appendChild(annosListItem)
       })
-      html += `  </ul>`
-      // console.log(html)
-      annosDiv.innerHTML = html
+      annosDiv.appendChild(annosList)
     }
 
     const parseRegionString = (region) => {
@@ -690,17 +700,18 @@
     }
 
     let zoomedToRegion = ''
-    const zoomto = (region) => {
+    const zoomto = (where) => {
+      let region = /^[0-9a-f]{8}$/.test(where)
+        ? annotations.find(anno => anno.id.slice(1,9) === where)?.target.selector.value // annotation id
+        : where
       initViewer().then(resp => {
-        if (region) {
-          if (zoomedToRegion === region) {
-            viewer.viewport.goHome()
-            zoomedToRegion = ''
-          } else {
-            zoomedToRegion = region
-            let rect = parseRegionString(region, viewer)
-            setTimeout(() => viewer.viewport.fitBounds(rect, false), 100)
-          }
+        if (zoomedToRegion === region) {
+          viewer.viewport.goHome()
+          zoomedToRegion = ''
+        } else {
+          zoomedToRegion = region
+          let rect = parseRegionString(region, viewer)
+          setTimeout(() => viewer.viewport.fitBounds(rect, false), 100)
         }
       })
     }

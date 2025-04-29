@@ -18,8 +18,19 @@ const paramToIframe = (param) => {
     iframe.setAttribute('allow', 'clipboard-write')
     if (param.id) iframe.id = param.id
     // if (param.classes.length > 0) iframe.className = param.classes.join(' ')
-    let args = `manifest=${param.getAttribute('manifest')}`
-    iframe.src = `${juncturePrefix}/components/${tag}?${args}`
+
+    let paramArgs = Object.fromEntries(Array.from(param.attributes).map(attr => [attr.name, attr.value]))
+    console.log(paramArgs)
+
+    let componentArgs = [
+      ...Object.entries(paramArgs)
+        .filter(([key, value]) => key !== 'width' && key !== 'height' && !key.startsWith('ve-')) // iframe attributes not passed to component
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+      ].join('&')
+
+    console.log(componentArgs)
+
+    iframe.src = `${juncturePrefix}/components/${tag}?${componentArgs}`
     // param.replaceWith(iframe)
     return iframe
   }
@@ -36,6 +47,7 @@ const v1Convert = () => {
       let carousel = document.createElement('sl-carousel')
       carousel.setAttribute('pagination', '')
       carousel.setAttribute('navigation', '')
+      carousel.setAttribute('style', '--aspect-ratio: 1;')
       wrapper.appendChild(para.cloneNode(true))
       wrapper.appendChild(carousel)
       para.replaceWith(wrapper)
@@ -636,7 +648,7 @@ const makeEntityPopups = () => {
 ////////// End Wikidata Entity functions //////////
 
 const processPage = (content) => {
-  // v1Convert()
+  v1Convert()
 
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML

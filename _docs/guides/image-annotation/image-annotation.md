@@ -4,11 +4,23 @@ layout: docs
 category: guides
 ---
 
-## Image Annotation Support
+## Image Annotation
 
 The Juncture `image` component supports **interactive image annotations** using [Annotorious](https://recogito.github.io/annotorious/) with [OpenSeadragon](https://openseadragon.github.io/). This allows authors to highlight and comment on specific regions of an image.
 
-`image #image src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg caption="Monument Valley" cover .right .shadow`
+Below is an example of an annotated image.
+
+`image #image src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg caption="Monument Valley" cover showannos .right .shadow`
+
+- [West Mitten Butte](image/zoomto/d3ebbd3e)
+- [East Mitten Butte](image/zoomto/cd3805ec)
+- [Merrick Butte](image/zoomto/e34e59e0)
+
+## How to Annotate an Image
+
+### Overview
+
+The Juncture `image` component uses the [Annotorious](https://annotorious.dev/) OpenSeadragon plugin for image annotation.  When a Juncture image is displayed any annotations found for the image are loaded and may be viewed on the image.  Annotations may be created, modified, or deleted by enabling the annotator from within the info drawer.  Any annotation updates must be manually saved by the annotation author as Juncture does not have the ability to create or modify files in a users GitHub account.
 
 ### Enabling Annotation Mode
 
