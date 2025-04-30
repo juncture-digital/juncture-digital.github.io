@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OpenSeadragon v5 + Annotorious Example</title>
+
+  <!-- OpenSeadragon v5 CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/openseadragon@5.0.1/build/openseadragon/openseadragon.css" />
+  <!-- Annotorious OpenSeadragon CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@annotorious/openseadragon@latest/dist/annotorious-openseadragon.css" />
+    <link  href="https://cdn.jsdelivr.net/npm/@recogito/annotorious-toolbar@latest/dist/annotorious-toolbar.min.css" rel="stylesheet"/>
+
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    #viewer    { width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+    <div id="toolbar"></div>
+
+  <div id="viewer"></div>
+
+  <!-- OpenSeadragon v5 JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/openseadragon@5.0.1/build/openseadragon/openseadragon.min.js">
+  </script>
+  <!-- Annotorious OpenSeadragon plugin JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/@annotorious/openseadragon@latest/dist/annotorious-openseadragon.js">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@recogito/annotorious-toolbar@latest/dist/annotorious-toolbar.min.js"></script>
+
+  <script>
+    window.addEventListener('load', () => {
+      // 1) Initialize OSD v5 with the Red Squirrel thumbnail as a simple image tile source
+      const viewer = OpenSeadragon({
+        id:        'viewer',
+        prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@5.0.1/build/openseadragon/images/',
+        tileSources: {
+          type: 'image',
+          url:  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Red_squirrel_%2821808%29.jpg/984px-Red_squirrel_%2821808%29.jpg'
+        }
+      });
+
+      // 2) Attach Annotorious and enable rectangle drawing by default
+      const anno = AnnotoriousOSD.createOSDAnnotator(viewer);
+      setTimeout(() => {
+        Annotorious.Toolbar(anno, document.getElementById('toolbar'), {
+            drawingTools: ['rect','polygon']
+          });        
+      }, 0);
+
+      // anno.setDrawingTool('rect');
+
+      // 3) Listen for new annotations (with body.value containing the user’s text)
+      anno.on('createAnnotation', annotation => {
+        console.log('New annotation:', annotation);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -106,16 +106,18 @@ const parseCodeEl = (el) => {
   // if (parent?.nextElementSibling?.tagName === 'UL' && parent?.nextElementSibling?.getAttribute('data') === '')
   //   parsed.kwargs.data = encodeURIComponent(parent.nextElementSibling.outerHTML.trim().replace(/\n/g, '').replace(/ data=\"\" style=\"display:none;\"/, ''))
 
-  let ghbase = window.ghbase
-  if (!ghbase && window.jekyll.site.github.owner_name) {
-    let owner = window.jekyll.site.github.owner_name
-    let repo = window.jekyll.site.github.repository_name
-    let branch = window.jekyll.site.github.source.branch
-    ghbase = `${owner}/${repo}/${branch}`
-  }
-  if (ghbase && window.jekyll.page.path) {
-    let dir = window.jekyll.page?.path ? `/${window.jekyll.page.path.split('/').slice(0,-1).join('/')}` : ''
-    parsed.kwargs.ghbase = `${ghbase}${dir}`
+  if (parsed.tag) {
+    let ghbase = window.ghbase
+    if (!ghbase && window.jekyll.site.github.owner_name) {
+      let owner = window.jekyll.site.github.owner_name
+      let repo = window.jekyll.site.github.repository_name
+      let branch = window.jekyll.site.github.source.branch
+      ghbase = `${owner}/${repo}/${branch}`
+    }
+    if (ghbase && window.jekyll.page.path) {
+      let dir = window.jekyll.page?.path ? `/${window.jekyll.page.path.split('/').slice(0,-1).join('/')}` : ''
+      parsed.kwargs.ghbase = `${ghbase}${dir}`
+    }
   }
   // console.log(parsed)
   return parsed
