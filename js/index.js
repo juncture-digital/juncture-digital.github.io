@@ -417,13 +417,14 @@ const addActionLinks = (rootEl) => {
         path = path.slice(targetIdx)
         let action = path[1]
         let args = path.slice(2)
+        let text = a.textContent
         if (a.href) {
           a.setAttribute('data-href', href)
           a.classList.add('trigger')
           a.removeAttribute('href')
           a.style.cursor = 'pointer'
           a.addEventListener('click', () => {
-            let msg = { event: 'action', action, args }
+            let msg = { event: 'action', action, text, args }
             document.getElementById(iframe.id)?.contentWindow.postMessage(JSON.stringify(msg), '*')
           })
         }

@@ -10,11 +10,19 @@ The Juncture `image` component supports **interactive image annotations** using 
 
 Below is an example of an annotated image.
 
-`image #image src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg caption="Monument Valley" cover showannos .right .shadow`
+`image #image1 src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg caption="Monument Valley" cover showannos .right .shadow`
 
-- [West Mitten Butte](image/zoomto/d3ebbd3e)
-- [East Mitten Butte](image/zoomto/cd3805ec)
-- [Merrick Butte](image/zoomto/e34e59e0)
+- [West Mitten Butte](image1/zoomto/d3ebbd3e)
+- [East Mitten Butte](image1/zoomto/cd3805ec)
+- [Merrick Butte](image1/zoomto/e34e59e0)
+
+##
+
+`image #image2 src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg caption="Monument Valley" cover .right .shadow`
+
+- [West Mitten Butte](image2/zoomto/pct:12.62,25.24,21.24,20.98)
+- [East Mitten Butte](image2/zoomto/pct:41.57,30.61,20.97,20.71)
+- [Merrick Butte](image2/zoomto/pct:61.07,23.52,32.77,32.36)
 
 ## How to Annotate an Image
 
