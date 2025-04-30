@@ -6,6 +6,7 @@
   <title>Document</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/themes/light.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@recogito/annotorious-openseadragon@2.7.14/dist/annotorious.min.css">
+
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     @keyframes fadeInOpacity { 0% { opacity: 0; } 100% { opacity: 1; } }
@@ -722,7 +723,76 @@
 
       return { x, y, w: newW, h: newH };
     }
+    
+/**
+ * Place a padded, semi‐transparent text caption under a box,
+ * with fully opaque text.
+ *
+ * @param {OpenSeadragon.Viewer} viewer
+ * @param {{x:number,y:number,w:number,h:number}} box   Image‐pixel bbox
+ * @param {string} text                                  Caption text
+ * @param {object} [opts]
+ * @param {number} [opts.fontSize=16]        Font size in px
+ * @param {string} [opts.bgColor='#000']     Background hex color (e.g. '#000', '#ff0000')
+ * @param {number} [opts.bgOpacity=0.5]      Background alpha (0–1)
+ * @param {string} [opts.textColor='#fff']   Text color
+ * @param {number} [opts.paddingEm=0.5]      Padding around text (in em)
+ * @returns {HTMLElement}                     The caption element
+ */
+ function addTextBelowBox(viewer, box, text, opts = {}) {
+  const {
+    fontSize   = 16,
+    bgColor    = '#000',
+    bgOpacity  = 0.5,
+    textColor  = '#fff',
+    paddingEm  = 0.5,
+  } = opts;
 
+  // Helper: turn '#rgb' or '#rrggbb' into 'rgba(r,g,b,alpha)'
+  function hexToRgba(hex, alpha) {
+    let h = hex.replace('#','');
+    if (h.length === 3) {
+      h = h.split('').map(c => c + c).join('');
+    }
+    const int = parseInt(h, 16);
+    const r = (int >> 16) & 255;
+    const g = (int >> 8) & 255;
+    const b = int & 255;
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  // 1) Create and style the DIV
+  const div = document.createElement('div');
+  div.textContent = text;
+  Object.assign(div.style, {
+    position:        'absolute',
+    display:         'inline-block',
+    fontSize:        fontSize + 'px',
+    backgroundColor: hexToRgba(bgColor, bgOpacity),
+    color:           textColor,
+    padding:         `${paddingEm}em`,
+    boxSizing:       'border-box',
+    whiteSpace:      'pre-wrap',
+    pointerEvents:   'none',
+    opacity:         '1'            // ensure text remains fully opaque
+  });
+
+  // 2) Compute the bottom-center of the box in image coords
+  const imgX = box.x + box.w/2;
+  const imgY = box.y + box.h;
+
+  // 3) Convert to viewport coords
+  const vp = viewer.viewport.imageToViewportCoordinates(imgX, imgY);
+
+  // 4) Add as a TOP-centered overlay (auto-width)
+  viewer.addOverlay({
+    element:   div,
+    location:  new OpenSeadragon.Point(vp.x, vp.y),
+    placement: OpenSeadragon.Placement.TOP
+  });
+
+  return div;
+}
     const parseRegionString = (region, center) => {
       let viewportRect
       const s1 = region.split(':')
@@ -745,6 +815,7 @@
       let anno = annotations.find(anno => anno.id.slice(1,9) === where)
       let region = anno?.target.selector.value || where
       initViewer().then(resp => {
+        viewer.clearOverlays();
         if (zoomedToRegion === region) {
           viewer.viewport.goHome()
           zoomedToRegion = ''
@@ -754,6 +825,16 @@
           setTimeout(() => {
             viewer.viewport.fitBounds(rect, false)
             // if (anno) annotorious.selectAnnotation(anno)
+            const s1 = region.split(':')
+            let [x,y,w,h] = s1[s1.length-1].split(',').map(v => parseInt(v))
+            let _region = {x,y,w,h}
+            addTextBelowBox(viewer, _region, anno.body[0].value, {
+              fontSize:  18,
+              bgColor:   "#fff",
+              bgOpacity: 0.8,
+              textColor: "#000",
+              paddingEm: 0.3
+            });
           }, 100)
         }
       })
