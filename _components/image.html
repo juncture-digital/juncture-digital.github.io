@@ -684,7 +684,46 @@
       annosDiv.appendChild(annosList)
     }
 
-    const parseRegionString = (region) => {
+    /**
+    * Expand a bounding box to twice its width and height,
+    * centering the original box inside the new one.
+    *
+    * @param {{x:number, y:number, w:number, h:number}} box
+    *   The original bounding box.
+    * @param {'round'|'floor'|'ceil'} [rounding='round']
+    *   How to round the computed coordinates.
+    * @returns {{x:number, y:number, w:number, h:number}}
+    *   The expanded, centered bounding box.
+    */
+    function expandBox(box, rounding = 'round') {
+      // New dimensions
+      const newW = box.w * 2;
+      const newH = box.h * 2;
+
+      // Center of the original box
+      const cx = box.x + box.w / 2;
+      const cy = box.y + box.h / 2;
+
+      // Compute top-left of the expanded box so it's centered on (cx,cy)
+      let x = cx - newW / 2;
+      let y = cy - newH / 2;
+
+      // Apply rounding
+      if (rounding === 'floor') {
+        x = Math.floor(x);
+        y = Math.floor(y);
+      } else if (rounding === 'ceil') {
+        x = Math.ceil(x);
+        y = Math.ceil(y);
+      } else {
+        x = Math.round(x);
+        y = Math.round(y);
+      }
+
+      return { x, y, w: newW, h: newH };
+    }
+
+    const parseRegionString = (region, center) => {
       let viewportRect
       const s1 = region.split(':')
       let [x,y,w,h] = s1[s1.length-1].split(',').map(v => parseInt(v))
@@ -696,22 +735,26 @@
         w = Math.round(size.x * w/100), 
         h = Math.round(size.y * h/100)
       }
+      if (center) ({x, y, w, h} = expandBox({x, y, w, h}))
       return viewer.viewport.imageToViewportRectangle(x,y,w,h)
     }
 
     let zoomedToRegion = ''
     const zoomto = (where) => {
-      let region = /^[0-9a-f]{8}$/.test(where)
-        ? annotations.find(anno => anno.id.slice(1,9) === where)?.target.selector.value // annotation id
-        : where
+      let isAnnoId = /^[0-9a-f]{8}$/.test(where)
+      let anno = annotations.find(anno => anno.id.slice(1,9) === where)
+      let region = anno?.target.selector.value || where
       initViewer().then(resp => {
         if (zoomedToRegion === region) {
           viewer.viewport.goHome()
           zoomedToRegion = ''
         } else {
           zoomedToRegion = region
-          let rect = parseRegionString(region, viewer)
-          setTimeout(() => viewer.viewport.fitBounds(rect, false), 100)
+          let rect = parseRegionString(region, isAnnoId)
+          setTimeout(() => {
+            viewer.viewport.fitBounds(rect, false)
+            // if (anno) annotorious.selectAnnotation(anno)
+          }, 100)
         }
       })
     }
