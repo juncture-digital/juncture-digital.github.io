@@ -377,12 +377,35 @@ details summary {
   -webkit-line-clamp: 5
 }
 
+/*
 .columns {
   display: grid;
-  /* Create responsive columns with a minimum width of 250px */
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   column-gap: 1rem;
 }
+*/
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;              /* optional gutter between items */
+  }
+
+  .columns > :first-child {
+  flex: 0 0 100%;         /* header takes full width */
+  }
+
+  .columns > *:not(:first-child) {
+  flex: 1 1 200px;        /* 
+                              – “1 1 200px” means:
+                                  • flex-grow: 1   → expand to fill leftover
+                                  • flex-shrink: 1 → shrink if needed
+                                  • flex-basis: 200px → minimum width before wrapping
+                              – you can adjust 200px up/down depending on
+                                  how narrow you’re willing to let each item get
+                              */
+  }
+
 
 h1:empty, h2:empty, h3:empty, h4:empty, h5:empty, h6:empty {
   display: none;

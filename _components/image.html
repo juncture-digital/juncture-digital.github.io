@@ -233,6 +233,7 @@
 
       window.addEventListener('message', (event) => {
         let eventData = JSON.parse(event.data)
+        console.log(eventData)
         let action = eventData.action?.toLowerCase()
         let text = eventData.text
         let args = eventData.args
@@ -500,7 +501,7 @@
           setCaption()
         })
       } else { // TODO: verify this
-        props.manifest = `https://iiif.mdpress.io${props.base}${props.src}/manifest.json`
+        props.manifest = `https://iiif.mdpress.io/gh:${props.ghbase}/${props.src}/manifest.json`
         loadImage(`https://raw.githubusercontent.com/${props.ghbase}${props.src[0] === '/' ? '' : '/'}${props.src}`)
       }
       

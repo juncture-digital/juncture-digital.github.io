@@ -37,9 +37,9 @@ contentSelector: main
     }
   }
 
-  const getMarkdown = async (owner, repo, branch, path) => {
+  const getGhMarkdown = async (owner, repo, branch, path) => {
     let extension = path.slice(-3) === '.md' ? 'md' : ''
-    // console.log(`getMarkdown: owner=${owner}, repo=${repo}, branch=${branch}, path=${path}, extension=${extension}`)
+    // console.log(`getGhMarkdown: owner=${owner}, repo=${repo}, branch=${branch}, path=${path}, extension=${extension}`)
     if (extension === 'md') {
       let resp = await getGhFile(owner, repo, branch, path)
       return resp.content
@@ -55,15 +55,31 @@ contentSelector: main
     }
   }
 
+  const getLocalMarkdown = async () => {
+    let href = location.href[location.href.length-1] === '/' ? location.href.slice(0,-1) : location.href
+    let extension = location.pathname.slice(-3) === '.md' ? 'md' : ''
+    if (extension === 'md') {
+      let resp = await fetch(location.href)
+      return resp.content
+    } else {
+      return await Promise.all([
+        fetch(`${href}.md`),
+        fetch(`${href}/README.md`),
+        fetch(`${href}/index.md`)
+      ]).then(resp => resp.find(r => r?.status === 200)?.text())
+    }
+  }
+
   let main = document.querySelector('main')
 
   let [owner, repo, ...path] = location.pathname.slice(window.jekyll?.site.baseurl.length || 0).split('/').filter(Boolean)
   let branch = new URLSearchParams(location.search).get('branch') || 'main'
-  console.log(path)
   let dir = path.filter(pe => !/\.md$/.test(pe)).join('/')
   window.ghbase = `${owner}/${repo}/${branch}` + (dir ? `/${dir}` : '')
 
-  let markdown = await getMarkdown(owner, repo, branch, path.join('/'))
+  let markdown = await getGhMarkdown(owner, repo, branch, path.join('/'))
+  if (!markdown) markdown = await getLocalMarkdown()
+
   if (markdown) {
     const fmRegex = /^---\s*[\r\n]+([\s\S]*?)[\r\n]+---[\r\n]+/;
 
@@ -83,14 +99,29 @@ contentSelector: main
       .use(markdownItAttrs, {leftDelimiter: '{:', rightDelimiter: '}'})
       .use(markdownitFootnote);
     
-    let tmp = new DOMParser().parseFromString(md.render(markdown), 'text/html').querySelector('body')
-     // remove "editor" and "view as" buttons
-     Array.from(tmp.querySelectorAll('a > img'))
+    let html = new DOMParser().parseFromString(md.render(markdown), 'text/html')
+    let style = html.querySelector('style')
+    let body = html.querySelector('body')
+    console.log('style', style)
+    console.log('body', body)
+
+    // remove "editor" and "view as" buttons
+    Array.from(body.querySelectorAll('a > img'))
       .find(img => img.src.indexOf('ve-button') > -1 || img.parentElement.href.indexOf('juncture-digital.org') > 0)
       ?.parentElement?.parentElement?.remove()
 
+    Array.from(body.querySelectorAll('h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p'))
+      .filter(p => !p.textContent)
+      .forEach(p => {
+        let heading = p.previousElementSibling
+        if (p.id) heading.id = p.id
+        p.classList.forEach(c => heading.classList.add(c))
+        if (p.getAttribute('style')) heading.setAttribute('style', p.getAttribute('style'))
+        p.remove()
+      })
+
     main.setAttribute('style', 'opacity:0; padding:0 1em;' + (frontMatter['max-width'] ? ` max-width:${frontMatter['max-width']}; margin:0 auto;` : ''))
-    main.innerHTML = tmp.innerHTML
+    main.innerHTML = (style ? `${style.outerHTML}\n` : '') + body.innerHTML
     let junctureScript = document.createElement('script')
     junctureScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.juncture-digital.io'}/js/index.js`
     junctureScript.type = 'module'

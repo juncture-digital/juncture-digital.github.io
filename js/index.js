@@ -115,7 +115,8 @@ const parseCodeEl = (el) => {
       ghbase = `${owner}/${repo}/${branch}`
     }
     if (ghbase && window.jekyll.page.path) {
-      let dir = window.jekyll.page?.path ? `/${window.jekyll.page.path.split('/').slice(0,-1).join('/')}` : ''
+      let dir = window.jekyll.page?.path !== '404.html' ? `/${window.jekyll.page.path.split('/').slice(0,-1).join('/')}` : ''
+      console.log(window.jekyll.page?.path, dir)
       parsed.kwargs.ghbase = `${ghbase}${dir}`
     }
   }
