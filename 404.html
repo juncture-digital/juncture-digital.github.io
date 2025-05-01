@@ -59,7 +59,9 @@ contentSelector: main
 
   let [owner, repo, ...path] = location.pathname.slice(window.jekyll?.site.baseurl.length || 0).split('/').filter(Boolean)
   let branch = new URLSearchParams(location.search).get('branch') || 'main'
-  window.ghbase = `${owner}/${repo}/${branch}`
+  console.log(path)
+  let dir = path.filter(pe => !/\.md$/.test(pe)).join('/')
+  window.ghbase = `${owner}/${repo}/${branch}` + (dir ? `/${dir}` : '')
 
   let markdown = await getMarkdown(owner, repo, branch, path.join('/'))
   if (markdown) {
