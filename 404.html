@@ -102,8 +102,6 @@ contentSelector: main
     let html = new DOMParser().parseFromString(md.render(markdown), 'text/html')
     let style = html.querySelector('style')
     let body = html.querySelector('body')
-    console.log('style', style)
-    console.log('body', body)
 
     // remove "editor" and "view as" buttons
     Array.from(body.querySelectorAll('a > img'))

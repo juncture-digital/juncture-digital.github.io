@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>OSD v5 Drag/Resize Bounding Boxes (Synced)</title>
+  <style>
+    #osd-container {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      height: 600px;
+      border: 1px solid #ccc;
+      user-select: none;
+    }
+    #drawing-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .box {
+      position: absolute;
+      border: 2px solid red;
+      box-sizing: border-box;
+      z-index: 20;
+    }
+    .box .handle {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: white;
+      border: 1px solid red;
+      box-sizing: border-box;
+      z-index: 21;
+    }
+    .box .handle.nw { top: -4px; left: -4px; cursor: nw-resize; }
+    .box .handle.ne { top: -4px; right: -4px; cursor: ne-resize; }
+    .box .handle.sw { bottom: -4px; left: -4px; cursor: sw-resize; }
+    .box .handle.se { bottom: -4px; right: -4px; cursor: se-resize; }
+    .copy-icon {
+      position: absolute;
+      width: 20px; height: 20px;
+      line-height: 20px;
+      text-align: center;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 22;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+<h3>⇧+drag to draw. Drag corners to resize, drag inside to move. Boxes stay synced.</h3>
+<div id="osd-container">
+  <div id="openseadragon" style="width:100%; height:100%;"></div>
+  <canvas id="drawing-overlay"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@5/build/openseadragon/openseadragon.min.js"></script>
+<script>
+  const viewer = OpenSeadragon({
+    id: "openseadragon",
+    prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@5/build/openseadragon/images/",
+    tileSources: {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/3/3b/Monument_Valley%2C_Utah%2C_USA.jpg',
+      type: 'image', buildPyramid: true
+    }
+  });
+
+  viewer.addHandler("open", () => {
+    const container = document.getElementById("openseadragon");
+    const overlay   = document.getElementById("drawing-overlay");
+    const ctx       = overlay.getContext("2d");
+    let isDrawing = false, startX = 0, startY = 0;
+
+    // Array of { rect, el, updateOverlay }
+    const boxes = [];
+
+    function resizeOverlay() {
+      overlay.width  = container.clientWidth;
+      overlay.height = container.clientHeight;
+    }
+    window.addEventListener("resize", resizeOverlay);
+    resizeOverlay();
+
+    function updateAllBoxes() {
+      boxes.forEach(b => b.updateOverlay());
+    }
+
+    viewer.addHandler("viewport-change", updateAllBoxes);
+
+    // === NEW BOX DRAWING ===
+    container.addEventListener("pointerdown", e => {
+      if (!e.shiftKey) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      isDrawing = true;
+      viewer.setMouseNavEnabled(false);
+      overlay.style.pointerEvents = "auto";
+      const r = overlay.getBoundingClientRect();
+      startX = e.clientX - r.left;
+      startY = e.clientY - r.top;
+    }, { capture: true });
+
+    document.addEventListener("pointermove", e => {
+      if (!isDrawing) return;
+      const r = overlay.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      ctx.clearRect(0,0,overlay.width,overlay.height);
+      ctx.strokeStyle = "red"; ctx.lineWidth = 2;
+      ctx.strokeRect(startX, startY, x - startX, y - startY);
+    });
+
+    document.addEventListener("pointerup", e => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      viewer.setMouseNavEnabled(true);
+      overlay.style.pointerEvents = "none";
+      ctx.clearRect(0,0,overlay.width,overlay.height);
+
+      const r = overlay.getBoundingClientRect();
+      const endX = e.clientX - r.left, endY = e.clientY - r.top;
+      const tl = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(startX, startY));
+      const br = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(endX, endY));
+      const rect = { x: tl.x, y: tl.y, width: br.x - tl.x, height: br.y - tl.y };
+
+      // Create the HTML overlay
+      const boxEl = document.createElement("div");
+      boxEl.className = "box";
+      container.appendChild(boxEl);
+
+      // Resize handlers
+      ['nw','ne','sw','se'].forEach(pos => {
+        const h = document.createElement("div");
+        h.className = `handle ${pos}`;
+        boxEl.appendChild(h);
+      });
+
+      // Copy icon
+      const icon = document.createElement("div");
+      icon.className = "copy-icon";
+      icon.textContent = "📋";
+      boxEl.appendChild(icon);
+      icon.addEventListener("click", () => {
+        navigator.clipboard.writeText(JSON.stringify(rect));
+      });
+
+      // Define updateOverlay function
+      function updateOverlay() {
+        const tlp = viewer.viewport.pixelFromPoint(new OpenSeadragon.Point(rect.x, rect.y), true);
+        const brp = viewer.viewport.pixelFromPoint(
+          new OpenSeadragon.Point(rect.x + rect.width, rect.y + rect.height), true
+        );
+        const w = brp.x - tlp.x, h = brp.y - tlp.y;
+        boxEl.style.left   = tlp.x + "px";
+        boxEl.style.top    = tlp.y + "px";
+        boxEl.style.width  = w + "px";
+        boxEl.style.height = h + "px";
+        // position icon
+        icon.style.left = (w - 10) + "px";
+        icon.style.top  = (h - 10) + "px";
+      }
+
+      // Initial positioning
+      updateOverlay();
+
+      // Add to array
+      boxes.push({ rect, el: boxEl, updateOverlay });
+
+      // === MOVE & RESIZE INTERACTIONS ===
+      let action = null, handlePos = null, startPx = 0, startPy = 0, origRect;
+
+      boxEl.addEventListener("pointerdown", e => {
+        e.stopPropagation(); e.preventDefault();
+        if (e.target.classList.contains("handle")) {
+          action = "resize";
+          handlePos = ['nw','ne','sw','se'].find(p => e.target.classList.contains(p));
+        } else {
+          action = "move";
+        }
+        viewer.setMouseNavEnabled(false);
+        startPx = e.clientX; startPy = e.clientY;
+        origRect = { ...rect };
+      });
+
+      document.addEventListener("pointermove", e => {
+        if (!action) return;
+        const dx = e.clientX - startPx, dy = e.clientY - startPy;
+        // get original corners in pixel space
+        const tlp = viewer.viewport.pixelFromPoint(new OpenSeadragon.Point(origRect.x, origRect.y), true);
+        const brp = viewer.viewport.pixelFromPoint(
+          new OpenSeadragon.Point(origRect.x + origRect.width, origRect.y + origRect.height), true
+        );
+        let leftPx = tlp.x, topPx = tlp.y, rightPx = brp.x, bottomPx = brp.y;
+
+        if (action === "move") {
+          leftPx += dx; rightPx += dx;
+          topPx  += dy; bottomPx += dy;
+        } else {
+          if (handlePos.includes("n")) topPx    += dy;
+          if (handlePos.includes("s")) bottomPx += dy;
+          if (handlePos.includes("w")) leftPx   += dx;
+          if (handlePos.includes("e")) rightPx  += dx;
+        }
+
+        // convert back to image coords
+        const newTL = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(leftPx, topPx));
+        const newBR = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(rightPx, bottomPx));
+        rect.x      = newTL.x;
+        rect.y      = newTL.y;
+        rect.width  = newBR.x - newTL.x;
+        rect.height = newBR.y - newTL.y;
+
+        updateOverlay();
+      });
+
+      document.addEventListener("pointerup", () => {
+        if (!action) return;
+        action = null;
+        viewer.setMouseNavEnabled(true);
+      });
+    });
+
+    // Clear on Escape
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        boxes.forEach(b => container.removeChild(b.el));
+        boxes.length = 0;
+      }
+    });
+  });
+</script>
+</body>
+</html>
