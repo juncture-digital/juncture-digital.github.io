@@ -884,16 +884,15 @@
           zoomedToRegion = regionStr
           let region = parseRegionString(regionStr, false)
           let expandedRegion = parseRegionString(regionStr, true)
-          console.log(region)
           setTimeout(() => {
             let rect = viewer.viewport.imageToViewportRectangle(...Object.values(expandedRegion))
             viewer.viewport.fitBounds(rect, false)
             const borderEl = drawBoxBorder(viewer, region, {
               color:     '#FFFF00',
-              lineWidth: 4
+              lineWidth: 2
             });
             addTextBelowBox(viewer, region, caption, {
-              fontSize:  18,
+              fontSize:  '1em',
               bgColor:   "#fff",
               bgOpacity: 0.8,
               textColor: "#000",
