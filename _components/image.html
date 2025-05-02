@@ -16,7 +16,6 @@
     .content { display: inline-block; justify-content: center; align-items: center; overflow: hidden; position: relative; }
     .content img { display: block; width: 100%; height: auto; object-fit: contain; }
     .content .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1; }
-    .content sl-spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; }
 
     figcaption { padding: 10px; font-size: 0.9rem; background-color: #f9f9f9; display: flex; align-items: center; gap: 0.5em; }
     svg { width: 1.3em; height: 1.3em; }
@@ -60,6 +59,18 @@
     #annos, sl-tab-panel[name="annotations"] { display: flex; flex-direction: column; }
     #annos > *, sl-tab-panel[name="annotations"] > * { margin-bottom: 0.5em; }
     ul.annosList li img { height: 50px; width: auto; }
+
+    /* styles used by bounding box drawing */
+    #osd-container { position: relative; width: 100%; height: 100%; user-select: none; }
+    #drawing-overlay { position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; }
+    .box { position: absolute; border: 2px solid red; box-sizing: border-box; z-index: 20; }
+    .box .handle { position: absolute; width: 8px; height: 8px; background: white; border: 1px solid red; box-sizing: border-box; z-index: 21; }
+    .box .handle.nw { top: -4px; left: -4px; cursor: nw-resize; }
+    .box .handle.ne { top: -4px; right: -4px; cursor: ne-resize; }
+    .box .handle.sw { bottom: -4px; left: -4px; cursor: sw-resize; }
+    .box .handle.se { bottom: -4px; right: -4px; cursor: se-resize; }
+    .copy-icon { position: absolute; width: 20px; height: 20px; line-height: 20px; text-align: center; background: rgba(255,255,255,0.8); border-radius: 50%; cursor: pointer; z-index: 22; user-select: none;}
+  
   </style>
 </head>
 <body>
@@ -69,15 +80,16 @@
       <div class="content">
         <img>
 
-        <div class="overlay" style="display: none;">
-          <sl-spinner style="font-size: 2rem; --indicator-color: white;"></sl-spinner>
+        <div id="osd-container">
+          <div id="osd" style="width:100%; height:100%;">
+            <div class="page-info"><div class="pageid"></div><img class="thumbnail" draggable="true"></div>
+            <div class="coords">region</div>
+          </div>
+          <canvas id="drawing-overlay"></canvas>
         </div>
 
-        <div id="osd">
-          <div class="page-info"><div class="pageid"></div><img class="thumbnail" draggable="true"></div>
-          <div class="coords">region</div>
-        </div>
       </div>
+
       <figcaption>      
         <svg class="drawer-toggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
         <div class="title clamp"></div>
@@ -90,8 +102,8 @@
             <sl-badge variant="primary" pill>1</sl-badge>
           </div>
         </div>
-  
       </figcaption>
+
     </figure>
 
     <sl-drawer contained class="drawer" no-header style="--size: calc(100% - 30px);">
@@ -152,7 +164,6 @@
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/button/button.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/copy-button/copy-button.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/drawer/drawer.js';
-    import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/spinner/spinner.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab/tab.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-group/tab-group.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-panel/tab-panel.js';
@@ -233,7 +244,6 @@
 
       window.addEventListener('message', (event) => {
         let eventData = JSON.parse(event.data)
-        console.log(eventData)
         let action = eventData.action?.toLowerCase()
         let text = eventData.text
         let args = eventData.args
@@ -264,6 +274,7 @@
     const setPageInfo = (pageId) => {
       pageIdEl.innerHTML = props.seq
       let thumb = staticImageUrl(200)
+      console.log('setPageInfo', thumb)
       thumbnailEl.src = thumb
     }
 
@@ -333,6 +344,7 @@
       rotation = parseInt(props.rotation || rotation || 0)
       quality = props.quality || quality || 'default'
       format = props.format || format || 'jpg'
+      console.log(`id=${itemInfo.service[0].id || itemInfo.service[0]['@id']} region=${region} size=${size} rotation=${rotation} quality=${quality} format=${format}`)
       url =`${itemInfo.service[0].id || itemInfo.service[0]['@id']}/${region}/${size}/${rotation}/${quality}.${format}`
       return url
     }
@@ -962,6 +974,180 @@
       }
     })
 
+    const boundingBoxHandler = (e) => {
+      const container = document.getElementById("osd");
+      const overlay   = document.getElementById("drawing-overlay");
+      const ctx       = overlay.getContext("2d");
+      let isDrawing = false, startX = 0, startY = 0;
+  
+      // Array of { rect, el, updateOverlay }
+      const boxes = [];
+  
+      function resizeOverlay() {
+        overlay.width  = container.clientWidth;
+        overlay.height = container.clientHeight;
+      }
+      window.addEventListener("resize", resizeOverlay);
+      resizeOverlay();
+  
+      function updateAllBoxes() {
+        boxes.forEach(b => b.updateOverlay());
+      }
+  
+      viewer.addHandler("viewport-change", updateAllBoxes);
+  
+      // === NEW BOX DRAWING ===
+      container.addEventListener("pointerdown", e => {
+        if (!e.shiftKey) return;
+        e.preventDefault(); e.stopImmediatePropagation();
+        isDrawing = true;
+        viewer.setMouseNavEnabled(false);
+        overlay.style.pointerEvents = "auto";
+        const r = overlay.getBoundingClientRect();
+        startX = e.clientX - r.left;
+        startY = e.clientY - r.top;
+      }, { capture: true });
+  
+      document.addEventListener("pointermove", e => {
+        if (!isDrawing) return;
+        const r = overlay.getBoundingClientRect();
+        const x = e.clientX - r.left, y = e.clientY - r.top;
+        ctx.clearRect(0,0,overlay.width,overlay.height);
+        ctx.strokeStyle = "red"; ctx.lineWidth = 2;
+        ctx.strokeRect(startX, startY, x - startX, y - startY);
+      });
+  
+      document.addEventListener("pointerup", e => {
+        if (!isDrawing) return;
+        isDrawing = false;
+        viewer.setMouseNavEnabled(true);
+        overlay.style.pointerEvents = "none";
+        ctx.clearRect(0,0,overlay.width,overlay.height);
+  
+        const r = overlay.getBoundingClientRect();
+        const endX = e.clientX - r.left, endY = e.clientY - r.top;
+        const tl = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(startX, startY));
+        const br = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(endX, endY));
+
+        console.log((startX/r.width*100).toFixed(2), (startY/r.height*100).toFixed(2), ((endX-startX)/r.width*100).toFixed(2), ((endY-startY)/r.height*100).toFixed(2))
+
+        const rect = { x: tl.x, y: tl.y, width: br.x - tl.x, height: br.y - tl.y };
+  
+        let itemInfo = iiifManifest && findItem({type:'Annotation', motivation:'painting'}, iiifManifest, props.seq).body
+        console.log(itemInfo.width, itemInfo.height, r.width, r.height)
+        console.log(itemInfo.width/itemInfo.height, r.width/r.height)
+
+        // Create the HTML overlay
+        const boxEl = document.createElement("div");
+        boxEl.className = "box";
+        container.appendChild(boxEl);
+  
+        // Resize handlers
+        ['nw','ne','sw','se'].forEach(pos => {
+          const h = document.createElement("div");
+          h.className = `handle ${pos}`;
+          boxEl.appendChild(h);
+        });
+  
+        // Copy icon
+        const icon = document.createElement("div");
+        icon.className = "copy-icon";
+        icon.textContent = "📋";
+        boxEl.appendChild(icon);
+        icon.addEventListener("click", () => {
+          let outStr = `pct:${(rect.x*100).toFixed(2)},${(rect.y*100).toFixed(2)},${(rect.width*100).toFixed(2)},${(rect.height*100).toFixed(2)}`
+          navigator.clipboard.writeText(outStr);
+          console.log(outStr)
+        });
+  
+        // Define updateOverlay function
+        function updateOverlay() {
+          const tlp = viewer.viewport.pixelFromPoint(new OpenSeadragon.Point(rect.x, rect.y), true);
+          const brp = viewer.viewport.pixelFromPoint(
+            new OpenSeadragon.Point(rect.x + rect.width, rect.y + rect.height), true
+          );
+          const w = brp.x - tlp.x, h = brp.y - tlp.y;
+          boxEl.style.left   = tlp.x + "px";
+          boxEl.style.top    = tlp.y + "px";
+          boxEl.style.width  = w + "px";
+          boxEl.style.height = h + "px";
+          // position icon
+          icon.style.left = (w - 10) + "px";
+          icon.style.top  = (h - 10) + "px";
+        }
+  
+        // Initial positioning
+        updateOverlay();
+  
+        // Add to array
+        boxes.push({ rect, el: boxEl, updateOverlay });
+  
+        // === MOVE & RESIZE INTERACTIONS ===
+        let action = null, handlePos = null, startPx = 0, startPy = 0, origRect;
+  
+        boxEl.addEventListener("pointerdown", e => {
+          e.stopPropagation(); e.preventDefault();
+          if (e.target.classList.contains("handle")) {
+            action = "resize";
+            handlePos = ['nw','ne','sw','se'].find(p => e.target.classList.contains(p));
+          } else {
+            action = "move";
+          }
+          viewer.setMouseNavEnabled(false);
+          startPx = e.clientX; startPy = e.clientY;
+          origRect = { ...rect };
+        });
+  
+        document.addEventListener("pointermove", e => {
+          if (!action) return;
+          const dx = e.clientX - startPx, dy = e.clientY - startPy;
+          // get original corners in pixel space
+          const tlp = viewer.viewport.pixelFromPoint(new OpenSeadragon.Point(origRect.x, origRect.y), true);
+          const brp = viewer.viewport.pixelFromPoint(
+            new OpenSeadragon.Point(origRect.x + origRect.width, origRect.y + origRect.height), true
+          );
+          let leftPx = tlp.x, topPx = tlp.y, rightPx = brp.x, bottomPx = brp.y;
+  
+          if (action === "move") {
+            leftPx += dx; rightPx += dx;
+            topPx  += dy; bottomPx += dy;
+          } else {
+            if (handlePos.includes("n")) topPx    += dy;
+            if (handlePos.includes("s")) bottomPx += dy;
+            if (handlePos.includes("w")) leftPx   += dx;
+            if (handlePos.includes("e")) rightPx  += dx;
+          }
+  
+          // convert back to image coords
+          const newTL = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(leftPx, topPx));
+          const newBR = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(rightPx, bottomPx));
+          rect.x      = newTL.x;
+          rect.y      = newTL.y;
+          rect.width  = newBR.x - newTL.x;
+          rect.height = newBR.y - newTL.y;
+  
+          console.log(r.width, r.height, iiifManifest.width, iiifManifest.height)
+          console.log((leftPx/r.width*100).toFixed(2), (topPx/r.height*100).toFixed(2), ((rightPx-leftPx)/r.width*100).toFixed(2), ((bottomPx-topPx)/r.height*100).toFixed(2))
+
+          updateOverlay();
+        });
+  
+        document.addEventListener("pointerup", () => {
+          if (!action) return;
+          action = null;
+          viewer.setMouseNavEnabled(true);
+        });
+      });
+  
+      // Clear on Escape
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+          boxes.forEach(b => container.removeChild(b.el));
+          boxes.length = 0;
+        }
+      });
+    }
+
     const initOsd = async (tileSources) => {
       // create the OpenSeadragon viewer
       viewer = OpenSeadragon({
@@ -1045,6 +1231,8 @@
         }
         setCoords() 
       })
+
+      viewer.addHandler("open", () => boundingBoxHandler())
 
       return new Promise((resolve, reject) => {
         

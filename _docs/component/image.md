@@ -13,13 +13,10 @@ The `image` tag creates an image viewer displaying the image found at the URL sp
 The most basic use of the `image` tag is to specify the URL of the image to be displayed. The example below shows the Markdown tag used to display an image hosted by the [Wikimedia Commons](https://commons.wikimedia.org/wiki/Main_Page) site.  
 
 ##### An example
-{: .example}
 
-```juncture
-`image src=wc:Sunflower_sky_backdrop.jpg center medium`
-```
----
-`image src=wc:Sunflower_sky_backdrop.jpg center medium`
+`image #imagex src=Test_grid_800x1000.png center medium`
+
+- [test](imagex/zoomto/pct:30,30,40,40)
 
 ## Attributes
 {: .attributes}

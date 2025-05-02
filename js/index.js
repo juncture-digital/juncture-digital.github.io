@@ -20,7 +20,7 @@ const paramToIframe = (param) => {
     // if (param.classes.length > 0) iframe.className = param.classes.join(' ')
 
     let paramArgs = Object.fromEntries(Array.from(param.attributes).map(attr => [attr.name, attr.value]))
-    console.log(paramArgs)
+    // console.log(paramArgs)
 
     let componentArgs = [
       ...Object.entries(paramArgs)
@@ -28,7 +28,7 @@ const paramToIframe = (param) => {
         .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       ].join('&')
 
-    console.log(componentArgs)
+    // console.log(componentArgs)
 
     iframe.src = `${juncturePrefix}/components/${tag}?${componentArgs}`
     // param.replaceWith(iframe)
@@ -116,7 +116,6 @@ const parseCodeEl = (el) => {
     }
     if (ghbase && window.jekyll.page.path) {
       let dir = window.jekyll.page?.path !== '404.html' ? `/${window.jekyll.page.path.split('/').slice(0,-1).join('/')}` : ''
-      console.log(window.jekyll.page?.path, dir)
       parsed.kwargs.ghbase = `${ghbase}${dir}`
     }
   }
