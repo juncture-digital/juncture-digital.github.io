@@ -274,7 +274,7 @@
     const setPageInfo = (pageId) => {
       pageIdEl.innerHTML = props.seq
       let thumb = staticImageUrl(200)
-      console.log('setPageInfo', thumb)
+      // console.log('setPageInfo', thumb)
       thumbnailEl.src = thumb
     }
 
@@ -344,7 +344,7 @@
       rotation = parseInt(props.rotation || rotation || 0)
       quality = props.quality || quality || 'default'
       format = props.format || format || 'jpg'
-      console.log(`id=${itemInfo.service[0].id || itemInfo.service[0]['@id']} region=${region} size=${size} rotation=${rotation} quality=${quality} format=${format}`)
+      // console.log(`id=${itemInfo.service[0].id || itemInfo.service[0]['@id']} region=${region} size=${size} rotation=${rotation} quality=${quality} format=${format}`)
       url =`${itemInfo.service[0].id || itemInfo.service[0]['@id']}/${region}/${size}/${rotation}/${quality}.${format}`
       return url
     }
@@ -437,7 +437,7 @@
           ? props.caption
           : iiifManifest
             ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
-            : img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.\S+$/,'').replace(/[-_]+/g,' ')
+            : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.\S+$/,'').replace(/[-_]+/g,' '))
       if (props.nocaption) {
         caption.style.display = 'none'
       } else {
@@ -1029,13 +1029,7 @@
         const tl = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(startX, startY));
         const br = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(endX, endY));
 
-        console.log((startX/r.width*100).toFixed(2), (startY/r.height*100).toFixed(2), ((endX-startX)/r.width*100).toFixed(2), ((endY-startY)/r.height*100).toFixed(2))
-
         const rect = { x: tl.x, y: tl.y, width: br.x - tl.x, height: br.y - tl.y };
-  
-        let itemInfo = iiifManifest && findItem({type:'Annotation', motivation:'painting'}, iiifManifest, props.seq).body
-        console.log(itemInfo.width, itemInfo.height, r.width, r.height)
-        console.log(itemInfo.width/itemInfo.height, r.width/r.height)
 
         // Create the HTML overlay
         const boxEl = document.createElement("div");
@@ -1055,17 +1049,17 @@
         icon.textContent = "📋";
         boxEl.appendChild(icon);
         icon.addEventListener("click", () => {
-          let outStr = `pct:${(rect.x*100).toFixed(2)},${(rect.y*100).toFixed(2)},${(rect.width*100).toFixed(2)},${(rect.height*100).toFixed(2)}`
-          navigator.clipboard.writeText(outStr);
-          console.log(outStr)
+          console.log(imageAspect)
+          // const regionPct = `pct:${(rect.x*100).toFixed(5)},${(rect.y*100*imageAspect).toFixed(5)},${(rect.width*100).toFixed(5)},${(rect.height*100*imageAspect).toFixed(5)}`
+          const regionPct = `pct:${(rect.x*100).toFixed(5)},${(rect.y*100).toFixed(5)},${(rect.width*100).toFixed(5)},${(rect.height*100).toFixed(5)}`
+          console.log(regionPct)
+          navigator.clipboard.writeText(regionPct);
         });
-  
+
         // Define updateOverlay function
         function updateOverlay() {
           const tlp = viewer.viewport.pixelFromPoint(new OpenSeadragon.Point(rect.x, rect.y), true);
-          const brp = viewer.viewport.pixelFromPoint(
-            new OpenSeadragon.Point(rect.x + rect.width, rect.y + rect.height), true
-          );
+          const brp = viewer.viewport.pixelFromPoint(new OpenSeadragon.Point(rect.x + rect.width, rect.y + rect.height), true);
           const w = brp.x - tlp.x, h = brp.y - tlp.y;
           boxEl.style.left   = tlp.x + "px";
           boxEl.style.top    = tlp.y + "px";
@@ -1125,9 +1119,6 @@
           rect.y      = newTL.y;
           rect.width  = newBR.x - newTL.x;
           rect.height = newBR.y - newTL.y;
-  
-          console.log(r.width, r.height, iiifManifest.width, iiifManifest.height)
-          console.log((leftPx/r.width*100).toFixed(2), (topPx/r.height*100).toFixed(2), ((rightPx-leftPx)/r.width*100).toFixed(2), ((bottomPx-topPx)/r.height*100).toFixed(2))
 
           updateOverlay();
         });
@@ -1160,6 +1151,7 @@
         initialPage: props.seq - 1,
         showReferenceStrip: tileSources.length > 1,
         zoomPerClick: 1.25,
+        maxZoomPixelRatio: 10,
         gestureSettingsMouse: {
           dragToPan: true,
           scrollToZoom: false,

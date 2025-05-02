@@ -16,7 +16,12 @@ The most basic use of the `image` tag is to specify the URL of the image to be d
 
 `image #imagex src=Test_grid_800x1000.png center medium`
 
-- [test](imagex/zoomto/pct:30,30,40,40)
+- [test](imagex/zoomto/pct:25,30,50,40)
+
+
+`image #test src=wc:Berlin_Mitte_June_2023_01.jpg center medium`
+
+- [test](test/zoomto/pct:59.71183,41.43596,2.90581,11.51831)
 
 ## Attributes
 {: .attributes}
