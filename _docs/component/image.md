@@ -14,14 +14,20 @@ The most basic use of the `image` tag is to specify the URL of the image to be d
 
 ##### An example
 
-`image #imagex src=Test_grid_800x1000.png center medium`
+`image #test1 src=Test_grid_1000x1000.png center medium`
 
-- [test](imagex/zoomto/pct:25,30,50,40)
+- [ref](test1/zoomto/pct:30,30,40,40)
+- [test](test1/zoomto/pct:40,19.93,10.08,40.02)
 
+`image #test2 src=Test_grid_1000x800.png center medium`
 
-`image #test src=wc:Berlin_Mitte_June_2023_01.jpg center medium`
+- [ref](test2/zoomto/pct:30,25,40,50)
+- [test](test2/zoomto/pct:40,12.5,10,50)
 
-- [test](test/zoomto/pct:59.71183,41.43596,2.90581,11.51831)
+`image #test3 src=Test_grid_800x1000.png center medium`
+
+- [ref](test3/zoomto/pct:25,30,50,40)
+- [test](test3/zoomto/)
 
 ## Attributes
 {: .attributes}
