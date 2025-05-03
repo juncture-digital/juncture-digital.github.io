@@ -50,3 +50,10 @@ You can define annotation regions using an interactive drawing tool in the image
 To cancel or remove the current bounding box, press the **Escape** key.
 
 ---
+
+### Another Example Using a High Resolution Image
+
+`image #bedroom src=wc:Vincent_van_Gogh_-_De_slaapkamer_-_Google_Art_Project.jpg`
+
+- [Picture above bed](bedroom/zoomto/pct:43.40,9.92,11.06,9.65)
+- [Heavy paint example](bedroom/zoomto/pct:35.26,41.20,1.28,1.43)
