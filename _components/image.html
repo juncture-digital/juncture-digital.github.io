@@ -716,8 +716,7 @@
     }
 
     let zoomedToRegion = ''
-    const zoomto = (where, caption) => {
-      let regionStr = anno?.target.selector.value || where
+    const zoomto = (regionStr, caption) => {
       initViewer().then(resp => {
         viewer.clearOverlays();
         if (zoomedToRegion === regionStr) {
