@@ -12,23 +12,6 @@ The `image` tag creates an image viewer displaying the image found at the URL sp
 
 The most basic use of the `image` tag is to specify the URL of the image to be displayed. The example below shows the Markdown tag used to display an image hosted by the [Wikimedia Commons](https://commons.wikimedia.org/wiki/Main_Page) site.  
 
-##### An example
-
-`image #test1 src=Test_grid_1000x1000.png center medium`
-
-- [ref](test1/zoomto/pct:30,30,40,40)
-- [test](test1/zoomto/pct:40,19.93,10.08,40.02)
-
-`image #test2 src=Test_grid_1000x800.png center medium`
-
-- [ref](test2/zoomto/pct:30,25,40,50)
-- [test](test2/zoomto/pct:40,12.5,10,50)
-
-`image #test3 src=Test_grid_800x1000.png center medium`
-
-- [ref](test3/zoomto/pct:25,30,50,40)
-- [test](test3/zoomto/)
-
 ## Attributes
 {: .attributes}
 
