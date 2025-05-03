@@ -15,10 +15,7 @@ Juncture is built on a modular architecture that combines modern web technologie
 
 - **[OpenSeadragon](https://openseadragon.github.io/)**  
   High-resolution, zoomable image viewing used in the `image` component.
-
-- **[Annotorious](https://recogito.github.io/annotorious/)**  
-  Region-based image annotation, integrated with OpenSeadragon.
-
+  
 - **[Leaflet](https://leafletjs.com/)**  
   Interactive map rendering for the `map` component.
 
