@@ -256,7 +256,7 @@ iframe[src*="google-book"] {
   background-color: #f8f8f8;
 }
 .footnotes::before {
-  content: "Footnotes";
+  content: "References";
   font-size: 1.3em;
   font-weight: 500;
   margin-bottom: 0.5em;

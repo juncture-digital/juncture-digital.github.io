@@ -123,7 +123,7 @@ const parseCodeEl = (el) => {
   return parsed
 }
 
-const juncturePrefix = location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://www.juncture-digital.io'
+const juncturePrefix = location.port === '4001' ? 'http://localhost:3000' : 'https://www.juncture-digital.io'
 // const juncturePrefix = 'https://juncture-digital.io'
 const makeIframe = (code) => {
   let iframe = document.createElement('iframe')
