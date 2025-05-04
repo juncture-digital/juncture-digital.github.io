@@ -264,7 +264,7 @@
       let url
       let [region, size, rotation, rest] = props.options?.split('/') || []
       let [quality, format] = rest?.split('.') || []
-      region = crop, props.region || region || 'full'
+      region = crop || props.region || region || 'full'
       size = width
         ? width === 'max'
           ? 'max'
@@ -367,7 +367,7 @@
         iiifManifest = manifest
         setCaption()
         updateManifestPanel()
-        if (!img.src) loadImage(staticImageUrl())
+        if (!img.src || props.region) loadImage(staticImageUrl())
       })
       return iiifManifest
     }
@@ -411,7 +411,8 @@
     
     } else if (props.manifest) {
       props.manifest = props.manifest.startsWith('http') ? props.manifest : `https://iiif.mdpress.io/${props.manifest}/manifest.json`
-      initViewer()
+      loadManifest(props.manifest)
+      // initViewer()
     }
 
     setCaption()

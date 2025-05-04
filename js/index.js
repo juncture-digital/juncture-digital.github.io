@@ -8,7 +8,6 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/t
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/tab-group/tab-group.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/tab-panel/tab-panel.js';
 
-
 const paramToIframe = (param) => {
   const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
   if (tag === 'image') {
@@ -30,7 +29,7 @@ const paramToIframe = (param) => {
 
     // console.log(componentArgs)
 
-    iframe.src = `${juncturePrefix}/components/${tag}?${componentArgs}`
+    iframe.src = `${junctureComponentsPrefix}/${tag}?${componentArgs}`
     // param.replaceWith(iframe)
     return iframe
   }
@@ -123,8 +122,8 @@ const parseCodeEl = (el) => {
   return parsed
 }
 
-const juncturePrefix = location.port === '4001' ? 'http://localhost:3000' : 'https://www.juncture-digital.io'
-// const juncturePrefix = 'https://juncture-digital.io'
+const junctureComponentsPrefix = location.port === '4100' ? 'http://localhost:3000/_components' : 'https://www.juncture-digital.io/components'
+console.log(location.port, junctureComponentsPrefix)
 const makeIframe = (code) => {
   let iframe = document.createElement('iframe')
   iframe.setAttribute('loading', 'lazy')
@@ -141,7 +140,7 @@ const makeIframe = (code) => {
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`), ...(code.booleans || [])
     ].join('&')
 
-  iframe.src = code.tag === 'iframe' ? code.kwargs.src : `${juncturePrefix}/components/${code.tag}?${args}`
+  iframe.src = code.tag === 'iframe' ? code.kwargs.src : `${junctureComponentsPrefix}/${code.tag}?${args}`
 
   let isOnlyChild = code.el.parentElement?.children.length === 1 && code.el.parentElement?.children[0] === code.el
   if (isOnlyChild) code.el.parentElement.replaceWith(iframe)

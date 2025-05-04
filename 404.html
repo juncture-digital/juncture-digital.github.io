@@ -121,7 +121,7 @@ contentSelector: main
     main.setAttribute('style', 'opacity:0; padding:0 1em;' + (frontMatter['max-width'] ? ` max-width:${frontMatter['max-width']}; margin:0 auto;` : ''))
     main.innerHTML = (style ? `${style.outerHTML}\n` : '') + body.innerHTML
     let junctureScript = document.createElement('script')
-    junctureScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.juncture-digital.io'}/js/index.js`
+    junctureScript.src = `${location.port === '4100' ? 'http://localhost:3000': 'https://www.juncture-digital.io'}/js/index.js`
     junctureScript.type = 'module'
     document.body.appendChild(junctureScript)
   } else {
