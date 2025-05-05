@@ -79,8 +79,10 @@ Notes:
 `youtube vid=dQw4w9WgXcQ .large .center`
 
 
-#### .right
+#### Float Right
 {: .example}
+
+Video is aligned with right margin and is 50% of viewport width.  Text will wrap around the image.
 
 ```juncture
 `youtube vid=dQw4w9WgXcQ .right`
