@@ -16,9 +16,9 @@ Major rock formations include [West and East Mitten Buttes](image/zoomto/675,518
 ## Geography and geology
 
 `map #map location=Q192017,4 caption="Monument Valley" marker .right .shadow`
-`- location=Q118841`
-`- location=Q777183`
-`- location=Q223969`
+`- marker=Q118841 layer="National Parks"`
+`- marker=Q777183 layer="National Parks"`
+`- marker=Q223969 layer="National Parks"`
 
 [Monument Valley](map/flyto/Q192017,11) is part of the Colorado Plateau. The elevation of the valley floor ranges from 5,000 to 6,000 feet above sea level. The floor is largely siltstone of the Cutler Group, or sand derived from it, deposited by the meandering rivers that carved the valley. The valley's vivid red coloration comes from iron oxide exposed in the weathered siltstone. The darker, blue-gray rocks in the valley get their color from manganese oxide.  For tourists doing a national park tour, Monument Valley is situated between [Arches National Park](map/flyto/Q223969,12) and the [Grand Canyon](map/flyto/Q118841,12).
 

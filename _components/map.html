@@ -72,6 +72,9 @@
     import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
     import 'https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js'
 
+    import '../js/leaflet-opacity.js'
+    import '../js/turf.min.js'
+
     // import any needed Shoelace components (https://shoelace.style/)
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/card/card.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/drawer/drawer.js';
@@ -302,18 +305,19 @@
 
       if (token.indexOf('=') > 0) {
         let [key, ...rest] = token.split('=')
-        let value = rest.join('=')
+        let value = decodeURIComponent(rest.join('='))
         value = '"' && value[value.length-1] === '"' ? value.slice(1,-1) : value
 
-        if ((key === 'location' && isQid(value)) || key === 'qid') {
+        if ((key === 'marker' && isQid(value)) || key === 'qid') {
           let entity = await getEntity(value)
-          obj = {...entityToInfoObj(entity, token), ...obj}          
+          obj = {...entityToInfoObj(entity, token), ...obj}
+          obj.type = 'marker' 
         }
         else if (key === 'iiif') {
           let manifest = await getManifest(token)
           obj = {...manifestToInfoObj(manifest, token), ...obj}
         } else {
-          obj[key] = value
+          obj[key === 'layer' ? 'layerName' : key] = value
         }
       } else if (booleans.has(token)) {
         obj[kebabToCamel(token)] = true
@@ -464,9 +468,6 @@
       marker.addTo(map)
     }
 
-    const warpedMapLayer = new Allmaps.WarpedMapLayer('https://annotations.allmaps.org/images/7c569bcd9d292a49')
-    warpedMapLayer.addTo(map)
-
     latLngZoom = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))},${zoom}`
     coords.textContent = latLngZoom
     map.on('click', (e) => {
@@ -520,6 +521,13 @@
     map.flyTo(center, zoom)
   }
 
+  const warpedMapLayers = { value: [] }
+  const addWarpedMap = (layer) => {
+    let warpedMapLayer = new Allmaps.WarpedMapLayer(`https://annotations.allmaps.org/images/${layer.allmaps}`)
+    warpedMapLayers.value.push({ name: decodeURIComponent(layer.name), layer: warpedMapLayer, opacity: layer.opacity || 100 })
+    return warpedMapLayer
+  }
+
   docReady(async function() {
     window.addEventListener('message', (event) => {
       let eventData = JSON.parse(event.data)
@@ -542,20 +550,67 @@
     if (props.caption) setCaption(props.caption)
     main.style.visibility = 'visible'
     map = await initMap()
+
     if (props.data) {
-      let locations = await Promise.all(props.data.split('|').map(rec => toObj(rec)))
-      // let locations = await Promise.all(Array.from(new DOMParser().parseFromString(props.data, 'text/html').querySelector('body').firstChild.querySelectorAll('li'))
-      //  .map(li => toObj(li.innerHTML.replace(/^\s*-\s+/, ''))))
+
+      const layerControl = L.control.layers(Object.fromEntries([]), {}).addTo(map)
+
       let markersByLayer = {}
-      locations
-        .forEach(item => {
-          let layerName = item.layer || 'Locations'
+
+      let layerDefs = await Promise.all(props.data.split('|').map(rec => toObj(rec)))
+      layerDefs.forEach(layerDef => {
+        if (layerDef.allmaps) {
+          addWarpedMap(layerDef)
+        } else if (layerDef.type === 'marker') { 
+          let layerName = layerDef.layerName || 'Locations'
           if (!markersByLayer[layerName]) markersByLayer[layerName] = []
-          markersByLayer[layerName].push(item)
-        })
+          markersByLayer[layerName].push(layerDef)
+        }
+      })
   
-      let geoJsonLayer = toGeoJSONLayer(toGeoJSON(markersByLayer.Locations))
-      map.addLayer(geoJsonLayer)
+      Object.keys(markersByLayer).forEach(layerName => {
+        let layer = markersByLayer[layerName]
+        let geoJsonLayer = toGeoJSONLayer(toGeoJSON(layer))
+        layerControl.addOverlay(geoJsonLayer, layerName)
+        map.addLayer(geoJsonLayer)
+      })
+
+      const opacityLayers = {}
+      warpedMapLayers.value?.forEach(layer => {
+        if (layerControl) layerControl.addOverlay(layer.layer, layer.name)
+        if (!layer.disabled) map.addLayer(layer.layer)
+        opacityLayers[layer.name] = layer.layer
+      })
+
+      if (Object.keys(opacityLayers).length > 0) {
+        let opacityControl =
+          L.control.opacity(opacityLayers, {
+            label: null,
+            collapsed: true,
+            position: 'topright' // topleft or topright or bottomleft or bottomright
+        })
+        opacityControl.addTo(map)
+        Array.from(opacityControl.getContainer().querySelectorAll('.leaflet-control-layers-overlays label'))
+          .forEach((overlay) => {
+            let label = overlay.children[0].textContent.trim()
+            let warpedMapLayer
+            warpedMapLayers.value?.forEach(item => {
+              if (item.name === label) warpedMapLayer = item
+            })
+            if (warpedMapLayer) {
+              let startingOpacity = warpedMapLayer.opacity
+              let rangeControl = overlay.children[1].children[0]
+              rangeControl.value = startingOpacity
+              warpedMapLayer.layer.setOpacity(startingOpacity / 100)
+              rangeControl.addEventListener('input', (evt) => {
+                evt.preventDefault()
+                evt.stopPropagation()
+                warpedMapLayer.layer.setOpacity(parseInt(rangeControl.value)/100)
+              })
+            }
+          })
+      }
+
     }
   })
 
