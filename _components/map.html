@@ -14,7 +14,7 @@
     main { display: flex; flex-direction: column; width: 100%; aspect-ratio: 1 / 1; visibility: hidden; }
     #content { position:relative; flex: 1; width: 100%; z-index: 2;}
     .captionBar { display: flex; align-items: center; gap: 0.2em; height: 36px; margin: 0.3em 0.5em; background-color: inherit; } 
-    svg { width: 1.3em; height: 1.3em; }
+    .captionBar svg { width: 1.3em; height: 1.3em; }
     sl-drawer::part(body) { padding: 0; margin: 3px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; }
     sl-tab::part(base) { padding: 0.5em 1em; }
     sl-tab-panel::part(base) { padding: 0.5em; }
@@ -110,11 +110,12 @@
 
     const props = {
       ...{              // default properties
-        location: '51.505,-0.09,8', // map center and zoom
-        marker: false,          // show marker
         caption: null,   // caption text,
         data: null,
-        gestureHandling: isMobile
+        gestureHandling: isMobile,
+        ghbase: null,
+        location: '51.505,-0.09,8', // map center and zoom
+        marker: false,          // show marker
       },
       ...Object.fromEntries( // URLSearchParams to object
         Array.from(new URLSearchParams(location.search).entries())
@@ -480,6 +481,7 @@
       getLatLngZoom(e)
       coords.textContent = latLngZoom
     })
+    
     return map
   }
 
@@ -549,22 +551,42 @@
 
     if (props.caption) setCaption(props.caption)
     main.style.visibility = 'visible'
+    
     map = await initMap()
 
-    if (props.data) {
+   if (props.data) {
 
       const layerControl = L.control.layers(Object.fromEntries([]), {}).addTo(map)
 
       let markersByLayer = {}
+      let geoJsonLayers = {}
 
       let layerDefs = await Promise.all(props.data.split('|').map(rec => toObj(rec)))
       layerDefs.forEach(layerDef => {
+        console.log(layerDef)
         if (layerDef.allmaps) {
           addWarpedMap(layerDef)
         } else if (layerDef.type === 'marker') { 
           let layerName = layerDef.layerName || 'Locations'
           if (!markersByLayer[layerName]) markersByLayer[layerName] = []
           markersByLayer[layerName].push(layerDef)
+        } else if (layerDef.geojson) {
+          if (layerDef.geojson.indexOf('http') !== 0) {
+            if (layerDef.geojson[0] === '/') {
+              let [owner, repo, branch, ...path] = props.ghbase.split('/')
+              layerDef.geojson = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${layerDef.geojson}`
+            } else {
+              layerDef.geojson = `https://raw.githubusercontent.com/${props.ghbase}/${layerDef.geojson}`
+            }
+            console.log(layerDef.geojson)
+            fetch(layerDef.geojson)
+              .then(resp => resp.json())
+              .then(data => {
+                console.log(data)
+                let geoJsonLayer = L.geoJSON(data).addTo(map)
+                layerControl.addOverlay(geoJsonLayer, 'geojson')
+              });
+          }
         }
       })
   
@@ -610,8 +632,8 @@
             }
           })
       }
-
     }
+
   })
 
   </script>
