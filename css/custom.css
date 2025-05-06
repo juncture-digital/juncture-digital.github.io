@@ -600,3 +600,31 @@ a.site-title img {
     flex: 1 1 100%;
   }
 }
+
+.site-search {
+  position: relative;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: white;
+  border: 1px solid #ccc;
+  max-height: 300px;
+  overflow-y: auto;
+  display: none;
+}
+
+.search-suggestions li {
+  padding: 0.5em;
+  cursor: pointer;
+}
+
+.search-suggestions li:hover {
+  background: #f0f0f0;
+}
