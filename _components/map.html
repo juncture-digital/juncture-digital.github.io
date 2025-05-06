@@ -82,6 +82,164 @@
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-group/tab-group.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-panel/tab-panel.js';
 
+    const baseMapsConfigs = {
+      CartoDB_DarkMatter: ['https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],
+      CartoDB_DarkMatterNoLabels: ['https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],
+      CartoDB_DarkMatterOnlyLabels: ['https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],
+      CartoDB_Positron: ['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],
+      CartoDB_PositronNoLabels: ['https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],
+      CartoDB_PositronOnlyLabels: ['https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],    
+      CartoDB_Voyager: ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],
+      CartoDB_VoyagerNoLabels: ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],
+      CartoDB_VoyagerOnlyLabels: ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20}],
+      CartoDB_VoyagerLabelsUnder: ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 20 }],
+      Esri_DeLorme: ['https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/DeLorme_World_Base_Map/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Copyright: &copy;2012 DeLorme',
+              minZoom: 1,
+              maxZoom: 11 }],
+      Esri_NatGeoWorldMap: ['https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
+              maxZoom: 16 }],
+      Esri_OceanBasemap: ['https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+              maxZoom: 13 }],
+      Esri_WorldGrayCanvas: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+              maxZoom: 16 }],
+      Esri_WorldImagery: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community' }],
+      Esri_WorldPhysical: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
+              maxZoom: 8,
+              attribution: 'Tiles &copy; Esri &mdash; Source: US National Park Service' }],
+      Esri_WorldShadedRelief: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
+              maxZoom: 13 }],
+      Esri_WorldStreetMap: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012' }],
+      Esri_WorldTerrain: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+              maxZoom: 13 }],
+      Esri_WorldTopoMap: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community' }],
+      MtbMap: ['http://tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; USGS' }],
+      OpenStreetMap: ['https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 18, 
+              attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>' }],
+      OpenStreetMap_DE: ['https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
+              maxZoom: 18,
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }],
+      OpenStreetMap_France: ['https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+              maxZoom: 20,
+              attribution: '&copy; OpenStreetMap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }],
+      OpenStreetMap_HOT: ['https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>',
+              maxZoom: 19 }],
+      OpenStreetMap_Mapnik: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              maxZoom: 19 }],
+      OpenTopoMap: ['https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+              maxZoom: 17,
+              attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)' }],
+      OPNVKarte: ['https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png', {
+              attribution: 'Map <a href="https://memomaps.de/">memomaps.de</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              maxZoom: 18}],
+      Stadia_AlidadeSmooth: ['https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+              maxZoom: 20 }],
+      Stadia_AlidadeSmoothDark: ['https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+              maxZoom: 20 }],
+      Stadia_OSMBright: ['https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+              maxZoom: 20 }],
+      Stadia_Outdoors: ['https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
+              maxZoom: 20,
+              attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors' }],
+      Stamen_Terrain: ['https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
+              attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              subdomains: 'abcd',
+              minZoom: 0,
+              maxZoom: 18,
+              ext: 'png' }],
+      Stamen_TerrainBackground: ['https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}{r}.{ext}', {
+              attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              subdomains: 'abcd',
+              minZoom: 0,
+              maxZoom: 18,
+              ext: 'png' }],
+      Stamen_TerrainLabels: ['https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-labels/{z}/{x}/{y}{r}.{ext}', {
+              attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              subdomains: 'abcd',
+              minZoom: 0,
+              maxZoom: 18,
+              ext: 'png' }],
+      Stamen_Toner: ['https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}', {
+              attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              subdomains: 'abcd',
+              minZoom: 0,
+              maxZoom: 20,
+              ext: 'png' }],
+      Stamen_TonerBackground : ['https://stamen-tiles-{s}.a.ssl.fastly.net/toner-background/{z}/{x}/{y}{r}.{ext}', {
+              attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              subdomains: 'abcd',
+              minZoom: 0,
+              maxZoom: 20,
+              ext: 'png' }],
+      Stamen_TonerLite: ['https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+              attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              subdomains: 'abcd',
+              minZoom: 0,
+              maxZoom: 20,
+              ext: 'png' }],
+      Stamen_Watercolor: ['https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+              subdomains: 'abcd',
+              minZoom: 1,
+              maxZoom: 16,
+              ext: 'jpg',
+              attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }],
+      USGS_USTopo : ['https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}', {
+              maxZoom: 20,
+              attribution: 'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>'}],
+      USGS_USImagery: ['https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}', {
+              maxZoom: 20,
+              attribution: 'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>'}],
+      USGS_USImageryTopo: ['https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/{z}/{y}/{x}', {
+              maxZoom: 20,
+              attribution: 'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>'
+        }],
+    }
+
     const main = document.querySelector('main')
     const content = document.querySelector('#content')
     const captionBar = document.querySelector('.captionBar')
@@ -110,9 +268,10 @@
 
     const props = {
       ...{              // default properties
+        basemaps: 'OpenStreetMap',
         caption: null,   // caption text,
         data: null,
-        gestureHandling: isMobile,
+        gestureHandling: true,
         ghbase: null,
         location: '51.505,-0.09,8', // map center and zoom
         marker: false,          // show marker
@@ -433,6 +592,12 @@
     })
   }
 
+  let layerControl
+  const addLayerControl = (layer, name) => {
+    if (!layerControl) layerControl = L.control.layers(Object.fromEntries([]), {}).addTo(map)
+    layerControl.addOverlay(layer, name)
+  }
+
   const initMap = async () => {
 
     let split = props.location.split(',')
@@ -447,6 +612,11 @@
       if (split.length > 2) zoom = parseFloat(split[2])
     }
 
+    let _basemaps = props.basemaps.split(',').map(name => {
+      let [url, options] = baseMapsConfigs[name]
+      return [name.replace(/_/,' '), L.tileLayer(url, options)]
+    })
+
     let map = L.map('map', {
       gestureHandling: props.gestureHandling === true,
       preferCanvas: false,
@@ -454,13 +624,11 @@
       smoothSensitivity: 1.5,   // zoom speed. default is 1
       smoothWheelZoom: true,  // enable smooth zoom 
       zoomAnimation: true,
-      zoomSnap: 0.1
+      zoomSnap: 0.1,
+      layers: [_basemaps[0][1]]
     }).setView(center, zoom);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
+    if (_basemaps.length > 1) layerControl = L.control.layers(Object.fromEntries(_basemaps), {}).addTo(map)
 
     if (props.marker) {
       let marker = L.marker(center)
@@ -556,14 +724,11 @@
 
    if (props.data) {
 
-      const layerControl = L.control.layers(Object.fromEntries([]), {}).addTo(map)
-
       let markersByLayer = {}
       let geoJsonLayers = {}
 
       let layerDefs = await Promise.all(props.data.split('|').map(rec => toObj(rec)))
       layerDefs.forEach(layerDef => {
-        console.log(layerDef)
         if (layerDef.allmaps) {
           addWarpedMap(layerDef)
         } else if (layerDef.type === 'marker') { 
@@ -578,13 +743,13 @@
             } else {
               layerDef.geojson = `https://raw.githubusercontent.com/${props.ghbase}/${layerDef.geojson}`
             }
-            console.log(layerDef.geojson)
             fetch(layerDef.geojson)
               .then(resp => resp.json())
               .then(data => {
-                console.log(data)
-                let geoJsonLayer = L.geoJSON(data).addTo(map)
-                layerControl.addOverlay(geoJsonLayer, 'geojson')
+                let geoJsonLayer = toGeoJSONLayer(data)
+                addLayerControl(geoJsonLayer, 'geojson')
+                map.addLayer(geoJsonLayer)
+
               });
           }
         }
@@ -593,13 +758,13 @@
       Object.keys(markersByLayer).forEach(layerName => {
         let layer = markersByLayer[layerName]
         let geoJsonLayer = toGeoJSONLayer(toGeoJSON(layer))
-        layerControl.addOverlay(geoJsonLayer, layerName)
+        addLayerControl(geoJsonLayer, layerName)
         map.addLayer(geoJsonLayer)
       })
 
       const opacityLayers = {}
       warpedMapLayers.value?.forEach(layer => {
-        if (layerControl) layerControl.addOverlay(layer.layer, layer.name)
+        addLayerControl(layer.layer, layer.name)        
         if (!layer.disabled) map.addLayer(layer.layer)
         opacityLayers[layer.name] = layer.layer
       })
