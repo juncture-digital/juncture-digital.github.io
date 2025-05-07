@@ -31,8 +31,21 @@
     <header class="site-header">
       <div class="wrapper">
 
-        <div class="site-search">
-          <input id="search-input" …>
+        <div class="search-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5
+                     C16 5.91 13.09 3 9.5 3S3 5.91 3 9.5
+                     5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57
+                     l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5
+                     14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5
+                     14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Search the site…"
+            aria-label="Search site"
+          />
           <ul id="search-suggestions" class="search-suggestions"></ul>
         </div>
 
@@ -248,7 +261,7 @@
               idx   = lunr(function() {
                 this.field('title',   { boost: 10 });
                 this.field('excerpt', { boost:  5 });
-                this.field('content');       // now index full content
+                this.field('content');       // index full content
                 this.ref('url');
                 docs.forEach(doc => this.add(doc));
               });
@@ -256,31 +269,38 @@
             .catch(err => console.error('[Search] index load failed:', err));
         }
       
-        // 3) Escape regex metachars
+        // 3) Escape regex metacharacters
         function escapeForRegex(str) {
           return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
       
-        // 4) Build a snippet around the first occurrence of the query
-        function makeSnippet(text, query, radius = 30) {
-          const q = query.replace(/\*$/, '');  // drop trailing *
-          const eq = escapeForRegex(q);
-          const re = new RegExp(`(.{0,${radius}})(${eq})(.{0,${radius}})`, 'i');
-          const m  = text.match(re);
-          if (m) {
-            return '…' + m[1] + '<mark>' + m[2] + '</mark>' + m[3] + '…';
+        // 4) Multi-snippet builder: up to maxSnips matches
+        function makeSnippetMulti(text, query, radius = 30, maxSnips = 3) {
+          const q    = query.replace(/\*$/, '');       // drop trailing wildcard
+          const eq   = escapeForRegex(q);
+          const re   = new RegExp(`(.{0,${radius}})(${eq})(.{0,${radius}})`, 'gi');
+          let match, snippets = [], count = 0;
+      
+          while ((match = re.exec(text)) && count < maxSnips) {
+            const [ , before, term, after ] = match;
+            snippets.push('…' + before + '<mark>' + term + '</mark>' + after + '…');
+            count++;
           }
-          // fallback: start of text
-          const snippet = text.slice(0, radius * 2);
-          return snippet + (text.length > snippet.length ? '…' : '');
+      
+          if (!snippets.length) {
+            const head = text.slice(0, radius * 2);
+            return head + (text.length > head.length ? '…' : '');
+          }
+          // join multiple snippets with a space (or <br> if you prefer)
+          return snippets.join(' ');
         }
       
-        // 5) Render suggestions with highlighted snippets
+        // 5) Render suggestions with multiple snippets
         function renderSuggestions(results, query) {
           suggest.innerHTML = results.map(hit => {
             const doc     = store.find(d => d.url === hit.ref);
             const source  = doc.content || doc.excerpt || '';
-            const snippet = makeSnippet(source, query, 40);
+            const snippet = makeSnippetMulti(source, query, 40, 3);
             return `
               <li data-url="${doc.url}">
                 <a href="${doc.url}">${doc.title}</a>
@@ -307,9 +327,9 @@
       
         // 7) Wire it all up
         input.addEventListener('focus', init);
-        input.addEventListener('input', debounce(e => {
+        input.addEventListener('input', debounce(evt => {
           if (!ready) init();
-          onInput(e);
+          onInput(evt);
         }, 200));
       
         suggest.addEventListener('click', e => {
