@@ -122,11 +122,12 @@ const parseCodeEl = (el) => {
   return parsed
 }
 
-const junctureComponentsPrefix = location.port === '4000'
-  ? 'http://localhost:4000/components'
+const junctureComponentsPrefix = location.port === '4200'
+  ? 'http://localhost:4200/components'
   : location.port === '4100'
     ? 'http://localhost:3000/_components'
     : 'https://www.juncture-digital.io/components'
+
 const makeIframe = (code) => {
   let iframe = document.createElement('iframe')
   iframe.setAttribute('loading', 'lazy')
