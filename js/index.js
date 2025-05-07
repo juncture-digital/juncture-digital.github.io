@@ -614,11 +614,13 @@ const makeEntityPopups = () => {
 
       let card = document.createElement('sl-card')
       card.setAttribute('hoist', '')
-      let img = document.createElement('img')
-      img.setAttribute('slot', 'image')
-      img.src = entity.thumbnail
-      img.setAttribute('alt', entity.label)
-      card.appendChild(img)
+      if (entity.thumbnail) {
+        let img = document.createElement('img')
+        img.setAttribute('slot', 'image')
+        img.src = entity.thumbnail
+        img.setAttribute('alt', entity.label)
+        card.appendChild(img)
+      }
       let content = document.createElement('div')
       content.className = 'content'
       if (entity.label) {
