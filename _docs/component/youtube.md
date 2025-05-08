@@ -29,21 +29,6 @@ The `youtube` tag displays a YouTube video player with a specified video.
 
 **[vid](#basic-example)** (_string_):  The YouTube ID of the image to stream
 
-### Positioning attributes
-
-**[left](#positioning-examples)** (_boolean_):  Align the component with the left side of the window.  The components width is 50% of the window and any section text following the component tag will wrap around the component.
-
-**[right](#positioning-examples)** (_boolean_):  Align the component with the .right side of the window.  The components width is 50% of the window and any section text following the component tag will wrap around the component.
-
-**[center](#positioning-examples)** (_boolean_):  The component is centered in the window.
-
-**[large](#positioning-examples)** (_boolean_):  The component is sized to 75% of the window.
-
-**[medium](#positioning-examples)** (_boolean_):  The component is sized to 50% of the window.
-
-**[small](#positioning-examples)** (_boolean_):  The component is sized to 33% of the window.
-
-
 Notes:
 - Boolean attributes are specified using the property name only, for instance - `marker`.
 - Non-boolean attributes are specified using property=value syntax (i.e., `caption=Example`).  If the value includes spaces the value must be quoted (i.e., `caption="An Example Map"`).

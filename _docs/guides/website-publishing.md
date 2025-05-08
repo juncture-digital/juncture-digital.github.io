@@ -74,7 +74,7 @@ This is my first Juncture-powered page.
 
 `map location=32.051,-81.104,8 caption="Savannah, GA" marker`
 
-`youtube vid=dQw4w9WgXcQ large center`
+`youtube vid=dQw4w9WgXcQ .large .center`
 ```
 
 This adds a heading, a map of Savannah, and a YouTube video.
