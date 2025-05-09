@@ -9,8 +9,9 @@
     *, *::before, *::after { box-sizing: border-box; }
     body { height:100dvh; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; background-color: white; }    
     main { height: 100%; display: flex; flex-direction: column; width: 100%; }
-    .background-image { background-repeat: no-repeat; background-size: auto; background-position: center; }
-    .title-bar { background-color: black; margin-top: auto; padding: 0.2em 0.5em; font-size: 2em; color: white; font-weight: 500; }
+    .background-image { background-repeat: no-repeat; background-size: auto; background-position: center; height:100%;}
+    .title, .subtitle { background-color: black; margin-top: auto; padding: 0.4rem 1rem; font-size: 1.7em; color: white; font-weight: 500; }
+    .subtitle { font-size: 1.2em; margin-top: 0; padding-top: 0; font-weight: 400; }
     nav { display: flex; }
     nav ul { list-style: none; margin: 0 0 0 auto; padding: 0.5em 0 0.5em 1em; }
     nav ul li { display: inline-block; padding-right: 1em; }
@@ -23,7 +24,8 @@
   
   <main>
     <nav></nav>
-    <div class="title-bar" style="display:none;"></div>
+    <div class="title" style="display:none;"></div>
+    <div class="subtitle" style="display:none;"></div>
   </main>
 
   <script type="module">
@@ -32,17 +34,21 @@
 
     const main = document.querySelector('main')
     const nav = document.querySelector('nav')
-    const titleBar = main.querySelector('.title-bar')
+    const titleBar = main.querySelector('.title')
+    const subtitleBar = main.querySelector('.subtitle')
 
     const props = {
       ...{              // default properties
         alpha: null,
+        author: null,
         background: null,  // background color
         base: null,
         color: null,      // text color
         data: null,
-        height: 150,
+        height: 300,
         img: null,
+        size: 'cover',
+        subtitle: null,
         title: null,
 
         position: null,
@@ -122,15 +128,20 @@
 
     // Perform init processing 
     const init = () => {
-      // console.log(props)
-      if (props.height) {
-        main.style.height = `${props.height}px`
+      console.log(props)
+      // if (props.height) {
+        //main.style.height = `${props.height}px`
         setWindowAspect()
-      }
+      //}
       if (props.title) {
         titleBar.style.display = 'block'
         titleBar.innerHTML = md2Html(props.title)
-        titleBar.style.backgroundColor = toRGBA(props.background || 'black', props.alpha !== null ? props.alpha : (props.img ? 0.3 : 1.0))
+        titleBar.style.backgroundColor = toRGBA(props.background || 'black', props.alpha !== null ? props.alpha : (props.img ? 0.5 : 1.0))
+      }
+      if (props.subtitle || props.author) {
+        subtitleBar.style.display = 'block'
+        subtitleBar.innerHTML = md2Html(props.subtitle || props.author)
+        subtitleBar.style.backgroundColor = toRGBA(props.background || 'black', props.alpha !== null ? props.alpha : (props.img ? 0.5 : 1.0))
       }
       if (props.color) {
         titleBar.style.color = props.color;
@@ -145,11 +156,12 @@
           props.position = `${positionX} ${positionY}`
         }
         main.style.backgroundPosition = props.position
+        main.style.backgroundSize = props.size
       }
       if (props.data) {
         let navList = `<ul><li>${props.data.split('|').map(md => md2Html(md)).join('</li><li>')}</li></ul>`
         nav.innerHTML = navList
-        nav.firstChild.style.backgroundColor = toRGBA(props.background || 'black', props.alpha !== null ? props.alpha : (props.img ? 0.3 : 1.0))
+        nav.firstChild.style.backgroundColor = toRGBA(props.background || 'black', props.alpha !== null ? props.alpha : (props.img ? 0.5 : 1.0))
         convertLinks()
       }
     }

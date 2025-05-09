@@ -172,6 +172,14 @@ pre { white-space: pre-wrap; word-wrap: break-word; }
 }
 
 .site-header {
+  z-index: 2;
+}
+header.post-header {
+  display: none;;
+}
+iframe[src*="header"] {
+  position: sticky;
+  top: -40px;
   z-index: 1;
 }
 
