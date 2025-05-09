@@ -726,7 +726,6 @@
 
       let layerDefs = await Promise.all(props.data.split('|').map(rec => toObj(rec)))
       layerDefs.forEach(layerDef => {
-        console.log(layerDef)
         if (layerDef.allmaps) {
           addWarpedMap(layerDef)
         } else if (layerDef.type === 'marker') { 

@@ -1,12 +1,12 @@
 import 'https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js'
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/card/card.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/carousel/carousel.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/carousel-item/carousel-item.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/copy-button/copy-button.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/dropdown/dropdown.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/tab/tab.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/tab-group/tab-group.js';
-import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/cdn/components/tab-panel/tab-panel.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/card/card.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/carousel/carousel.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/carousel-item/carousel-item.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/copy-button/copy-button.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/dropdown/dropdown.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab/tab.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-group/tab-group.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
 const paramToIframe = (param) => {
   const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
@@ -385,7 +385,8 @@ const makeDetails = (rootEl) => {
     }
   })
   // Add sl-copy-button to each example
-  rootEl.querySelectorAll('details pre.language-juncture, .example pre.language-juncture').forEach((el, idx) => {
+  rootEl.querySelectorAll('pre').forEach((el, idx) => {
+    el.style.position = 'relative'
     el.id = `cb-${idx}`
     let cb = document.createElement('sl-copy-button')
     cb.setAttribute('from', el.id)

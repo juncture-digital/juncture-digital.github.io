@@ -10,11 +10,16 @@ Welcome to Juncture – your fast, free gateway to building engaging, interactiv
 
 ## Create Websites That Captivate
 
+![](/static/images/Juncture_Features.svg)
+{: .right .shadow}
+
 - **Quick & Accessible:** Launch your website in minutes without costly licenses or steep learning curves. Juncture provides all the tools you need to design a polished, interactive site.
 
 - **Interactive Components:** Add dynamic features like zoomable images, immersive maps, responsive video players, and audio narrations using our lightweight, iframe-based components. These features integrate seamlessly into your site, giving it a modern, engaging feel.
 
 - **Powered by Open Tools:** Built on proven and trusted web technologies like GitHub, Jekyll, and Markdown to keep your website fast, secure, and easy to maintain.
+
+^##
 
 ## Empower Your Creative Vision
 

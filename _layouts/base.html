@@ -9,9 +9,17 @@
     <link rel="icon" type="image/x-icon" href="{{ '/favicon.ico' | relative_url }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ '/css/index.css' | relative_url }}">
+    <script>
+      (function() {
+        window.jekyll = {site:{baseurl:'{{site.baseurl}}', contentSelector:'{{site.contentSelector}}', github:{owner_name:'{{site.github.owner_name}}',repository_name:'{{site.github.repository_name}}',source:{branch:'{{site.github.source.branch}}'}}},page:{path:'{{page.path}}',dir:'{{page.dir}}',name:'{{page.name}}',contentSelector:'{{page.contentSelector}}'}}
+        var baseUrl = (window.location.port === '4200')
+          ? 'http://localhost:4200'
+          : 'https://www.juncture-digital.io';
+        document.write('<link rel="stylesheet" href="' + baseUrl + '/css/index.css">');
+        window.dynamicBaseUrl = baseUrl;
+      })();
+    </script>
     {%- feed_meta -%} 
-        
     {% if jekyll.environment == "production" %}
       <!-- Google tag (gtag.js) -->
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-74LKHV7QM5"></script>
@@ -214,7 +222,7 @@
         window.ghbase = `${owner}/${repo}/${branch}`
       }      
       let junctureScript = document.createElement('script')
-      junctureScript.src = `${location.hostname === 'localhost' ? 'http://localhost:4000': 'https://www.juncture-digital.io'}/js/index.js`
+      junctureScript.src = `${window.dynamicBaseUrl}/js/index.js`
       junctureScript.type = 'module'
       document.body.appendChild(junctureScript)
 
