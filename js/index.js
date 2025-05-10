@@ -27,8 +27,6 @@ const paramToIframe = (param) => {
         .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       ].join('&')
 
-    // console.log(componentArgs)
-
     iframe.src = `${junctureComponentsPrefix}/${tag}?${componentArgs}`
     // param.replaceWith(iframe)
     return iframe
@@ -74,6 +72,7 @@ const parseCodeEl = (el) => {
     if (tokens.length > 0 && tokens[tokens.length-1].indexOf('=') === tokens[tokens.length-1].length-1) tokens[tokens.length-1] = `${tokens[tokens.length-1]}${token}`
     else tokens.push(token)
   })
+  console.log(tokens)
   let parsed = {el, tag:null, id:null, kwargs:{}, classes:[], booleans:[], data:[]}
   let tokenIdx = 0
   while (tokenIdx < tokens.length) {
@@ -129,6 +128,7 @@ const junctureComponentsPrefix = location.port === '4200'
     : 'https://www.juncture-digital.io/components'
 
 const makeIframe = (code) => {
+  console.log(code)
   let iframe = document.createElement('iframe')
   iframe.setAttribute('loading', 'lazy')
   iframe.setAttribute('allowfullscreen', '')
@@ -737,3 +737,5 @@ document.addEventListener('paste', () => {
 
 // Prevent default browser behavior on dragover to allow drop
 document.addEventListener('dragover', (e) => e.preventDefault());
+
+console.log('Juncture components loaded')
