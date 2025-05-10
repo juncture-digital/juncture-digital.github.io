@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expanding Search Toolbar</title>
+    <style>
+        /* --- Customization Points --- */
+        :root {
+            --toolbar-height: 60px;
+            --toolbar-bg-color: #333;
+            --toolbar-text-color: #fff;
+            --search-accent-color: #007bff;
+            --search-input-bg-color: #fff;
+            --search-input-text-color: #333;
+            --search-icon-char: "🔍";
+            --close-icon-char: "×";
+            --dropdown-bg-color: #fff;
+            --dropdown-text-color: #333;
+            --dropdown-hover-bg-color: #f0f0f0;
+            --highlight-bg-color: yellow;
+            --highlight-text-color: #000;
+            --transition-speed: 0.3s;
+        }
+
+        /* --- Basic Reset & Body --- */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        /* --- Toolbar Styling --- */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            height: var(--toolbar-height);
+            background-color: var(--toolbar-bg-color);
+            color: var(--toolbar-text-color);
+            position: relative;
+            z-index: 100;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .toolbar-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .toolbar-nav a {
+            color: var(--toolbar-text-color);
+            text-decoration: none;
+            margin-left: 15px;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .toolbar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- Search Component Styling --- */
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            background: none;
+            border: none;
+            color: var(--toolbar-text-color);
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity var(--transition-speed) ease;
+        }
+        .search-icon::before {
+            content: var(--search-icon-char);
+        }
+
+        .search-input-wrapper {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            background-color: var(--search-input-bg-color);
+            border-radius: 4px;
+            width: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: width var(--transition-speed) ease, opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+            overflow: hidden;
+            z-index: 101;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .search-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            padding: 10px 40px 10px 15px; /* Right padding for custom close button */
+            font-size: 1em;
+            color: var(--search-input-text-color);
+            background-color: transparent;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* NEW: Hide browser's default clear button for search inputs */
+        .search-input::-webkit-search-decoration,
+        .search-input::-webkit-search-cancel-button,
+        .search-input::-webkit-search-results-button,
+        .search-input::-webkit-search-results-decoration {
+            -webkit-appearance: none;
+        }
+        .search-input::-ms-clear { /* For IE/Edge */
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+
+        .search-close-btn { /* This is our custom close button */
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #888;
+            cursor: pointer;
+            padding: 0 10px; /* Clickable area */
+            line-height: 1;
+        }
+        .search-close-btn::before {
+            content: var(--close-icon-char);
+        }
+        .search-close-btn:hover {
+            color: var(--search-input-text-color);
+        }
+
+        /* Active state for search */
+        .search-container.search-active .search-input-wrapper {
+            width: 250px;
+            opacity: 1;
+            visibility: visible;
+        }
+        .search-container.search-active .search-icon {
+             opacity: 0;
+             pointer-events: none;
+        }
+
+        /* --- Search Results Dropdown Styling --- */
+        .search-results-dropdown {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0; 
+            width: 250px;
+            background-color: var(--dropdown-bg-color);
+            border: 1px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-height: 350px;
+            overflow-y: auto;
+            z-index: 102;
+            display: none;
+        }
+
+        .search-results-dropdown li {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .search-results-dropdown li:last-child {
+            border-bottom: none;
+        }
+        .search-results-dropdown li:hover {
+            background-color: var(--dropdown-hover-bg-color);
+        }
+        .search-results-dropdown li.no-results {
+            padding: 10px 15px;
+            color: #888;
+            cursor: default;
+        }
+        .search-results-dropdown li.no-results:hover {
+            background-color: transparent;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: var(--search-input-text-color);
+            margin-bottom: 5px;
+            font-size: 1em;
+        }
+        .result-title strong, .result-snippet strong {
+            background-color: var(--highlight-bg-color);
+            color: var(--highlight-text-color);
+            font-weight: bold;
+        }
+        .result-snippet {
+            font-size: 0.85em;
+            color: #555;
+            line-height: 1.4;
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .toolbar-title {
+                font-size: 1.3em;
+                margin-right: 10px;
+            }
+            .toolbar-nav {
+                display: none;
+            }
+            .search-container.search-active .search-input-wrapper,
+            .search-container.search-active .search-results-dropdown {
+                width: 220px;
+            }
+        }
+        @media (max-width: 480px) {
+             .toolbar-title {
+                font-size: 1.1em;
+            }
+            .search-container.search-active .search-input-wrapper,
+            .search-container.search-active .search-results-dropdown {
+                width: 200px;
+            }
+            .search-input {
+                padding: 8px 35px 8px 10px;
+                font-size: 0.9em;
+            }
+            .search-close-btn {
+                font-size: 1.3em;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="toolbar">
+    <div class="toolbar-left">
+        <div class="toolbar-title">MyApp</div>
+        <div class="search-container" id="searchContainer">
+            <button class="search-icon" id="searchIcon" aria-label="Open search" title="Open search"></button>
+            <div class="search-input-wrapper" id="searchInputWrapper">
+                <input type="search" class="search-input" id="searchInput" placeholder="Search..." aria-label="Search input">
+                <button class="search-close-btn" id="searchCloseBtn" aria-label="Close search" title="Close search"></button>
+            </div>
+            <ul class="search-results-dropdown" id="searchResultsDropdown"></ul>
+        </div>
+    </div>
+    <nav class="toolbar-nav">
+        <a href="#">Home</a>
+        <a href="#">Features</a>
+        <a href="#">Pricing</a>
+    </nav>
+</div>
+
+<div style="padding: 20px; height: 1000px;">
+    <h1>Page Content</h1>
+    <p>This is some content below the toolbar to demonstrate that the search overlays correctly and does not push content down.</p>
+    <p>Try searching for terms like "apple", "fruit", "berry", "nutrition", "vitamin C", etc.</p>
+</div>
+
+<script>
+    // --- Configuration ---
+    const MIN_CHARS_FOR_SEARCH = 3;
+    const MAX_RESULTS_TO_DISPLAY = 10;
+    const SNIPPET_MAX_LENGTH = 120; // Max length for generated snippets
+
+    // Updated Mock Data with titles and content
+    const MOCK_DATA = [
+        { id: 1, title: "Apple - Fruit Information", content: "The apple is a pome fruit, cultivated worldwide. Apples are extremely rich in important antioxidants, flavanoids, and dietary fiber. The phytonutrients and antioxidants in apples may help reduce the risk of developing cancer, hypertension, diabetes, and heart disease. Contains Vitamin C." },
+        { id: 2, title: "Banana - A Versatile Fruit", content: "Bananas are elongated, edible fruit – botanically a berry – produced by several kinds of large herbaceous flowering plants. In some countries, bananas used for cooking may be called 'plantains'. Rich in potassium and Vitamin B6." },
+        { id: 3, title: "Blueberry Benefits", content: "Blueberries are perennial flowering plants with blue or purple berries. They are classified in the section Cyanococcus within the genus Vaccinium. Blueberries are packed with antioxidants and phytoflavinoids, and are also high in potassium and vitamin C." },
+        { id: 4, title: "Cherry Varieties and Uses", content: "A cherry is the fruit of many plants of the genus Prunus, and is a fleshy drupe (stone fruit). Cherries are a good source of melatonin, which helps regulate sleep cycles. Sweet cherries are often eaten raw, while sour cherries are used in cooking." },
+        { id: 5, title: "Cranberry and Health", content: "Cranberries are a group of evergreen dwarf shrubs or trailing vines in the subgenus Oxycoccus of the genus Vaccinium. They are known for their tart taste and are often used in juices and sauces. Cranberries can help prevent urinary tract infections." },
+        { id: 6, title: "Date Palm Cultivation", content: "Dates are the sweet, fleshy fruit of the date palm tree, native to the Middle East. They are a good source of energy, sugar, and fiber. Essential minerals such as calcium, iron, phosphorus, sodium, potassium, magnesium, and zinc are found in dates." },
+        { id: 7, title: "Dragonfruit Exotic Appeal", content: "Dragonfruit, also known as pitaya, is a vibrant tropical fruit with a unique look and taste. It's rich in antioxidants and Vitamin C. The flesh can be white or red, dotted with tiny black edible seeds." },
+        { id: 8, title: "Elderberry: Immunity Booster", content: "Elderberries are dark purple berries that grow on the Sambucus tree. They have been used for centuries in traditional medicine to treat flu, colds, and to boost the immune system. Often consumed as syrup or in supplements." },
+        { id: 9, title: "Fig - Ancient Fruit", content: "Figs are the fruit of the Ficus carica tree. They are unique in that they have an opening, called an 'ostiole' or 'eye', which is not connected to the tree, but to the exterior. Figs are high in natural sugars, minerals and soluble fiber." },
+        { id: 10, title: "Grape Nutrition Facts", content: "Grapes are berries that grow on woody vines of the genus Vitis. They can be eaten raw or used for making jam, juice, jelly, vinegar, wine, raisins, and grapeseed oil. Grapes contain resveratrol, an antioxidant." },
+        { id: 11, title: "Guava Tropical Delight", content: "Guava is a common tropical fruit cultivated in many tropical and subtropical regions. Guavas are rich in dietary fiber and vitamin C, with moderate levels of folic acid. Some say it tastes like a strawberry and a pear." },
+        { id: 12, title: "Honeydew Melon Refreshment", content: "Honeydew melon is a fruit that belongs to the melon species Cucumis melo (muskmelon). The sweet flesh of honeydew is typically light green, while its skin has a smooth, waxy surface. Excellent source of Vitamin C." },
+        { id: 13, title: "Jackfruit - The Meaty Fruit", content: "Jackfruit is a species of tree in the fig, mulberry, and breadfruit family. It is known for its large size and unique, subtly sweet flavor. Young jackfruit has a meaty texture and is often used as a meat substitute in vegetarian dishes." },
+        { id: 14, title: "Kiwi Fruit Origin", content: "Kiwifruit, or Chinese gooseberry, is the edible berry of several species of woody vines in the genus Actinidia. Kiwis are a nutrient-dense food, high in vitamin C, vitamin K, vitamin E, folate, and potassium." },
+        { id: 15, title: "Lemon: Citrus Power", content: "The lemon is a species of small evergreen tree in the flowering plant family Rutaceae, native to South Asia. Lemons are prized for their high vitamin C content and are used widely in culinary and cleaning applications. Lemon juice is a key ingredient in lemonade." },
+        { id: 16, title: "Lime and its Acidity", content: "Lime is a citrus fruit, which is typically round, green in color, 3–6 centimetres in diameter, and contains acidic juice vesicles. Limes are an excellent source of vitamin C, and are often used to accent the flavours of foods and beverages." }
+    ];
+
+
+    // --- DOM Elements ---
+    const searchContainer = document.getElementById('searchContainer');
+    const searchIcon = document.getElementById('searchIcon');
+    const searchInput = document.getElementById('searchInput');
+    const searchCloseBtn = document.getElementById('searchCloseBtn');
+    const searchResultsDropdown = document.getElementById('searchResultsDropdown');
+
+    // --- Event Listeners ---
+    searchIcon.addEventListener('click', () => {
+        searchContainer.classList.add('search-active');
+        searchInput.focus();
+        clearAndHideDropdown();
+    });
+
+    searchCloseBtn.addEventListener('click', closeSearch);
+
+    function closeSearch() {
+        searchContainer.classList.remove('search-active');
+        searchInput.value = '';
+        clearAndHideDropdown();
+        searchIcon.focus();
+    }
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim();
+
+        if (query.length >= MIN_CHARS_FOR_SEARCH) {
+            const lowerCaseQuery = query.toLowerCase();
+            const filteredResults = MOCK_DATA.filter(item =>
+                item.title.toLowerCase().includes(lowerCaseQuery) ||
+                (item.content && item.content.toLowerCase().includes(lowerCaseQuery))
+            ).slice(0, MAX_RESULTS_TO_DISPLAY);
+
+            displayResults(filteredResults, query);
+        } else {
+            clearAndHideDropdown();
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        const isClickInsideSearchContainer = searchContainer.contains(event.target);
+        if (!isClickInsideSearchContainer && searchResultsDropdown.style.display === 'block') {
+             clearAndHideDropdown();
+        }
+    });
+
+    searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            if (searchResultsDropdown.style.display === 'block' && searchResultsDropdown.children.length > 0) {
+                clearAndHideDropdown();
+            } else {
+                closeSearch();
+            }
+            event.preventDefault(); 
+        }
+    });
+
+    // --- Helper Functions ---
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function generateSnippet(content, query, maxLength) {
+        if (!content) return '';
+        const lowerContent = content.toLowerCase();
+        const lowerQuery = query.toLowerCase();
+        let snippet = '';
+
+        const matchIndex = lowerContent.indexOf(lowerQuery);
+
+        if (matchIndex === -1) {
+            return content.length > maxLength ? content.substring(0, maxLength) + "..." : content;
+        }
+
+        let padding = Math.floor((maxLength - query.length) / 2);
+        if (padding < 15) padding = 15;
+
+        let start = Math.max(0, matchIndex - padding);
+        let end = Math.min(content.length, matchIndex + query.length + padding);
+
+        if (start > 0) {
+            const spaceBefore = content.lastIndexOf(' ', start);
+            if (spaceBefore !== -1) start = spaceBefore + 1;
+        }
+        if (end < content.length) {
+            const spaceAfter = content.indexOf(' ', end);
+            if (spaceAfter !== -1) end = spaceAfter;
+        }
+
+        snippet = content.substring(start, end);
+        const escapedQuery = escapeRegExp(query);
+        snippet = snippet.replace(new RegExp(escapedQuery, 'gi'), (match) => `<strong>${match}</strong>`);
+
+        if (start > 0) snippet = "..." + snippet;
+        if (end < content.length) snippet = snippet + "...";
+
+        return snippet;
+    }
+
+    function displayResults(results, query) {
+        searchResultsDropdown.innerHTML = '';
+
+        if (results.length === 0 && query.length >= MIN_CHARS_FOR_SEARCH) {
+            const noResultsItem = document.createElement('li');
+            noResultsItem.textContent = 'No results found.';
+            noResultsItem.classList.add('no-results');
+            searchResultsDropdown.appendChild(noResultsItem);
+        } else {
+            const escapedQuery = escapeRegExp(query);
+            const highlightRegex = new RegExp(escapedQuery, 'gi');
+
+            results.forEach(result => {
+                const listItem = document.createElement('li');
+                listItem.setAttribute('role', 'option');
+                listItem.tabIndex = -1; 
+
+                const titleDiv = document.createElement('div');
+                titleDiv.classList.add('result-title');
+                titleDiv.innerHTML = result.title.replace(highlightRegex, (match) => `<strong>${match}</strong>`);
+
+                const snippetDiv = document.createElement('div');
+                snippetDiv.classList.add('result-snippet');
+                snippetDiv.innerHTML = generateSnippet(result.content, query, SNIPPET_MAX_LENGTH);
+
+                listItem.appendChild(titleDiv);
+                listItem.appendChild(snippetDiv);
+
+                listItem.addEventListener('click', () => {
+                    searchInput.value = result.title;
+                    clearAndHideDropdown();
+                    searchInput.focus();
+                });
+                searchResultsDropdown.appendChild(listItem);
+            });
+        }
+
+        if (results.length > 0 || (results.length === 0 && query.length >= MIN_CHARS_FOR_SEARCH)) {
+            searchResultsDropdown.style.display = 'block';
+        } else {
+            searchResultsDropdown.style.display = 'none';
+        }
+    }
+
+    function clearAndHideDropdown() {
+        searchResultsDropdown.innerHTML = '';
+        searchResultsDropdown.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        clearAndHideDropdown();
+    });
+
+</script>
+
+</body>
+</html>
