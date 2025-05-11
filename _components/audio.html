@@ -144,7 +144,14 @@
       if (props.src.indexOf('http') === 0) return props.src
       else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1) return mwUrl(props.src)
       else if (props.src.indexOf('gh:') === 0) return `https://raw.githubusercontent.com/${props.src.slice(3)}`
-      else return `https://raw.githubusercontent.com/${props.ghbase}/${props.src}`
+      else {
+        if (props.src[0] === '/') {
+          let [owner, repo, branch, ...rest] = props.ghbase.split('/')
+          return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${props.src}`
+        } else {
+          return `https://raw.githubusercontent.com/${props.ghbase}/${props.src}`
+        }
+      }
     }
       
     createPlayer(getAudioSourceUrl())
