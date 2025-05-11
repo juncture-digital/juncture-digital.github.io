@@ -404,7 +404,12 @@
           setCaption()
         })
       } else { // TODO: verify this
-        props.manifest = `https://iiif.mdpress.io/gh:${props.ghbase}/${props.src}/manifest.json`
+        if (props.src[0] === '/') {
+          let [owner, repo, branch, ...rest] = props.src.split('/')
+          props.manifest = `https://iiif.mdpress.io/gh:${owner}/${repo}/${branch}${props.src}/manifest.json`
+        } else {
+          props.manifest = `https://iiif.mdpress.io/gh:${props.ghbase}/${props.src}/manifest.json`
+        }
         loadImage(`https://raw.githubusercontent.com/${props.ghbase}${props.src[0] === '/' ? '' : '/'}${props.src}`)
       }
       loadManifest(props.manifest)
