@@ -309,9 +309,20 @@ const makeCards = (rootEl) => {
       const contentElements = Array.from(sub.children).filter(el => {
         return !/^H[1-6]$/.test(el.tagName) && el.tagName.toLowerCase() !== 'img';
       });
-      contentElements.forEach(el => {
-        contentWrapper.appendChild(el.cloneNode(true));
-      });
+      if (contentElements.length > 1) {
+        let details = document.createElement('details')
+        contentWrapper.appendChild(details)
+        let summary = document.createElement('summary')
+        summary.innerHTML = contentElements[0].innerHTML
+        details.appendChild(summary)
+        for (let i = 1; i < contentElements.length; i++) {
+          details.appendChild(contentElements[i].cloneNode(true))
+        }
+      } else {
+        contentElements.forEach(el => {
+          contentWrapper.appendChild(el.cloneNode(true));
+        });      
+      }
       card.appendChild(contentWrapper);
 
       // Add the card to the grid.

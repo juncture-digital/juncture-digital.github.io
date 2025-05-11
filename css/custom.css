@@ -295,9 +295,15 @@ iframe[src*="google-book"] {
 
 .cards .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 1rem;
   padding: 0 0;
+}
+.cards .card-grid > sl-card > img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: block;
 }
 
 sl-card::part(base) {
