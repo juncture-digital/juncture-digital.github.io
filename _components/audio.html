@@ -41,6 +41,7 @@
     const props = {
       ...{              // default properties
         caption: null,
+        ghbase: null,
         nocaption: false,
         src: null
       },
@@ -143,6 +144,7 @@
       if (props.src.indexOf('http') === 0) return props.src
       else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1) return mwUrl(props.src)
       else if (props.src.indexOf('gh:') === 0) return `https://raw.githubusercontent.com/${props.src.slice(3)}`
+      else return `https://raw.githubusercontent.com/${props.ghbase}/${props.src}`
     }
       
     createPlayer(getAudioSourceUrl())
