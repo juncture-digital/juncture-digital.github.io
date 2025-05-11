@@ -405,7 +405,7 @@
         })
       } else { // TODO: verify this
         if (props.src[0] === '/') {
-          let [owner, repo, branch, ...rest] = props.src.split('/')
+          let [owner, repo, branch, ...rest] = props.ghbase.split('/')
           props.manifest = `https://iiif.mdpress.io/gh:${owner}/${repo}/${branch}${props.src}/manifest.json`
         } else {
           props.manifest = `https://iiif.mdpress.io/gh:${props.ghbase}/${props.src}/manifest.json`
