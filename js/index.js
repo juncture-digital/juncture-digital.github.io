@@ -8,15 +8,6 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-group/tab-group.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
-console.log('Juncture', document.readyState);
-document.addEventListener('readystatechange', () => {
-  console.log('Juncture', document.readyState);
-  if (document.readyState === 'interactive') {
-    console.log(document.querySelector('.post-content') || document.body)
-  }
-});
-
-
 const paramToIframe = (param) => {
   const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
   if (tag === 'image') {
@@ -668,7 +659,7 @@ const makeEntityPopups = () => {
 
 const processPage = (content) => {
   // v1Convert()
-
+  console.log(content)
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
 
@@ -699,7 +690,7 @@ const processPage = (content) => {
   content.style.opacity = 1
 }
 
-processPage(document.querySelector('.post-content') || document.body)
+// processPage(document.querySelector('.post-content') || document.body)
 
 /*
 let content = document.querySelector('.post-content') || document.body
@@ -749,3 +740,12 @@ document.addEventListener('paste', () => {
 
 // Prevent default browser behavior on dragover to allow drop
 document.addEventListener('dragover', (e) => e.preventDefault());
+
+if (document.readyState === 'interactive') processPage(document.querySelector('.post-content') || document.body)
+else {
+  console.log('Juncture', document.readyState);
+  document.addEventListener('readystatechange', () => {
+    console.log('Juncture', document.readyState);
+    if (document.readyState === 'interactive') processPage(document.querySelector('.post-content') || document.body)
+  });
+}
