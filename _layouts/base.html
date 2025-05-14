@@ -196,8 +196,9 @@
 
     <!-- Juncture Language Definition -->
     <script src="/js/prism-juncture.js"></script>
-    <script>    
-      let junctureScript = document.createElement('script')
+    <script>
+      window.jekyll = {site:{baseurl:'{{site.baseurl}}', contentSelector:'{{site.contentSelector}}', github:{owner_name:'{{site.github.owner_name}}',repository_name:'{{site.github.repository_name}}',source:{branch:'{{site.github.source.branch}}'}}},page:{path:'{{page.path}}',dir:'{{page.dir}}',name:'{{page.name}}',contentSelector:'{{page.contentSelector}}'}}
+     let junctureScript = document.createElement('script')
       junctureScript.src = `${window.dynamicBaseUrl}/js/index.js`
       junctureScript.type = 'module'
       document.body.appendChild(junctureScript)
