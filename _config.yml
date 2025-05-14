@@ -39,5 +39,3 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
-
-contentSelector: main.post-content, div.post-content
