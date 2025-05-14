@@ -692,6 +692,7 @@ const processPage = (content) => {
 
 let contentSelector = window.jekyll?.page?.contentSelector || window.jekyll?.site?.contentSelector || 'body'
 let content = document.querySelector(contentSelector)
+console.log(contentSelector, content)
 
 if (content) {
   processPage(content)
