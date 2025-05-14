@@ -741,11 +741,5 @@ document.addEventListener('paste', () => {
 // Prevent default browser behavior on dragover to allow drop
 document.addEventListener('dragover', (e) => e.preventDefault());
 
-if (document.readyState === 'interactive') processPage(document.querySelector('.post-content') || document.body)
-else {
-  console.log('Juncture', document.readyState);
-  document.addEventListener('readystatechange', () => {
-    console.log('Juncture', document.readyState);
-    if (document.readyState === 'interactive') processPage(document.querySelector('.post-content') || document.body)
-  });
-}
+if (document.readyState === 'loading') document.addEventListener('readystatechange', () => processPage(document.querySelector('.post-content') || document.body))
+else processPage(document.querySelector('.post-content') || document.body)
