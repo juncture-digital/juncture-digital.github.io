@@ -690,7 +690,7 @@ const processPage = (content) => {
   content.style.opacity = 1
 }
 
-let contentSelector = window.jekyll?.page?.contentSelector || window.jekyll?.site?.contentSelector || 'body'
+let contentSelector = window.jekyll?.page?.contentSelector || window.jekyll?.site?.contentSelector || '.post-content, body'
 let content = document.querySelector(contentSelector)
 console.log(contentSelector, content)
 
