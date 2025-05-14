@@ -659,8 +659,7 @@ const makeEntityPopups = () => {
 
 const processPage = (content) => {
   // v1Convert()
-  document.body.style.transition = 'opacity 0.3s ease';
-  console.log(content)
+  document.body.style.transition = 'opacity 1s ease';
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
 
@@ -742,6 +741,5 @@ document.addEventListener('paste', () => {
 // Prevent default browser behavior on dragover to allow drop
 document.addEventListener('dragover', (e) => e.preventDefault());
 
-console.log('Juncture', document.readyState)
 if (document.readyState === 'loading') document.addEventListener('readystatechange', () => processPage(document.querySelector('.post-content') || document.body))
 else processPage(document.querySelector('.post-content') || document.body)
