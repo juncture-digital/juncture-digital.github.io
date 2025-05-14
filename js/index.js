@@ -10,8 +10,9 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab
 
 console.log('Juncture', document.readyState);
 document.addEventListener('readystatechange', () => {
+  console.log('Juncture', document.readyState);
   if (document.readyState === 'interactive') {
-    console.log('Juncture', document.readyState);
+    console.log(document.querySelector('.post-content') || document.body)
   }
 });
 
@@ -666,7 +667,6 @@ const makeEntityPopups = () => {
 ////////// End Wikidata Entity functions //////////
 
 const processPage = (content) => {
-  console.log(content)
   // v1Convert()
 
   let newContent = restructureMarkdownToSections(content)
