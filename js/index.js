@@ -106,7 +106,6 @@ const parseCodeEl = (el) => {
   if (parsed.tag) {
     let [owner, repo, branch, ...path] = window.ghbase?.split('/')
     let dir = path[0] !== '404.html' ? `/${path.filter(p => !/\.md$/.test(p)).join('/')}` : ''
-    console.log(owner, repo, branch, path, dir)
     parsed.kwargs.ghbase = `${owner}/${repo}/${branch}${dir}`
   }
   // console.log(parsed)
