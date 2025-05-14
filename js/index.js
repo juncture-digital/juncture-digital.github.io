@@ -8,10 +8,10 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-group/tab-group.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
-console.log('Juncture')
+console.log('Juncture', document.readyState);
 document.addEventListener('readystatechange', () => {
   if (document.readyState === 'interactive') {
-    console.log('ready to go')
+    console.log('Juncture', document.readyState);
   }
 });
 
