@@ -659,6 +659,7 @@ const makeEntityPopups = () => {
 
 const processPage = (content) => {
   // v1Convert()
+  document.body.style.transition = 'opacity 0.3s ease';
   console.log(content)
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
@@ -687,7 +688,7 @@ const processPage = (content) => {
   makeEntityPopups()
 
   addActionLinks(content)
-  content.style.opacity = 1
+  document.body.style.opacity = 1
 }
 
 // processPage(document.querySelector('.post-content') || document.body)

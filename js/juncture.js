@@ -1,3 +1,5 @@
+console.log('Load Juncture', document.readyState)
+document.body?.display.opacity = 0;
 window.ghbase = "{{site.github.owner_name}}/{{site.github.repository_name}}/{{site.github.source.branch}}/{{page.path}}";
 var baseUrl = (window.location.port === '4100') ? 'http://localhost:3000' : 'https://www.juncture-digital.io';
 document.write('<link rel="stylesheet" href="https://www.juncture-digital.io/css/index.css">');
