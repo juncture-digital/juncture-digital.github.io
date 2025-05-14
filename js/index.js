@@ -658,7 +658,8 @@ const makeEntityPopups = () => {
 ////////// End Wikidata Entity functions //////////
 
 const processPage = (content) => {
-  v1Convert()
+  console.log(content)
+  // v1Convert()
 
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
@@ -690,8 +691,10 @@ const processPage = (content) => {
   content.style.opacity = 1
 }
 
-let content = document.querySelector('.post-content') || document.body
+processPage(document.querySelector('.post-content') || document.body)
 
+/*
+let content = document.querySelector('.post-content') || document.body
 if (content) {
   processPage(content)
 } else {
@@ -710,6 +713,7 @@ if (content) {
   })
   observer.observe(document.body, { childList: true, subtree: true })
 }
+*/
 
 // Handle drag-and-drop and copy/paste URLs from GitHub.  This provides a convenient way to view Juncture pages using a GitHub source.
 const processGitHubUrl = (url) => {
