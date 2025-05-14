@@ -690,8 +690,8 @@ const processPage = (content) => {
   content.style.opacity = 1
 }
 
-let contentSelector = window.jekyll?.page?.contentSelector || window.jekyll?.site?.contentSelector || '.post-content, body'
-let content = document.querySelector(contentSelector)
+let contentSelector = window.jekyll?.page?.contentSelector || window.jekyll?.site?.contentSelector || '.post-content'
+let content = document.querySelector(contentSelector) || document.body
 console.log(contentSelector, content)
 
 if (content) {
