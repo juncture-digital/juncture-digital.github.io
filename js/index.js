@@ -104,7 +104,7 @@ const parseCodeEl = (el) => {
   //   parsed.kwargs.data = encodeURIComponent(parent.nextElementSibling.outerHTML.trim().replace(/\n/g, '').replace(/ data=\"\" style=\"display:none;\"/, ''))
 
   if (parsed.tag) {
-    let [owner, repo, branch, ...path] = window.ghbase?.split('/')
+    let [owner, repo, branch, ...path] = document.getElementById('junctureScript')?.dataset.ghbase.split('/')
     let dir = path[0] !== '404.html' ? `/${path.filter(p => !/\.md$/.test(p)).join('/')}` : ''
     parsed.kwargs.ghbase = `${owner}/${repo}/${branch}${dir}`
   }
@@ -659,7 +659,6 @@ const makeEntityPopups = () => {
 
 const processPage = (content) => {
   // v1Convert()
-  document.body.style.transition = 'opacity 1s ease';
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
 
