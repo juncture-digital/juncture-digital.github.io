@@ -740,7 +740,7 @@ document.addEventListener('paste', () => {
 // Prevent default browser behavior on dragover to allow drop
 document.addEventListener('dragover', (e) => e.preventDefault());
 
-
+console.log(document.getElementById('junctureScript'))
 let selectors = ['.post-content', '.page-content', 'body']
 console.log('Juncture script loaded', selectors)
 if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
