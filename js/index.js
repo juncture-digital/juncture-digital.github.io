@@ -746,8 +746,10 @@ if (document.getElementById('junctureScript')?.dataset.selector) selectors = [do
 for (let selector of selectors) {
   let el = document.querySelector(selector)
   if (el) {
+    el.style.opacity = 0;
+    el.style.transition = 'opacity 1s ease-in-out';
     processPage(el)
+    el.style.opacity = 1
     break
   }
 }
-document.body.style.opacity = 1
