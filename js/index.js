@@ -658,6 +658,7 @@ const makeEntityPopups = () => {
 ////////// End Wikidata Entity functions //////////
 
 const processPage = (content) => {
+  console.log(content)
   // v1Convert()
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
@@ -686,7 +687,6 @@ const processPage = (content) => {
   makeEntityPopups()
 
   addActionLinks(content)
-  document.body.style.opacity = 1
 }
 
 // processPage(document.querySelector('.post-content') || document.body)
@@ -740,5 +740,14 @@ document.addEventListener('paste', () => {
 // Prevent default browser behavior on dragover to allow drop
 document.addEventListener('dragover', (e) => e.preventDefault());
 
-if (document.readyState === 'loading') document.addEventListener('readystatechange', () => processPage(document.querySelector('.post-content') || document.body))
-else processPage(document.querySelector('.post-content') || document.body)
+let selectors = ['.post-content', '.page-content', 'body']
+console.log('Juncture script loaded', selectors)
+if (document.getElementById('junctureScript')?.dataset.querySelector) selectors = [document.getElementById('junctureScript').dataset.querySelector, ...selectors]
+for (let selector of selectors) {
+  let el = document.querySelector(selector)
+  if (el) {
+    processPage(el)
+    break
+  }
+}
+document.body.style.opacity = 1
