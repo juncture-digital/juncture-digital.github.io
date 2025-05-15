@@ -742,8 +742,8 @@ document.addEventListener('dragover', (e) => e.preventDefault());
 
 console.log(document.getElementById('junctureScript'))
 let selectors = ['.post-content', '.page-content', 'body']
-console.log('Juncture script loaded', selectors)
 if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
+console.log('Juncture script loaded', selectors)
 for (let selector of selectors) {
   let el = document.querySelector(selector)
   if (el) {
