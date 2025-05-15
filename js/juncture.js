@@ -2,7 +2,6 @@ var baseUrl = (window.location.port === '4100') ? 'http://localhost:3000' : 'htt
 document.write('<link rel="stylesheet" href="https://www.juncture-digital.io/css/index.css">');
 const ghbase = document.getElementById('loader')?.dataset.ghbase || '{{site.github.owner_name}}/{{site.github.repository_name}}/{{site.github.source.branch}}/{{page.path}}';
 const selector = document.getElementById('loader')?.dataset.selector;
-console.log(`Juncture loader: ghbase=${ghbase} selector=${selector}`);
 let added = false;
 const addScript = () => {
   if (!added) { 
