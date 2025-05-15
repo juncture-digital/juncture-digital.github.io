@@ -424,7 +424,7 @@ const addActionLinks = (rootEl) => {
         path = path.slice(targetIdx)
         let action = path[1]
         let args = path.slice(2)
-        let text = a.textContent
+        let text = a.getAttribute('label') || a.dataset.label || a.textContent
         if (a.href) {
           a.setAttribute('data-href', href)
           a.classList.add('trigger')
