@@ -3,7 +3,7 @@ Prism.languages.juncture = {
 
     // Component type: image, map, etc. — must appear at the beginning
     'component': {
-      pattern: /^\s*`\s*(header|image|map|youtube|iframe|audio|component-name|-)\b/,
+      pattern: /\s*`\s*(header|image|map|youtube|iframe|audio|component-name|-)\b/,
       lookbehind: false
     },
   

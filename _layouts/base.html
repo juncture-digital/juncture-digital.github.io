@@ -9,17 +9,10 @@
     <link rel="icon" type="image/x-icon" href="{{ '/favicon.ico' | relative_url }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" rel="stylesheet">
-    <script>
-      (function() {
-        window.ghbase = "{{site.github.owner_name}}/{{site.github.repository_name}}/{{site.github.source.branch}}/{{page.path}}";
-        var baseUrl = (window.location.port === '4200')
-          ? 'http://localhost:4200'
-          : 'https://www.juncture-digital.io';
-        document.write('<link rel="stylesheet" href="' + baseUrl + '/css/index.css">');
-        window.dynamicBaseUrl = baseUrl;
-      })();
-    </script>
+    <script id="loader" src="https://www.juncture-digital.io/js/juncture.js" data-ghbase="{{site.github.owner_name}}/{{site.github.repository_name}}/{{site.github.source.branch}}/{{page.path}}"></script>
+
     {%- feed_meta -%} 
+
     {% if jekyll.environment == "production" %}
       <!-- Google tag (gtag.js) -->
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-74LKHV7QM5"></script>
@@ -196,19 +189,16 @@
 
     <!-- Juncture Language Definition -->
     <script src="/js/prism-juncture.js"></script>
+    
     <script>
-      let junctureScript = document.createElement('script')
-      junctureScript.src = `${window.dynamicBaseUrl}/js/index.js`
-      junctureScript.type = 'module'
-      document.body.appendChild(junctureScript)
-
-      maxWidth = maxWidth || '{{ site.max-width }}'
-      if (maxWidth) {
-        document.querySelectorAll('.site-header .wrapper, .site-footer .wrapper, .page-content .wrapper').forEach((el) => {
-          el.style.maxWidth = maxWidth === 'full' ? 'unset' : maxWidth
-        })
-      }
-
+      (function() {
+        maxWidth = maxWidth || '{{ site.max-width }}'
+        if (maxWidth) {
+          document.querySelectorAll('.site-header .wrapper, .site-footer .wrapper, .page-content .wrapper').forEach((el) => {
+            el.style.maxWidth = maxWidth === 'full' ? 'unset' : maxWidth
+          })
+        }
+      })();
     </script>
 
   </body>

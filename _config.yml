@@ -7,6 +7,12 @@ author:
   name: Ron Snyder
   email: ron@snyderjr.com
 
+github:
+  owner_name: juncture-digital
+  repository_name: juncture-digital.github.io
+  source:
+    branch: main
+
 collections:
   components:
     output: true

@@ -30,7 +30,7 @@ h1:empty, h2:empty, h3:empty, h4:empty, h5:empty, h6:empty {
 }
 
 main.post-content {
-  opacity: 0;
+  /* opacity: 0; */
   transition: all 0.5s ease;
 }
 
@@ -696,3 +696,6 @@ p.snippet {
   margin: 0;
 }
 
+code[class*="language-"], pre[class*="language-"] {
+  white-space: pre-wrap;
+}

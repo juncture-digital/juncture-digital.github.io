@@ -233,6 +233,8 @@ const restructureMarkdownToSections = (contentEl) => {
       }
     }
   });
+
+
   
   container.querySelector('hr.footnotes-sep')?.remove()
   let footnotes = container.querySelector('section.footnotes')
