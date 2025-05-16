@@ -743,10 +743,8 @@ document.addEventListener('dragover', (e) => e.preventDefault());
 
 let selectors = ['.post-content', '.page-content', 'body']
 if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
-console.log(document.body.cloneNode(true))
 for (let selector of selectors) {
   let el = document.querySelector(selector)
-  console.log(selector, el)
   if (el) {
     el.style.opacity = 0;
     el.style.transition = 'opacity 1s ease-in-out';
