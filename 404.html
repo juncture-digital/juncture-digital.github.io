@@ -16,6 +16,25 @@ contentSelector: main
 <script src="https://cdn.jsdelivr.net/npm/markdown-it-deflist@3.0.0/dist/markdown-it-deflist.min.js"></script>
 <script type="module">
 
+  const branches = async (acct, repo) => {
+    let resp = await fetch(`https://api.github.com/repos/${acct}/${repo}/branches`, {headers: { Accept: 'application/vnd.github+json' } })
+    if (resp.ok) {
+      resp = await resp.json()
+      return resp.map(b => b.name)
+    }
+  }
+
+  const defaultBranch = async (acct, repo) => {
+    let defaultBranch = null
+    let url = `https://api.github.com/repos/${acct}/${repo}`
+    let resp = await fetch(url)
+    if (resp.ok) {
+      resp = await resp.json()
+      defaultBranch = resp.default_branch
+    }
+    return defaultBranch
+  }
+
   const getGhFile = async (acct, repo, branch, path) => {
     let url = `https://api.github.com/repos/${acct}/${repo}/contents/${path}?ref=${branch}`
     let resp = await fetch(url, {cache: 'no-cache'})
@@ -72,12 +91,21 @@ contentSelector: main
 
   let main = document.querySelector('main')
 
-  let [owner, repo, ...path] = location.pathname.slice(window.jekyll?.site.baseurl.length || 0).split('/').filter(Boolean)
-  let branch = new URLSearchParams(location.search).get('branch') || 'main'
-  let dir = path.filter(pe => !/\.md$/.test(pe)).join('/')
-  window.ghbase = `${owner}/${repo}/${branch}` + (dir ? `/${dir}` : '')
+  let [owner, repo, ...rest] = location.pathname.split('/').filter(p => p)
+  let branch
+  if (rest[0] === 'main' || rest[0] === 'master') {
+    branch = rest.shift()
+  } else {
+    const repoBranches = await branches(owner, repo)
+    if (repoBranches.length === 1) branch = repoBranches[0]
+    else branch = await defaultBranch(owner, repo)
+  }
+  let path = rest.join('/')
+  // console.log(`owner=${owner}, repo=${repo}, branch=${branch}, path=${path}`)
 
-  let markdown = await getGhMarkdown(owner, repo, branch, path.join('/'))
+  document.getElementById('junctureScript').dataset.ghbase = `${owner}/${repo}/${branch}/${path}`;
+
+  let markdown = await getGhMarkdown(owner, repo, branch, path)
   if (!markdown) markdown = await getLocalMarkdown()
 
   if (markdown) {

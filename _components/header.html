@@ -45,6 +45,7 @@
         base: null,
         color: null,      // text color
         data: null,
+        date: null,
         height: 250,
         img: null,
         size: 'cover',
@@ -86,7 +87,10 @@
       return url
     }
 
-    const setWindowAspect = () => window.parent.postMessage({ type: 'setAspect', aspect: main.clientWidth/main.clientHeight }, '*')
+    const setWindowAspect = () => {
+      const aspect = main.clientWidth/main.clientHeight
+      window.parent.postMessage({ type: 'setAspect', aspect }, '*')
+    }
     new ResizeObserver(() => setWindowAspect()).observe(main)
 
     // Convert links to be opened by parent rather than in Iframe
@@ -128,11 +132,10 @@
 
     // Perform init processing 
     const init = () => {
-      console.log(props)
-      // if (props.height) {
-        //main.style.height = `${props.height}px`
+      if (props.height) {
+        main.style.height = `${props.height}px`
         setWindowAspect()
-      //}
+      }
       if (props.title) {
         titleBar.style.display = 'block'
         titleBar.innerHTML = md2Html(props.title)
