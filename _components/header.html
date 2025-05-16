@@ -150,6 +150,26 @@
         titleBar.style.color = props.color;
       }
       if (props.img) {
+        if (props.img.indexOf('wc:') === 0 || props.img.indexOf('wikimedia.org') > -1 || props.img.indexOf('wikipedia.org') > -1 && props.img.indexOf('/media/File:') > -1) {
+          props.img = wcImageUrl(props.img.slice(3))
+        } else if (props.img.indexOf('gh:') === 0) {
+          props.img = `https://raw.githubusercontent.com/${props.img.slice(3)}`
+        } else if (props.img.indexOf('wd:') === 0 || /^Q[0-9]+$/.test(props.img)) {
+          // TODO
+          /*
+          const qid = props.src.replace(/^wd:/, '')
+          wdImage(qid).then(mwFile => {
+          })
+          */
+        } else {
+          if (props.img[0] === '/') {
+            let [owner, repo, branch, ...rest] = props.ghbase.split('/')
+            props.img = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${props.img}`
+          } else {
+            props.img = `https://raw.githubusercontent.com/${props.ghbase}/${props.img}`
+          }
+        }
+
         if (props.img.indexOf('wc:') === 0) props.img = wcImageUrl(props.img.slice(3))
         main.classList.add('background-image')
         main.style.backgroundImage = `url("${props.img}")`
