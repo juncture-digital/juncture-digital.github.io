@@ -165,7 +165,7 @@
           if (props.img[0] === '/') {
             let [owner, repo, branch, ...rest] = props.ghbase.split('/')
             props.img = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${props.img}`
-          } else {
+          } else if (props.img.indexOf('http') !== 0) {
             props.img = `https://raw.githubusercontent.com/${props.ghbase}/${props.img}`
           }
         }

@@ -12,8 +12,7 @@ category: guides
 
 ## 1. Why GitHub?
 
-GitHub is like **Google Docs for text files**—but with a time machine and a built-in discussion board.  
-Using it for Markdown lets you:
+GitHub is like **Google Docs for text files**—but with a time machine and a built-in discussion board.  Using it for Markdown lets you:
 
 * work together without overwriting each other’s edits;
 * see **who changed what, when, and why**;
@@ -30,7 +29,7 @@ Using it for Markdown lets you:
 | **Pull Request (PR)** | A proposal to merge one branch into another, with a discussion thread | “Hey team, look at my edits—OK to add them?” |
 | **Merge** | Accepting the changes from a PR into the main branch | Putting the updated pages back in the binder |
 
-> **Tip:** Don’t worry about memorizing the jargon—refer back here while you learn.
+> **Tip:** Don’t worry about memorizing the jargon—refer back while you learn.
 
 ## 3. Getting Set Up
 
