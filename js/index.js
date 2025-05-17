@@ -682,11 +682,9 @@ const processPage = (content) => {
     })
 
   makeDetails(content)
-
   makeCards(content)
   makeTabs(content)
   makeEntityPopups()
-
   addActionLinks(content)
 }
 
@@ -746,6 +744,7 @@ if (document.getElementById('junctureScript')?.dataset.selector) selectors = [do
 for (let selector of selectors) {
   let el = document.querySelector(selector)
   if (el) {
+    console.log(el.cloneNode(true))
     el.style.opacity = 0;
     el.style.transition = 'opacity 1s ease-in-out';
     processPage(el)
