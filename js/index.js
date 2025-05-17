@@ -746,7 +746,7 @@ for (let selector of selectors) {
   if (el) {
     console.log(document.readyState)
     console.log(el.cloneNode(true))
-    el.style.opacity = 0;
+    // el.style.opacity = 0;
     // el.style.transition = 'opacity 1s ease-in-out';
     processPage(el)
     // el.style.opacity = 1
