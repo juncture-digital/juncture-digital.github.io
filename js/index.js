@@ -744,6 +744,8 @@ if (document.getElementById('junctureScript')?.dataset.selector) selectors = [do
 for (let selector of selectors) {
   let el = document.querySelector(selector)
   if (el) {
+    document.body.style.opacity = 0;
+    document.body.transition = 'opacity 0.5s ease-in-out';
     processPage(el)
     document.body.style.opacity = 1
     break
