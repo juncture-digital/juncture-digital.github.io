@@ -5,7 +5,7 @@ const selector = document.getElementById('loader')?.dataset.selector;
 let added = false;
 const addScript = () => {
   if (!added) { 
-    const scriptEl = Object.assign(document.createElement('script'), { id: 'junctureScript', src: `${baseUrl}/js/index.js`, type: 'module' } );
+    const scriptEl = Object.assign(document.createElement('script'), { id: 'junctureScript', src: `${baseUrl}/js/index.js`, type: 'module', 'async': '' } );
     if (ghbase) scriptEl.dataset.ghbase = ghbase;
     if (selector) scriptEl.dataset.selector = selector;
     document.body.appendChild(scriptEl);
