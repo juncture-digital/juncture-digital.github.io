@@ -97,7 +97,7 @@ contentSelector: main
     branch = rest.shift()
   } else {
     const repoBranches = await branches(owner, repo)
-    if (repoBranches.length === 1) branch = repoBranches[0]
+    if (repoBranches?.length === 1) branch = repoBranches[0]
     else branch = await defaultBranch(owner, repo)
   }
   let path = rest.join('/')
