@@ -123,6 +123,7 @@ const makeIframe = (code) => {
   iframe.setAttribute('loading', 'lazy')
   iframe.setAttribute('allowfullscreen', '')
   iframe.setAttribute('allow', 'clipboard-write')
+  iframe.setAttribute('title', `${code.tag} viewer`)
   if (code.kwargs.width) iframe.setAttribute('width', code.kwargs.width)
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
   if (code.tag === 'audio') iframe.setAttribute('allow', 'autoplay')
