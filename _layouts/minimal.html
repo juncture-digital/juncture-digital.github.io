@@ -7,6 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script id="loader" src="https://www.juncture-digital.io/js/juncture.js" data-ghbase="{{site.github.owner_name}}/{{site.github.repository_name}}/{{site.github.source.branch}}/{{page.path}}"></script>
     -->
+    (function() {
+      window.jekyll = {site:{baseurl:'{{site.baseurl}}', contentSelector:'{{site.contentSelector}}', github:{owner_name:'{{site.github.owner_name}}',repository_name:'{{site.github.repository_name}}',source:{branch:'{{site.github.source.branch}}'}}},page:{path:'{{page.path}}',dir:'{{page.dir}}',name:'{{page.name}}',contentSelector:'{{page.contentSelector}}'}}
+      var baseUrl = (window.location.port === '4200')
+        ? 'http://localhost:4200'
+        : 'https://www.juncture-digital.io';
+      document.write('<link rel="stylesheet" href="' + baseUrl + '/css/index.css">');
+      window.dynamicBaseUrl = baseUrl;
+    })();
   </head>
 
   <body>
