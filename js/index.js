@@ -668,7 +668,6 @@ const makeEntityPopups = () => {
 ////////// End Wikidata Entity functions //////////
 
 const processPage = (content) => {
-  console.log(content)
   // v1Convert()
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
@@ -756,7 +755,6 @@ if (document.getElementById('junctureScript')?.dataset.selector) selectors = [do
 for (let selector of selectors) {
   let el = document.querySelector(selector)
   if (el) {
-    console.log(selector)
     document.body.style.opacity = 0;
     document.body.transition = 'opacity 0.5s ease-in-out';
     processPage(el)
