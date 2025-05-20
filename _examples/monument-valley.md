@@ -3,7 +3,7 @@ layout: default
 max-width: 1000px
 ---
 
-`header title="{{ page.title }}" img=wc:Monument_Valley_banner.jpg`
+`header title="Monument Valley" img=wc:Monument_Valley_banner.jpg`
 `- [Home](/)`
 `- [About](/about)`
 
