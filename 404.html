@@ -17,7 +17,7 @@ contentSelector: main
 <script type="module">
 
   console.log('404.html')
-  
+
   const branches = async (acct, repo) => {
     let resp = await fetch(`https://api.github.com/repos/${acct}/${repo}/branches`, {headers: { Accept: 'application/vnd.github+json' } })
     if (resp.ok) {
@@ -150,6 +150,7 @@ contentSelector: main
       })
 
     main.setAttribute('style', 'padding:0 1em;' + (frontMatter['max-width'] ? ` max-width:${frontMatter['max-width']}; margin:0 auto;` : ''))
+    main.className = 'page-content'
     main.innerHTML = (style ? `${style.outerHTML}\n` : '') + body.innerHTML
     let junctureScript = document.createElement('script')
     junctureScript.src = `${location.port === '4100' ? 'http://localhost:3000': 'https://www.juncture-digital.io'}/js/index.js`

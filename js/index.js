@@ -773,6 +773,7 @@ for (let selector of selectors) {
 let observer = new MutationObserver((mutations) => {
   mutations.forEach(mutation => {
     mutation.addedNodes.forEach(node => {
+      console.log(mutation)
       if (node.nodeType === Node.ELEMENT_NODE) {
         for (let selector of selectors) {
           if (node.matches(selector)) {
