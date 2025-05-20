@@ -733,7 +733,7 @@ const processGitHubUrl = (url) => {
 
 const githubSearchArg = new URLSearchParams(window.location.search).get('github');
 if (githubSearchArg) {
-  processGitHubUrl(githubSearchArg);
+  // processGitHubUrl(githubSearchArg);
 }
 
 // Attach event listeners
