@@ -8,7 +8,6 @@ const addScript = () => {
     const scriptEl = Object.assign(document.createElement('script'), { id: 'junctureScript', src: `${baseUrl}/js/index.js`, type: 'module' } );
     if (ghbase) scriptEl.dataset.ghbase = ghbase;
     if (selector) scriptEl.dataset.selector = selector;
-    scriptEl.setAttribute('async', '')
     document.body.appendChild(scriptEl);
     added = true;
   }
