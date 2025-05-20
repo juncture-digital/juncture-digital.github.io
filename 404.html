@@ -16,8 +16,6 @@ contentSelector: main
 <script src="https://cdn.jsdelivr.net/npm/markdown-it-deflist@3.0.0/dist/markdown-it-deflist.min.js"></script>
 <script type="module">
 
-  console.log('404.html')
-
   const branches = async (acct, repo) => {
     let resp = await fetch(`https://api.github.com/repos/${acct}/${repo}/branches`, {headers: { Accept: 'application/vnd.github+json' } })
     if (resp.ok) {
@@ -65,11 +63,12 @@ contentSelector: main
       let resp = await getGhFile(owner, repo, branch, path)
       return resp.content
     } else {
-      return await Promise.all([
-        getGhFile(owner, repo, branch, `${path}.md`),
-        getGhFile(owner, repo, branch, `${path}/README.md`),
-        getGhFile(owner, repo, branch, `${path}/index.md`)
-      ]).then(resp => { 
+      let promises = [
+        getGhFile(owner, repo, branch, path ? `${path}/README.md` : 'README.md'),
+        getGhFile(owner, repo, branch, path ? `${path}/index.md` : 'index.md')
+      ]
+      if (path) promises.push(getGhFile(owner, repo, branch, `${path}/index.md`))
+      return await Promise.all(promises).then(resp => { 
         let found = resp.find(r => r?.status === 200)
         return found?.content || ''
       })
