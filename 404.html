@@ -155,7 +155,7 @@ contentSelector: main
     let junctureScript = document.createElement('script')
     junctureScript.src = `${location.port === '4100' ? 'http://localhost:3000': 'https://www.juncture-digital.io'}/js/index.js`
     junctureScript.type = 'module'
-    document.body.appendChild(junctureScript)
+    // document.body.appendChild(junctureScript)
   } else {
     main.innerHTML = `<div class="container">
       <h1>404</h1>
