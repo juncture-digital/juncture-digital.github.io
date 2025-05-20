@@ -67,7 +67,7 @@ contentSelector: main
         getGhFile(owner, repo, branch, path ? `${path}/README.md` : 'README.md'),
         getGhFile(owner, repo, branch, path ? `${path}/index.md` : 'index.md')
       ]
-      if (path) promises.push(getGhFile(owner, repo, branch, `${path}/index.md`))
+      if (path) promises.push(getGhFile(owner, repo, branch, `${path}.md`))
       return await Promise.all(promises).then(resp => { 
         let found = resp.find(r => r?.status === 200)
         return found?.content || ''
