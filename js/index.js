@@ -8,8 +8,6 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-group/tab-group.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
-console.log('index.js')
-
 const paramToIframe = (param) => {
   const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
   if (tag === 'image') {
@@ -413,7 +411,6 @@ const addMessageHandler = () => {
       const iframes = document.querySelectorAll('iframe');
       for (const iframe of iframes) {
         if (iframe.contentWindow === event.source) {
-          console.log(iframe)
           let msg = { event: 'id', id: iframe.id }
           event.source.postMessage(JSON.stringify(msg), '*')
           break;
@@ -678,7 +675,6 @@ const processPage = (content) => {
 
   addMessageHandler()
 
-  console.log('convertTags')
   Array.from(content.querySelectorAll('p > code'))
     .map(codeEl => parseCodeEl(codeEl))
     .reduce((acc, parsed) => {
@@ -690,7 +686,6 @@ const processPage = (content) => {
       return acc
     }, [])
     .forEach(codeEl => {
-      console.log(codeEl)
       if (codeEl.data.length > 0) codeEl.kwargs.data = codeEl.data.join('|')
       if (!codeEl.inline) makeIframe(codeEl)
     })
@@ -769,22 +764,3 @@ for (let selector of selectors) {
     break
   }
 }
-
-let observer = new MutationObserver((mutations) => {
-  mutations.forEach(mutation => {
-    mutation.addedNodes.forEach(node => {
-      console.log(mutation)
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        for (let selector of selectors) {
-          if (node.matches(selector)) {
-            console.log('mutationObserver', selector)
-            // observer.disconnect()
-            // processPage(node)
-          }
-        }
-      }
-    })
-  })
-})
-observer.observe(document.body, { childList: true, subtree: true })
-
