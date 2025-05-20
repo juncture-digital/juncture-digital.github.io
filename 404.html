@@ -105,10 +105,9 @@ contentSelector: main
   let path = rest.join('/')
   // console.log(`owner=${owner}, repo=${repo}, branch=${branch}, path=${path}`)
 
-  document.getElementById('junctureScript').dataset.ghbase = `${owner}/${repo}/${branch}/${path}`;
+  // document.getElementById('junctureScript').dataset.ghbase = `${owner}/${repo}/${branch}/${path}`;
 
   let markdown = await getGhMarkdown(owner, repo, branch, path)
-  console.log(markdown)
   if (!markdown) markdown = await getLocalMarkdown()
 
   if (markdown) {
@@ -153,6 +152,7 @@ contentSelector: main
     main.innerHTML = (style ? `${style.outerHTML}\n` : '') + body.innerHTML
     let junctureScript = document.createElement('script')
     junctureScript.src = `${location.port === '4100' ? 'http://localhost:3000': 'https://www.juncture-digital.io'}/js/index.js`
+    junctureScript.dataset.ghbase = `${owner}/${repo}/${branch}/${path}`
     junctureScript.type = 'module'
     document.body.appendChild(junctureScript)
   } else {
