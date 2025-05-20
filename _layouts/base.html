@@ -33,7 +33,7 @@
     <header class="site-header">
       <div class="wrapper">
 
-        <a class="site-title" rel="author" href="{{ '/' | relative_url }}"><img src="/favicon.ico"> {{ site.title | escape }}</a>
+        <a class="site-title" rel="author" href="{{ '/' | relative_url }}"><img src="/favicon.ico" alt="Site logo"> {{ site.title | escape }}</a>
 
         {% include search-lunr.html %}
 
@@ -97,7 +97,7 @@
               {% assign parts = item | split: '||' %}
               {% assign url = parts[0] | strip %}
               {% assign title = parts[1] | strip %}
-              {% if url and title %}
+              {% if url and title != empty %}
                 {%- if title == 'Blog' %}
                   {% if site.blog.enabled %}
                     {% if page.url == url %}
