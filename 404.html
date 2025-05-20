@@ -150,12 +150,11 @@ contentSelector: main
       })
 
     main.setAttribute('style', 'padding:0 1em;' + (frontMatter['max-width'] ? ` max-width:${frontMatter['max-width']}; margin:0 auto;` : ''))
-    main.className = 'page-content'
     main.innerHTML = (style ? `${style.outerHTML}\n` : '') + body.innerHTML
     let junctureScript = document.createElement('script')
     junctureScript.src = `${location.port === '4100' ? 'http://localhost:3000': 'https://www.juncture-digital.io'}/js/index.js`
     junctureScript.type = 'module'
-    // document.body.appendChild(junctureScript)
+    document.body.appendChild(junctureScript)
   } else {
     main.innerHTML = `<div class="container">
       <h1>404</h1>
