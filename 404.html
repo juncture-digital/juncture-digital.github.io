@@ -16,6 +16,8 @@ contentSelector: main
 <script src="https://cdn.jsdelivr.net/npm/markdown-it-deflist@3.0.0/dist/markdown-it-deflist.min.js"></script>
 <script type="module">
 
+  console.log('404.html')
+  
   const branches = async (acct, repo) => {
     let resp = await fetch(`https://api.github.com/repos/${acct}/${repo}/branches`, {headers: { Accept: 'application/vnd.github+json' } })
     if (resp.ok) {
@@ -106,6 +108,7 @@ contentSelector: main
   document.getElementById('junctureScript').dataset.ghbase = `${owner}/${repo}/${branch}/${path}`;
 
   let markdown = await getGhMarkdown(owner, repo, branch, path)
+  console.log(markdown)
   if (!markdown) markdown = await getLocalMarkdown()
 
   if (markdown) {
