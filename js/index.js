@@ -728,6 +728,7 @@ const processGitHubUrl = (url) => {
   if (new URL(url.trim()).hostname !== 'github.com') return
   let [owner, repo, branch, ...path] = url.split('/').slice(3).filter(p => p !== 'blob' && p !== 'tree')
   path = path.filter(p => p !== 'README.md' && p !== 'index.md').map(p => p.replace(/\.md$/, '')).join('/')
+  console.log(`owner=${owner} repo=${repo} branch=${branch} path=${path}`)
   location.href = `${location.origin}/${owner}/${repo}${branch === 'main' ? '' : ('/' + branch)}/${path}`
 }
 
