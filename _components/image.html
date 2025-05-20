@@ -162,6 +162,7 @@
     ['rotation', 'seq'].forEach(prop => props[prop] = parseInt(props[prop]) || props[prop]) // convert to number if possible
     console.log(props)
 
+    let id;
     let imageAspect;
 
     const setWindowAspect = () => {
@@ -175,12 +176,15 @@
       
       new ResizeObserver(() => { setWindowAspect() }).observe(document.body)
 
+      window.parent.postMessage({ type: 'getID' }, '*');
       window.addEventListener('message', (event) => {
         let eventData = JSON.parse(event.data)
         let action = eventData.action?.toLowerCase()
         let text = eventData.text
         let args = eventData.args
-        if (action === 'zoomto') {
+        if (eventData.event === 'id') {
+          id = eventData.id;
+        } else if (action === 'zoomto') {
           zoomto(args[0], text)
         } else if (action === 'gotopage') {
           gotopage(parseInt(args[0]))
@@ -822,13 +826,13 @@
         });
   
         // Copy icon
-        const icon = document.createElement("div");
-        icon.className = "copy-icon";
-        icon.textContent = "📋";
+        const icon = document.createElement('div');
+        icon.className = 'copy-icon';
+        icon.textContent = '📋';
         boxEl.appendChild(icon);
-        icon.addEventListener("click", () => {
+        icon.addEventListener('click', () => {
           const regionPct = `pct:${(rect.x*100).toFixed(2)},${(rect.y*100*imageAspect).toFixed(2)},${(rect.width*100).toFixed(2)},${(rect.height*100*imageAspect).toFixed(2)}`
-          navigator.clipboard.writeText(regionPct);
+          navigator.clipboard.writeText(`${id}/zoomto/${regionPct}`);
         });
 
         // Define updateOverlay function

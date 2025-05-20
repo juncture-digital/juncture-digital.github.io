@@ -408,6 +408,17 @@ const addMessageHandler = () => {
       if (event.origin !== location.origin) return;
       let msg = { event: 'path', path: location.pathname }
       event.source.postMessage(JSON.stringify(msg), '*')
+    } else if (event.data.type === 'getID') {
+      if (event.origin !== location.origin) return;
+      const iframes = document.querySelectorAll('iframe');
+      for (const iframe of iframes) {
+        if (iframe.contentWindow === event.source) {
+          console.log(iframe)
+          let msg = { event: 'id', id: iframe.id }
+          event.source.postMessage(JSON.stringify(msg), '*')
+          break;
+        }
+      }
     }
   })
 }
