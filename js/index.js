@@ -233,8 +233,6 @@ const restructureMarkdownToSections = (contentEl) => {
       }
     }
   });
-
-
   
   container.querySelector('hr.footnotes-sep')?.remove()
   let footnotes = container.querySelector('section.footnotes')
@@ -678,6 +676,7 @@ const processPage = (content) => {
 
   addMessageHandler()
 
+  console.log('convertTags')
   Array.from(content.querySelectorAll('p > code'))
     .map(codeEl => parseCodeEl(codeEl))
     .reduce((acc, parsed) => {
@@ -689,6 +688,7 @@ const processPage = (content) => {
       return acc
     }, [])
     .forEach(codeEl => {
+      console.log(codeEl)
       if (codeEl.data.length > 0) codeEl.kwargs.data = codeEl.data.join('|')
       if (!codeEl.inline) makeIframe(codeEl)
     })
