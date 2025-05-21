@@ -1,4 +1,6 @@
 ---
+title: Monument Valley
+description: Interactive visual essay on Monument Valley.
 layout: default
 max-width: 1000px
 ---
