@@ -430,7 +430,7 @@ const addMessageHandler = () => {
       if (sendingIframe) sendingIframe.style.aspectRatio = event.data.aspect
     } else if (event.data.type === 'showDialog') {
       console.log('showDialog', event.origin, location.origin, event.data.props)
-      if (event.origin !== location.origin) return;
+      // if (event.origin !== location.origin) return;
       showDialog(event.data.props)
     } else if (event.data.type === 'openLink') {
       window.open(event.data.url, event.data.newtab ? '_blank' : '_self')
