@@ -365,6 +365,7 @@
       img.setAttribute('alt', altText)
       img.style.objectFit = props.cover === true ? 'cover' : 'contain'
       img.addEventListener('click', () => {
+        console.log('Image clicked, opening dialog')
         window.parent.postMessage({ 
           type: 'showDialog', 
           props: {
