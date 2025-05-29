@@ -429,6 +429,7 @@ const addMessageHandler = () => {
       const sendingIframe = Array.from(document.querySelectorAll('iframe')).find((iframe) => iframe.contentWindow === event.source)
       if (sendingIframe) sendingIframe.style.aspectRatio = event.data.aspect
     } else if (event.data.type === 'showDialog') {
+      console.log('showDialog', event.origin, location.origin, event.data.props)
       if (event.origin !== location.origin) return;
       showDialog(event.data.props)
     } else if (event.data.type === 'openLink') {
