@@ -705,3 +705,10 @@ p.snippet {
 code[class*="language-"], pre[class*="language-"] {
   white-space: pre-wrap;
 }
+
+sl-dialog::part(body) {
+  padding: 0;
+}
+sl-dialog::part(footer) {
+  padding: 0.5em;
+}

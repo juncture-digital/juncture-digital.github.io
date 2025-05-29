@@ -1,8 +1,10 @@
 import 'https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js'
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/button/button.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/card/card.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/carousel/carousel.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/carousel-item/carousel-item.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/copy-button/copy-button.js';
+import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/dialog/dialog.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/dropdown/dropdown.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab/tab.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-group/tab-group.js';
@@ -119,26 +121,28 @@ const junctureComponentsPrefix = location.port === '4200'
     : 'https://www.juncture-digital.io/components'
 
 const makeIframe = (code) => {
+  let tag = code.tag || code.kwargs.tag || 'iframe'
   let iframe = document.createElement('iframe')
   iframe.setAttribute('loading', 'lazy')
   iframe.setAttribute('allowfullscreen', '')
   iframe.setAttribute('allow', 'clipboard-write')
-  iframe.setAttribute('title', `${code.tag} viewer`)
+  iframe.setAttribute('title', `${tag} viewer`)
   if (code.kwargs.width) iframe.setAttribute('width', code.kwargs.width)
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
-  if (code.tag === 'audio') iframe.setAttribute('allow', 'autoplay')
+  if (code.kwargs.aspect) iframe.style.aspectRatio = code.kwargs.aspect
+  if (tag === 'audio') iframe.setAttribute('allow', 'autoplay')
   if (code.id) iframe.id = code.id
-  if (code.classes.length > 0) iframe.className = code.classes.join(' ')
+  if (code.classes?.length > 0) iframe.className = code.classes.join(' ')
   let args = [
     ...Object.entries(code.kwargs)
       .filter(([key, value]) => key !== 'width' && key !== 'height') // iframe attributes not passed to component
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`), ...(code.booleans || [])
     ].join('&')
 
-  iframe.src = code.tag === 'iframe' ? code.kwargs.src : `${junctureComponentsPrefix}/${code.tag}?${args}`
+  iframe.src = tag === 'iframe' ? code.kwargs.src : `${junctureComponentsPrefix}/${tag}?${args}`
 
   let isOnlyChild = code.el.parentElement?.children.length === 1 && code.el.parentElement?.children[0] === code.el
-  if (isOnlyChild) code.el.parentElement.replaceWith(iframe)
+  if (isOnlyChild && code.el.parentElement.tagName !== 'SL-DIALOG') code.el.parentElement.replaceWith(iframe)
   else {
     let nonCodeElements = Array.from(code.el.parentElement?.children).filter(c => c.tagName !== 'CODE').length
     if (!nonCodeElements) code.el.parentElement.classList.add('iframe-container')
@@ -396,11 +400,37 @@ const makeDetails = (rootEl) => {
   })
 }
 
+let dialog
+const showDialog = (props) => {
+  if (dialog) return
+  dialog = document.createElement('sl-dialog')
+  dialog.id = 'junctureDialog'
+  dialog.setAttribute('size', 'large')
+  dialog.setAttribute('no-header', '')
+  dialog.setAttribute('style', '--width: 100vw;')
+  dialog.addEventListener('sl-after-hide', () => dialog = dialog.remove())
+  let closeButton = document.createElement('sl-button')
+  closeButton.setAttribute('slot', 'footer')
+  closeButton.setAttribute('variant', 'primary')
+  closeButton.setAttribute('size', 'small')
+  closeButton.textContent = 'Close'
+  closeButton.addEventListener('click', () => dialog.hide())
+  dialog.appendChild(closeButton)
+  let el = document.createElement('div')
+  dialog.appendChild(el)
+  makeIframe({ el, tag: props.tag, kwargs: props.kwargs })
+  document.body.appendChild(dialog)
+  dialog.show()
+}
+
 const addMessageHandler = () => {
   window.addEventListener('message', (event) => {
     if (event.data.type === 'setAspect') {
       const sendingIframe = Array.from(document.querySelectorAll('iframe')).find((iframe) => iframe.contentWindow === event.source)
       if (sendingIframe) sendingIframe.style.aspectRatio = event.data.aspect
+    } else if (event.data.type === 'showDialog') {
+      if (event.origin !== location.origin) return;
+      showDialog(event.data.props)
     } else if (event.data.type === 'openLink') {
       window.open(event.data.url, event.data.newtab ? '_blank' : '_self')
     } else if (event.data.type === 'getPath') {

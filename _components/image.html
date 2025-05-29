@@ -13,7 +13,7 @@
     body { height:100dvh; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
     main { height: 100%; display: flex; flex-direction: column; width: 100%; visibility: hidden; } 
     figure { display: grid; grid-template-rows: 1fr auto; height: 100%; margin: 0; }
-    .content { display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
+    .content { display: inline-block; overflow: hidden; position: relative; }
     .content img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .content .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1; }
     figcaption { padding: 10px; font-size: 0.9rem; background-color: #f9f9f9; display: flex; align-items: center; gap: 0.5em; }
@@ -141,6 +141,7 @@
         cover: false,
         format: null,
         ghbase: null,
+        iiif: false,
         language: 'en',
         manifest: null,
         nocaption: false,
@@ -167,8 +168,8 @@
 
     const setWindowAspect = () => {
       if (!imageAspect) return
-      let aspect = main.clientWidth/(main.clientWidth / imageAspect + caption.clientHeight)
-      console.log('setWindowAspect', aspect)
+      // let aspect = main.clientWidth/(main.clientWidth / imageAspect + caption.clientHeight)
+      // console.log('setWindowAspect', aspect)
       // window.parent.postMessage({ type: 'setAspect', aspect }, '*');
     }
 
@@ -341,7 +342,7 @@
           : iiifManifest
             ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
             : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.\S+$/,'').replace(/[-_]+/g,' '))
-      if (props.nocaption) {
+      if (props.nocaption === true) {
         caption.style.display = 'none'
       } else {
         captionText.innerHTML = md2Html(text)    
@@ -362,8 +363,23 @@
           ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
           : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.\S+$/,'').replace(/[-_]+/g,' '))
       img.setAttribute('alt', altText)
-      img.style.objectFit = props.cover ? 'cover' : 'contain'
-      img.addEventListener('click', () => initViewer())
+      img.style.objectFit = props.cover === true ? 'cover' : 'contain'
+      img.addEventListener('click', () => {
+        window.parent.postMessage({ 
+          type: 'showDialog', 
+          props: {
+            kwargs: {
+              ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
+              ...{
+                aspect: imageAspect,
+                tag: 'image',
+                iiif: true,
+                cover: true
+              }
+            }
+          }
+        }, '*');
+      })
     }
 
     const loadManifest = (manifestUrl) => {
@@ -400,37 +416,36 @@
       
       if (props.src.indexOf('http') === 0) {
         props.manifest = `https://iiif.mdpress.io/${props.src}/manifest.json`
-        loadImage(props.src)
+        if (!props.iiif) loadImage(props.src)
       } else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1 || props.src.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
         let mwFile = props.src.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
         props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
-        loadImage(mwImage(mwFile, main.clientWidth))
+        if (!props.iiif) loadImage(mwImage(mwFile, main.clientWidth))
       } else if (props.src.indexOf('gh:') === 0) {
         props.manifest = `https://iiif.mdpress.io/${props.src}/manifest.json`
-        loadImage(`https://raw.githubusercontent.com/${props.src.slice(3)}`)
+        if (!props.iiif) loadImage(`https://raw.githubusercontent.com/${props.src.slice(3)}`)
       } else if (props.src.indexOf('wd:') === 0 || /^Q[0-9]+$/.test(props.src)) {
         const qid = props.src.replace(/^wd:/, '')
         wdImage(qid).then(mwFile => {
           props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
-          loadImage(mwImage(mwFile, main.clientWidth))
+          if (!props.iiif) loadImage(mwImage(mwFile, main.clientWidth))
           setCaption()
         })
       } else {
         if (props.src[0] === '/') {
           let [owner, repo, branch, ...rest] = props.ghbase.split('/')
           props.manifest = `https://iiif.mdpress.io/gh:${owner}/${repo}/${branch}${props.src}/manifest.json`
-          loadImage(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}${props.src}`)
+          if (!props.iiif) loadImage(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}${props.src}`)
         } else {
           props.manifest = `https://iiif.mdpress.io/gh:${props.ghbase}/${props.src}/manifest.json`
-          loadImage(`https://raw.githubusercontent.com/${props.ghbase}/${props.src}`)
+          if (!props.iiif) loadImage(`https://raw.githubusercontent.com/${props.ghbase}/${props.src}`)
         }
       }
-      loadManifest(props.manifest)
+      loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     
     } else if (props.manifest) {
       props.manifest = props.manifest.startsWith('http') ? props.manifest : `https://iiif.mdpress.io/${props.manifest}/manifest.json`
       loadManifest(props.manifest)
-      // initViewer()
     }
 
     setCaption()
@@ -941,7 +956,7 @@
         maxZoomPixelRatio: 10,
         gestureSettingsMouse: {
           dragToPan: true,
-          scrollToZoom: false,
+          scrollToZoom: true,
           clickToZoom: true,
           dblClickToZoom: false,
           dblClickDragToZoom: false,
