@@ -365,7 +365,6 @@
       img.setAttribute('alt', altText)
       img.style.objectFit = props.cover === true ? 'cover' : 'contain'
       img.addEventListener('click', () => {
-        console.log('Image clicked, opening dialog')
         window.parent.postMessage({ 
           type: 'showDialog', 
           props: {
@@ -446,7 +445,7 @@
     
     } else if (props.manifest) {
       props.manifest = props.manifest.startsWith('http') ? props.manifest : `https://iiif.mdpress.io/${props.manifest}/manifest.json`
-      loadManifest(props.manifest)
+      loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     }
 
     setCaption()
