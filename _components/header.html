@@ -89,7 +89,8 @@
 
     const setWindowAspect = () => {
       const aspect = main.clientWidth/main.clientHeight
-      window.parent.postMessage({ type: 'setAspect', aspect }, '*')
+      console.log(`setWindowAspect: ${aspect}`)
+      // window.parent.postMessage({ type: 'setAspect', aspect }, '*')
     }
     new ResizeObserver(() => setWindowAspect()).observe(main)
 

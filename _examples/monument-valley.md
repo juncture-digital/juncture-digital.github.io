@@ -9,7 +9,7 @@ max-width: 1000px
 `- [Home](/)`
 `- [About](/about)`
 
-`image #image src=wc:Monument_Valley,_Utah,_USA.jpg caption="Monument Valley" cover .right .shadow`
+`image #image src=wc:Monument_Valley,_Utah,_USA.jpg caption="Monument Valley" .right .shadow`
 
 **Monument Valley**, meaning "valley of the rocks", is a region of the Colorado Plateau characterized by a cluster of sandstone buttes, with the largest reaching 1,000 ft (300 m) above the valley floor.[^1] The most famous butte formations are located in northeastern Arizona along the Utah–Arizona state line. The valley is considered sacred by the [Navajo Nation](Q1783171), the Native American people within whose reservation it lies.[^2]
 
