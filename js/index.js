@@ -403,11 +403,15 @@ const makeDetails = (rootEl) => {
 let dialog
 const showDialog = (props) => {
   if (dialog) return
+  let aspectRatio = props.kwargs.aspect || 1.0
+  let width = aspectRatio > 1.0
+    ? window.innerWidth * 0.93
+    : window.innerHeight * aspectRatio * 0.93
   dialog = document.createElement('sl-dialog')
   dialog.id = 'junctureDialog'
   dialog.setAttribute('size', 'large')
   dialog.setAttribute('no-header', '')
-  dialog.setAttribute('style', '--width: 100vw;')
+  dialog.setAttribute('style', `--width: ${width}px;`)
   dialog.addEventListener('sl-after-hide', () => dialog = dialog.remove())
   let closeButton = document.createElement('sl-button')
   closeButton.setAttribute('slot', 'footer')
@@ -424,6 +428,7 @@ const showDialog = (props) => {
 }
 
 const addMessageHandler = () => {
+  console.log('addMessageHandler')
   window.addEventListener('message', (event) => {
     if (event.data.type === 'setAspect') {
       const sendingIframe = Array.from(document.querySelectorAll('iframe')).find((iframe) => iframe.contentWindow === event.source)

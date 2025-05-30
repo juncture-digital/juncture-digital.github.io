@@ -168,7 +168,7 @@
     
     let junctureScript = document.createElement('script')
     junctureScript.id = 'junctureScript';
-    junctureScript.src = `${location.port === '4100' ? 'http://localhost:3000': 'https://www.juncture-digital.io'}/js/index.js`
+    junctureScript.src = `${window.dynamicBaseUrl}/js/index.js`
     junctureScript.dataset.ghbase = `${owner}/${repo}/${branch}/${path}`
     junctureScript.type = 'module'
     document.body.appendChild(junctureScript)
