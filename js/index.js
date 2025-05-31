@@ -785,6 +785,26 @@ document.addEventListener('paste', () => {
 // Prevent default browser behavior on dragover to allow drop
 document.addEventListener('dragover', (e) => e.preventDefault());
 
+let ghbase = document.getElementById('junctureScript')?.dataset.ghbase
+let [owner, repo, branch, ...rest] = ghbase.split('/')
+document.querySelectorAll('.post-image').forEach((el) => {
+  if (el.dataset?.src) {
+    let postPath = el.parentElement.dataset?.path .split('/').slice(0,-1)
+    el.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
+  }
+});
+
+let path = rest.slice(0, -1).join('/')
+// console.log(`${owner} ${repo} ${branch} ${path}`)
+document.querySelectorAll('img').forEach((img) => {
+  console.log(img)
+  let src = new URL(img.src)
+  if (location.origin !== src.origin) return
+  let imgSrc = src.pathname.split('/').pop()
+  if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
+  img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
+});
+
 let selectors = ['.post-content', '.page-content', 'body']
 if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
 for (let selector of selectors) {
@@ -797,23 +817,3 @@ for (let selector of selectors) {
     break
   }
 }
-
-let ghbase = document.getElementById('junctureScript')?.dataset.ghbase
-let [owner, repo, branch, ...rest] = ghbase.split('/')
-document.querySelectorAll('.post-image').forEach((el) => {
-  if (el.dataset?.src) {
-    let postPath = el.parentElement.dataset?.path .split('/').slice(0,-1)
-    el.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
-  }
-
-});
-
-let path = rest.slice(0, -1).join('/')
-// console.log(`${owner} ${repo} ${branch} ${path}`)
-document.querySelectorAll('img').forEach((img) => {
-  let src = new URL(img.src)
-  if (location.origin !== src.origin) return
-  let imgSrc = src.pathname.split('/').pop()
-  if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
-  img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
-});
