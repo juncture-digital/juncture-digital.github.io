@@ -800,6 +800,7 @@ for (let selector of selectors) {
 
 let ghbase = document.getElementById('junctureScript')?.dataset.ghbase
 let [owner, repo, branch, ...rest] = ghbase.split('/')
+console.log(`${owner} ${repo} ${branch} ${rest.join('/')}`)
 document.querySelectorAll('.post-image').forEach((el) => {
   if (el.dataset?.src) {
     let postPath = el.parentElement.dataset?.path .split('/').slice(0,-1)
