@@ -809,10 +809,11 @@ document.querySelectorAll('.post-image').forEach((el) => {
 });
 
 let path = rest.slice(0, -1).join('/')
-console.log(`${owner} ${repo} ${branch} ${path}`)
+// console.log(`${owner} ${repo} ${branch} ${path}`)
 document.querySelectorAll('img').forEach((img) => {
   let src = new URL(img.src)
   if (location.origin !== src.origin) return
-  console.log(src)
-  img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${src.pathname.split('/').pop()}`
+  let imgSrc = src.pathname.split('/').pop()
+  if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
+  img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
 });
