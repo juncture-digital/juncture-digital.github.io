@@ -428,7 +428,6 @@ const showDialog = (props) => {
 }
 
 const addMessageHandler = () => {
-  console.log('addMessageHandler')
   window.addEventListener('message', (event) => {
     if (event.data.type === 'setAspect') {
       const sendingIframe = Array.from(document.querySelectorAll('iframe')).find((iframe) => iframe.contentWindow === event.source)
@@ -798,3 +797,17 @@ for (let selector of selectors) {
     break
   }
 }
+
+let ghbase = document.getElementById('junctureScript')?.dataset.ghbase
+let [owner, repo, branch, ...rest] = ghbase.split('/')
+document.querySelectorAll('.post-image').forEach((el) => {
+  if (el.dataset?.src) {
+    let postPath = el.parentElement.dataset?.path .split('/').slice(0,-1)
+    el.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
+  }
+
+});
+
+document.querySelectorAll('img').forEach((img) => {
+  console.log(img.src)
+});
