@@ -800,7 +800,6 @@ for (let selector of selectors) {
 
 let ghbase = document.getElementById('junctureScript')?.dataset.ghbase
 let [owner, repo, branch, ...rest] = ghbase.split('/')
-console.log(`${owner} ${repo} ${branch} ${rest.join('/')}`)
 document.querySelectorAll('.post-image').forEach((el) => {
   if (el.dataset?.src) {
     let postPath = el.parentElement.dataset?.path .split('/').slice(0,-1)
@@ -809,6 +808,11 @@ document.querySelectorAll('.post-image').forEach((el) => {
 
 });
 
+let path = rest.slice(0, -1).join('/')
+console.log(`${owner} ${repo} ${branch} ${path}`)
 document.querySelectorAll('img').forEach((img) => {
-  console.log(img.src)
+  let src = new URL(img.src)
+  if (location.origin !== src.origin) return
+  console.log(src)
+  img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${src.pathname.split('/').pop()}`
 });
