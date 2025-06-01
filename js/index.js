@@ -806,7 +806,6 @@ document.querySelectorAll('img').forEach((img) => {
   // img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
-  const img = new Image();
   img.onload = () => {
     console.log(img.naturalWidth, img.naturalHeight);
     img.height = img.naturalHeight * (width / img.naturalWidth);
