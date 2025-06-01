@@ -430,6 +430,7 @@ const showDialog = (props) => {
 const addMessageHandler = () => {
   window.addEventListener('message', (event) => {
     if (event.data.type === 'setAspect') {
+      console.log('setAspect', event.data.aspect)
       const sendingIframe = Array.from(document.querySelectorAll('iframe')).find((iframe) => iframe.contentWindow === event.source)
       if (sendingIframe) sendingIframe.style.aspectRatio = event.data.aspect
     } else if (event.data.type === 'showDialog') {
@@ -804,6 +805,8 @@ document.querySelectorAll('img').forEach((img) => {
   if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
   // img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
+  img.width = width
+  img.height = width
   img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
 });
 
