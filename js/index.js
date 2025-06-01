@@ -804,6 +804,7 @@ document.querySelectorAll('img').forEach((img) => {
   let imgSrc = src.pathname.split('/').pop()
   if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
   // img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
+  let width = img.clientWidth || img.parentElement.clientWidth || 1000
   fetch(`https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`, { method: 'HEAD' })
   .then(resp => {
     if (resp.ok) {
@@ -812,7 +813,6 @@ document.querySelectorAll('img').forEach((img) => {
       console.warn(`Image not found: ${imgSrc}`)
     }
   })
-  let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
   img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
 });
