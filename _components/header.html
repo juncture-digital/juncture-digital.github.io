@@ -154,7 +154,7 @@
         let imgUrl
         // if (props.img.indexOf('wc:') === 0 || props.img.indexOf('wikimedia.org') > -1 || props.img.indexOf('wikipedia.org') > -1 && props.img.indexOf('/media/File:') > -1) {
         if (props.img.indexOf('wc:') === 0) {
-          imgUrl = wcImageUrl(props.img.slice(3))
+          imgUrl = wcImageUrl(props.img.slice(3), main.clientWidth)
         } else if (props.img.indexOf('gh:') === 0) {
           imgUrl = `https://raw.githubusercontent.com/${props.img.slice(3)}`
         } else if (props.img.indexOf('wd:') === 0 || /^Q[0-9]+$/.test(props.img)) {
