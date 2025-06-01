@@ -138,7 +138,7 @@ In this example the positioning attributes `medium` and `center` are used to dis
 `image src=gh:juncture-digital/juncture-digital.github.io/main/docs/components/monument-valley.jpg .medium .center .shadow`
 ```
 ---
-`image src=gh:juncture-digital/juncture-digital.github.io/main/docs/components/monument-valley.jpg .medium .center .shadow`
+`image src=gh:juncture-digital/juncture-digital.github.io/main/static/images/Monument_Valley.jpg .medium .center .shadow`
 
 ### Annotations 
 
