@@ -805,15 +805,12 @@ document.querySelectorAll('img').forEach((img) => {
   if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
   // img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
-  fetch(`https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`, { method: 'HEAD' })
-  .then(resp => {
-    if (resp.ok) {
-      console.log(resp.headers)
-    } else {
-      console.warn(`Image not found: ${imgSrc}`)
-    }
-  })
   img.width = width
+  const img = new Image();
+  img.onload = () => {
+    console.log(img.naturalWidth, img.naturalHeight);
+    img.height = img.naturalHeight * (width / img.naturalWidth);
+  };
   img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
 });
 
