@@ -805,14 +805,15 @@ document.querySelectorAll('img').forEach((img) => {
   if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
   // img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
+  let imgUrl = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`;
   img.width = width
   let imgPreload = new Image()
   imgPreload.onload = () => {
     console.log(imgPreload.naturalWidth, imgPreload.naturalHeight);
     img.height = imgPreload.naturalHeight * (width / imgPreload.naturalWidth);
-    img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`;
+    img.src = imgUrl;
   };
-  imgPreload.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
+  imgPreload.src = imgUrl;
 });
 
 let selectors = ['.post-content', '.page-content', 'body']
