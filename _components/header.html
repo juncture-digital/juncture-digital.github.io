@@ -152,7 +152,8 @@
       }
       if (props.img) {
         let imgUrl
-        if (props.img.indexOf('wc:') === 0 || props.img.indexOf('wikimedia.org') > -1 || props.img.indexOf('wikipedia.org') > -1 && props.img.indexOf('/media/File:') > -1) {
+        // if (props.img.indexOf('wc:') === 0 || props.img.indexOf('wikimedia.org') > -1 || props.img.indexOf('wikipedia.org') > -1 && props.img.indexOf('/media/File:') > -1) {
+        if (props.img.indexOf('wc:') === 0) {
           imgUrl = wcImageUrl(props.img.slice(3))
         } else if (props.img.indexOf('gh:') === 0) {
           imgUrl = `https://raw.githubusercontent.com/${props.img.slice(3)}`
@@ -173,8 +174,7 @@
             imgUrl = props.img
           }
         }
-        let height = main.clientHeight
-        props.img = `https://res.cloudinary.com/dmceci9t1/image/fetch/h_${height}/${imgUrl}`
+        props.img = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${main.clientWidth}/${imgUrl}`
 
         main.classList.add('background-image')
         main.style.backgroundImage = `url("${props.img}")`
