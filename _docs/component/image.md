@@ -146,7 +146,18 @@ In this example the positioning attributes `medium` and `center` are used to dis
 {: .example}
 
 ```juncture
-`image src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg .medium .center .shadow`
+`image #monument-valley src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg .right .shadow`
+
+Click on link to show annotation:
+- [West Mitten Butte](monument-valley/zoomto/pct:12.84,24.83,18.13,20.27)
+- [East Mitten Butte](monument-valley/zoomto/pct:44.86,31.83,12.23,15.73)
+- [Merrick Butte](monument-valley/zoomto/pct:68.39,27.15,16.43,24.25)
+
 ```
 ---
-`image src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg .medium .center .shadow`
+`image #monument-valley src=wc:Monument_Valley,_Utah,_USA_(23611451292).jpg .right .shadow`
+
+Click on link to show annotation:
+- [West Mitten Butte](monument-valley/zoomto/pct:12.84,24.83,18.13,20.27)
+- [East Mitten Butte](monument-valley/zoomto/pct:44.86,31.83,12.23,15.73)
+- [Merrick Butte](monument-valley/zoomto/pct:68.39,27.15,16.43,24.25)

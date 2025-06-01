@@ -430,7 +430,6 @@ const showDialog = (props) => {
 const addMessageHandler = () => {
   window.addEventListener('message', (event) => {
     if (event.data.type === 'setAspect') {
-      console.log('setAspect', event.data.aspect)
       const sendingIframe = Array.from(document.querySelectorAll('iframe')).find((iframe) => iframe.contentWindow === event.source)
       if (sendingIframe) sendingIframe.style.aspectRatio = event.data.aspect
     } else if (event.data.type === 'showDialog') {

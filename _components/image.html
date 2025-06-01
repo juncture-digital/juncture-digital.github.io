@@ -855,6 +855,12 @@
         icon.textContent = '📋';
         boxEl.appendChild(icon);
         icon.addEventListener('click', () => {
+          if (document.hasFocus()) {
+            navigator.clipboard.writeText('Hello world!')
+              .catch(err => console.error('Copy failed:', err));
+          } else {
+            alert('Please click on the window to focus it before copying.');
+          }
           const regionPct = `pct:${(rect.x*100).toFixed(2)},${(rect.y*100*imageAspect).toFixed(2)},${(rect.width*100).toFixed(2)},${(rect.height*100*imageAspect).toFixed(2)}`
           navigator.clipboard.writeText(`${id}/zoomto/${regionPct}`);
         });

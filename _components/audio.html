@@ -117,7 +117,11 @@
       player.appendChild(source)
       figure.insertBefore(player, figure.firstChild)
       if (!props.nocaption) {
-        captionLabel.innerHTML = md2Html(props.caption || props.src.split('/').pop().replace(/\.\S+$/,'').replace(/[_]+/g,' '))
+        captionLabel.innerHTML = md2Html(props.caption || 
+          props.src.split('/').pop()
+            .replace(/^\S+:/,'')
+            .replace(/\.\S+$/,'')
+            .replace(/[_]+/g,' '))
         captionEl.style.display = 'flex'
       }
       return player
