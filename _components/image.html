@@ -358,7 +358,7 @@
       }
       console.log('loadImage', url)
       // img.src = url
-      img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_250,h_160,c_fill/${url}`
+      img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${main.clientWidth}/${url}`
       let altText = props.caption
         ? props.caption
         : iiifManifest
@@ -431,7 +431,8 @@
         const qid = props.src.replace(/^wd:/, '')
         wdImage(qid).then(mwFile => {
           props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
-          if (!props.iiif) loadImage(mwImage(mwFile, main.clientWidth))
+          // if (!props.iiif) loadImage(mwImage(mwFile, main.clientWidth))
+          if (!props.iiif) loadImage(mwImage(mwFile))
           setCaption()
         })
       } else {
