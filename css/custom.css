@@ -712,6 +712,9 @@ sl-dialog::part(body) {
 sl-dialog::part(footer) {
   padding: 0.5em;
 }
+
+/*
 sl-dialog::part(panel) {
   width: calc(100% - 2em);
 }
+  */
