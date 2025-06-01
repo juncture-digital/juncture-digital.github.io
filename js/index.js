@@ -803,6 +803,8 @@ document.querySelectorAll('img').forEach((img) => {
   if (location.origin !== src.origin) return
   let imgSrc = src.pathname.split('/').pop()
   if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
+  let extension = imgSrc.split('.').pop()
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(extension) < 0) return
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
   img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
