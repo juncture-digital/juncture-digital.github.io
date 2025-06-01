@@ -356,7 +356,9 @@
         imageAspect = img.naturalWidth/img.naturalHeight
         setWindowAspect()
       }
-      img.src = url
+      console.log('loadImage', url)
+      // img.src = url
+      img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_250,h_160,c_fill/${url}`
       let altText = props.caption
         ? props.caption
         : iiifManifest
@@ -420,7 +422,8 @@
       } else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1 || props.src.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
         let mwFile = props.src.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
         props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
-        if (!props.iiif) loadImage(mwImage(mwFile, main.clientWidth))
+        // if (!props.iiif) loadImage(mwImage(mwFile, main.clientWidth))
+        if (!props.iiif) loadImage(mwImage(mwFile))
       } else if (props.src.indexOf('gh:') === 0) {
         props.manifest = `https://iiif.mdpress.io/${props.src}/manifest.json`
         if (!props.iiif) loadImage(`https://raw.githubusercontent.com/${props.src.slice(3)}`)
