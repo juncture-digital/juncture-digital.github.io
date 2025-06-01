@@ -803,7 +803,7 @@ document.querySelectorAll('img').forEach((img) => {
   let imgSrc = src.pathname.split('/').pop()
   if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
   // img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
-  let width = img.clientWidth || image.parentElement.clientWidth || 1000
+  let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
 });
 
