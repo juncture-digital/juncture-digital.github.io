@@ -165,19 +165,9 @@
 
     let id;
     let imageAspect;
-
-    const setWindowAspect = () => {
-      if (!imageAspect) return
-      // let aspect = main.clientWidth/(main.clientWidth / imageAspect + caption.clientHeight)
-      // console.log('setWindowAspect', aspect)
-      // window.parent.postMessage({ type: 'setAspect', aspect }, '*');
-    }
-
     const docReady = (fn) => { if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(fn, 1); else document.addEventListener('DOMContentLoaded', fn) }
     docReady(function() {
       
-      new ResizeObserver(() => { setWindowAspect() }).observe(document.body)
-
       window.parent.postMessage({ type: 'getID' }, '*');
       window.addEventListener('message', (event) => {
         let eventData = JSON.parse(event.data)
@@ -352,11 +342,7 @@
     }
 
     const loadImage = (url) => {
-      img.onload = (e) => {
-        imageAspect = img.naturalWidth/img.naturalHeight
-        setWindowAspect()
-      }
-      // img.src = url
+      img.onload = (e) => { imageAspect = img.naturalWidth/img.naturalHeight }
       img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${main.clientWidth}/${url}`
       let altText = props.caption
         ? props.caption
@@ -396,7 +382,7 @@
         iiifManifest = manifest
         setCaption()
         updateManifestPanel()
-        if (!img.src || props.region) loadImage(staticImageUrl())
+        loadImage(staticImageUrl(1000))
       })
       return iiifManifest
     }
@@ -417,29 +403,23 @@
       
       if (props.src.indexOf('http') === 0) {
         props.manifest = `https://iiif.mdpress.io/${props.src}/manifest.json`
-        if (!props.iiif) loadImage(props.src)
       } else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1 || props.src.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
         let mwFile = props.src.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
         props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
-        if (!props.iiif) loadImage(mwImage(mwFile, main.clientWidth))
       } else if (props.src.indexOf('gh:') === 0) {
         props.manifest = `https://iiif.mdpress.io/${props.src}/manifest.json`
-        if (!props.iiif) loadImage(`https://raw.githubusercontent.com/${props.src.slice(3)}`)
       } else if (props.src.indexOf('wd:') === 0 || /^Q[0-9]+$/.test(props.src)) {
         const qid = props.src.replace(/^wd:/, '')
         wdImage(qid).then(mwFile => {
           props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
-          if (!props.iiif) loadImage(mwImage(mwFile, main.clientWidth))
           setCaption()
         })
       } else {
         if (props.src[0] === '/') {
           let [owner, repo, branch, ...rest] = props.ghbase.split('/')
           props.manifest = `https://iiif.mdpress.io/gh:${owner}/${repo}/${branch}${props.src}/manifest.json`
-          if (!props.iiif) loadImage(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}${props.src}`)
         } else {
           props.manifest = `https://iiif.mdpress.io/gh:${props.ghbase}/${props.src}/manifest.json`
-          if (!props.iiif) loadImage(`https://raw.githubusercontent.com/${props.ghbase}/${props.src}`)
         }
       }
       loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })

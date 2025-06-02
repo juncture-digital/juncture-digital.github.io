@@ -536,14 +536,16 @@ details.example summary {
   font-weight:500;
   cursor:pointer;
   position:relative;          /* lets us absolutely‑position the icon */
-  padding-left:1.6em;         /* room for the icon */
+  padding: 0.5em 0.5em 0.5em 2em;         /* room for the icon */
+  background-color: #ddd;
+  border-radius: 6px;;
 }
 
 /* 3. Insert a custom icon */
 details.example summary::before {
   content:"💡";               /* alternatives: 📋 📝 📄 👉 */
   position:absolute;
-  left:0; top:0;
+  left:4px; top:8px;
   font-size:1em;
   transition:transform .25s ease;
 }
