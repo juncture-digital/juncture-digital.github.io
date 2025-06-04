@@ -792,11 +792,15 @@ let ghbase = document.getElementById('junctureScript')?.dataset.ghbase
 let [owner, repo, branch, ...rest] = ghbase.split('/')
 document.querySelectorAll('.post-image').forEach((el) => {
   console.log(el.parentElement)
-  if (el.dataset?.src && !el.src.startsWith('http')) {
-    let postPath = el.parentElement.dataset?.path?.split('/').slice(0,-1) || []
-    el.src = postPath.length 
-      ? `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
-      : `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${el.dataset?.src}`;
+  if (el.dataset?.src) {
+    if (el.dataset?.src.startsWith('wc:') || el.dataset?.src.startsWith('http') {
+      el.src = el.dataset?.src
+    } else {
+      let postPath = el.parentElement.dataset?.path?.split('/').slice(0,-1) || []
+      el.src = postPath.length 
+        ? `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
+        : `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${el.dataset?.src}`;
+    }
     console.log(`postPath: ${postPath} data-src: ${el.dataset?.src} src: ${el.src}`)
   }
 });
