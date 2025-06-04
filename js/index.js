@@ -793,7 +793,7 @@ let [owner, repo, branch, ...rest] = ghbase.split('/')
 document.querySelectorAll('.post-image').forEach((el) => {
   console.log(el.parentElement)
   if (el.dataset?.src) {
-    if (el.dataset?.src.startsWith('wc:') || el.dataset?.src.startsWith('http') {
+    if (el.dataset?.src.startsWith('wc:') || el.dataset?.src.startsWith('http')) {
       el.src = el.dataset?.src
     } else {
       let postPath = el.parentElement.dataset?.path?.split('/').slice(0,-1) || []
