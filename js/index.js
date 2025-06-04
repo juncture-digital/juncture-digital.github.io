@@ -791,7 +791,7 @@ console.log('Transform URLs')
 let ghbase = document.getElementById('junctureScript')?.dataset.ghbase
 let [owner, repo, branch, ...rest] = ghbase.split('/')
 document.querySelectorAll('.post-image').forEach((el) => {
-  console.log(el)
+  console.log(el.parentElement)
   if (el.dataset?.src) {
     let postPath = el.parentElement.dataset?.path .split('/').slice(0,-1)
     el.src = postPath.length 
@@ -813,7 +813,7 @@ document.querySelectorAll('img').forEach((img) => {
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
   img.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${path}/${imgSrc}`
-  console.log(`img: ${path} src: ${img.src}`)
+  // console.log(`img: ${path} src: ${img.src}`)
 });
 
 let selectors = ['.post-content', '.page-content', 'body']
