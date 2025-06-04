@@ -792,10 +792,10 @@ let [owner, repo, branch, ...rest] = ghbase.split('/')
 document.querySelectorAll('.post-image').forEach((el) => {
   if (el.dataset?.src) {
     let postPath = el.parentElement.dataset?.path .split('/').slice(0,-1)
-    console.log(`postPath: ${postPath} data-src: ${el.dataset?.src}`)
     el.src = postPath.length 
       ? `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
       : `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${el.dataset?.src}`;
+    console.log(`postPath: ${postPath} data-src: ${el.dataset?.src} src: ${el.src}`)
   }
 });
 
@@ -811,6 +811,7 @@ document.querySelectorAll('img').forEach((img) => {
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
   img.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${path}/${imgSrc}`
+  console.log(`img: ${path} src: ${img.src}`)
 });
 
 let selectors = ['.post-content', '.page-content', 'body']
