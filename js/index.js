@@ -10,6 +10,8 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-group/tab-group.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
+let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
+
 const paramToIframe = (param) => {
   const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
   if (tag === 'image') {
@@ -790,8 +792,7 @@ let [owner, repo, branch, ...rest] = ghbase.split('/')
 document.querySelectorAll('.post-image').forEach((el) => {
   if (el.dataset?.src) {
     let postPath = el.parentElement.dataset?.path .split('/').slice(0,-1)
-    let imgSrc = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
-    el.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_250,h_160,c_fill/${imgSrc}`
+    el.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
   }
 });
 
@@ -806,7 +807,7 @@ document.querySelectorAll('img').forEach((img) => {
   if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(extension) < 0) return
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
-  img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${width}/https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}/${imgSrc}`
+  img.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${path}/${imgSrc}`
 });
 
 let selectors = ['.post-content', '.page-content', 'body']

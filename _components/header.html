@@ -32,6 +32,10 @@
     import 'https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js';
     import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js"
 
+    // let iiifServiceUrl = 'http://localhost:8088';
+    let iiifServiceUrl = 'https://iiif.mdpress.io';
+    let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
+
     const main = document.querySelector('main')
     const nav = document.querySelector('nav')
     const titleBar = main.querySelector('.title')
@@ -177,30 +181,33 @@
       
         let manifestUrl
         if (props.img.indexOf('http') === 0) {
-          manifestUrl = `https://iiif.mdpress.io/${props.img}/manifest.json`
+          props.img = `${imageServiceUrl}/${props.img}`
+          manifestUrl = `${iiifServiceUrl}/${props.img}/manifest.json`
         } else if (props.img.indexOf('wc:') === 0 || props.img.indexOf('wikimedia.org') > -1 || props.img.indexOf('wikipedia.org') > -1 && props.img.indexOf('/media/File:') > -1) {
           let mwFile = props.img.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
-          manifestUrl = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
+          props.img = `${imageServiceUrl}/wc:${mwFile}`
+          manifestUrl = `${iiifServiceUrl}/wc:${mwFile}/manifest.json`
         } else if (props.img.indexOf('gh:') === 0) {
-          manifestUrl = `https://iiif.mdpress.io/${props.img}/manifest.json`
+          props.img = `${imageServiceUrl}/${props.img}`
+          manifestUrl = `${iiifServiceUrl}/${props.img}/manifest.json`
         } else if (props.img.indexOf('wd:') === 0 || /^Q[0-9]+$/.test(props.img)) {
           const qid = props.img.replace(/^wd:/, '')
           wdImage(qid).then(mwFile => {
-            manifestUrl = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
+            props.img = `${imageServiceUrl}/wc:${mwFile}`
+            manifestUrl = `${iiifServiceUrl}/wc:${mwFile}/manifest.json`
           })
         } else {
           if (props.img[0] === '/') {
             let [owner, repo, branch, ...rest] = props.ghbase.split('/')
-            manifestUrl = `https://iiif.mdpress.io/gh:${owner}/${repo}/${branch}${props.img}/manifest.json`
+            props.img = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}${props.img}`
+            manifestUrl = `${iiifServiceUrl}/gh:${owner}/${repo}/${branch}${props.img}/manifest.json`
           } else {
-            manifestUrl = `https://iiif.mdpress.io/gh:${props.ghbase}/${props.img}/manifest.json`
+            props.img = `${imageServiceUrl}/gh:${props.ghbase}/${props.img}`
+            manifestUrl = `${iiifServiceUrl}/gh:${props.ghbase}/${props.img}/manifest.json`
           }
         }
-        loadManifest(manifestUrl).then(manifest => { 
-          let imageUrl = staticImageUrl(manifest, 'max')
-          props.img = `https://res.cloudinary.com/dmceci9t1/image/fetch/${imageUrl}`
-          main.style.backgroundImage = `url("${props.img}")`
-        })
+        main.style.backgroundImage = `url("${props.img}")`
+        loadManifest(manifestUrl)
 
         main.classList.add('background-image')
         if (!props.position) {
@@ -226,7 +233,7 @@
         const isV3Manifest = contexts.find(ctx => ctx.indexOf('shared-canvas.org') > 0 || parseFloat(ctx.split('/').slice(-2,-1).pop()) < 3) ? false : true
         return isV3Manifest 
           ? manifest 
-          : await fetch(`https://iiif.mdpress.io/prezi2to3/`, { method: 'POST', body: JSON.stringify(manifest) }).then(resp => resp.json())
+          : await fetch(`${iiifServiceUrl}/prezi2to3/`, { method: 'POST', body: JSON.stringify(manifest) }).then(resp => resp.json())
       })
     }
 

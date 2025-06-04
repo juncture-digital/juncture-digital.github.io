@@ -113,6 +113,10 @@
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-group/tab-group.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-panel/tab-panel.js';
 
+    // let iiifServiceUrl = 'http://localhost:8088';
+    let iiifServiceUrl = 'https://iiif.mdpress.io';
+    let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
+
     const main = document.querySelector('main')
     const figure = main.querySelector('figure')
     const img = figure.querySelector('img')
@@ -343,7 +347,7 @@
 
     const loadImage = (url) => {
       img.onload = (e) => { imageAspect = img.naturalWidth/img.naturalHeight }
-      img.src = `https://res.cloudinary.com/dmceci9t1/image/fetch/w_${main.clientWidth}/${url}`
+      img.src = url
       let altText = props.caption
         ? props.caption
         : iiifManifest
@@ -376,13 +380,12 @@
         const isV3Manifest = contexts.find(ctx => ctx.indexOf('shared-canvas.org') > 0 || parseFloat(ctx.split('/').slice(-2,-1).pop()) < 3) ? false : true
         return isV3Manifest 
           ? manifest 
-          : await fetch(`https://iiif.mdpress.io/prezi2to3/`, { method: 'POST', body: JSON.stringify(manifest) }).then(resp => resp.json())
+          : await fetch(`${iiifServiceUrl}/prezi2to3/`, { method: 'POST', body: JSON.stringify(manifest) }).then(resp => resp.json())
       })
       .then(manifest => {
         iiifManifest = manifest
         setCaption()
         updateManifestPanel()
-        loadImage(staticImageUrl(1000))
       })
       return iiifManifest
     }
@@ -400,32 +403,38 @@
     }
 
     if (props.src) {
-      
+      let imgUrl
       if (props.src.indexOf('http') === 0) {
-        props.manifest = `https://iiif.mdpress.io/${props.src}/manifest.json`
+        imgUrl = `${imageServiceUrl}/${props.src}`
+        props.manifest = `${iiifServiceUrl}/${props.src}/manifest.json`
       } else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1 || props.src.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
         let mwFile = props.src.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
-        props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
+        imgUrl = `${imageServiceUrl}/wc:${mwFile}`
+        props.manifest = `${iiifServiceUrl}/wc:${mwFile}/manifest.json`
       } else if (props.src.indexOf('gh:') === 0) {
-        props.manifest = `https://iiif.mdpress.io/${props.src}/manifest.json`
+        imgUrl = `${imageServiceUrl}/${props.src}`
+        props.manifest = `${iiifServiceUrl}/${props.src}/manifest.json`
       } else if (props.src.indexOf('wd:') === 0 || /^Q[0-9]+$/.test(props.src)) {
         const qid = props.src.replace(/^wd:/, '')
         wdImage(qid).then(mwFile => {
-          props.manifest = `https://iiif.mdpress.io/wc:${mwFile}/manifest.json`
+          props.manifest = `${iiifServiceUrl}/wc:${mwFile}/manifest.json`
           setCaption()
         })
       } else {
         if (props.src[0] === '/') {
           let [owner, repo, branch, ...rest] = props.ghbase.split('/')
-          props.manifest = `https://iiif.mdpress.io/gh:${owner}/${repo}/${branch}${props.src}/manifest.json`
+          imgUrl = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}${props.src}`
+          props.manifest = `${iiifServiceUrl}/gh:${owner}/${repo}/${branch}${props.src}/manifest.json`
         } else {
-          props.manifest = `https://iiif.mdpress.io/gh:${props.ghbase}/${props.src}/manifest.json`
+          imgUrl = `${imageServiceUrl}/gh:${props.ghbase}/${props.src}`
+          props.manifest = `${iiifServiceUrl}/gh:${props.ghbase}/${props.src}/manifest.json`
         }
       }
+      loadImage(imgUrl)
       loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     
     } else if (props.manifest) {
-      props.manifest = props.manifest.startsWith('http') ? props.manifest : `https://iiif.mdpress.io/${props.manifest}/manifest.json`
+      props.manifest = props.manifest.startsWith('http') ? props.manifest : `${iiifServiceUrl}/${props.manifest}/manifest.json`
       loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     }
 
