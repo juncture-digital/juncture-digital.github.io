@@ -793,12 +793,12 @@ let [owner, repo, branch, ...rest] = ghbase.split('/')
 document.querySelectorAll('.post-image').forEach((el) => {
   if (el.dataset?.src) {
     if (el.dataset?.src.startsWith('wc:') || el.dataset?.src.startsWith('http')) {
-      el.src = `${imageServiceUrl}/${el.dataset?.src}`;
+      el.src = `${imageServiceUrl}/${el.dataset?.src}/w_250`;
     } else {
       let postPath = el.parentElement.dataset?.path?.split('/').slice(0,-1) || []
       el.src = postPath.length 
-        ? `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}`
-        : `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${el.dataset?.src}`;
+        ? `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${postPath.join('/')}/${el.dataset?.src}/w_250`
+        : `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${el.dataset?.src}/w_250`;
     }
   }
 });
