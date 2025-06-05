@@ -787,7 +787,6 @@ document.addEventListener('paste', () => {
 // Prevent default browser behavior on dragover to allow drop
 document.addEventListener('dragover', (e) => e.preventDefault());
 
-console.log('Transform URLs')
 let ghbase = document.getElementById('junctureScript')?.dataset.ghbase
 let [owner, repo, branch, ...rest] = ghbase.split('/')
 document.querySelectorAll('.post-image').forEach((el) => {
