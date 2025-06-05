@@ -651,6 +651,7 @@ const makeEntityPopups = () => {
     let qid = path?.find(p => /^Q\d+$/.test(p))
     if (qid) {
       let entity = await getEntity(qid)
+      if (!entity) return
       let dd = document.createElement('sl-dropdown')
       dd.className = 'entity-popup'
       dd.setAttribute('placement', 'top')
