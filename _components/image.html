@@ -386,6 +386,7 @@
         iiifManifest = manifest
         setCaption()
         updateManifestPanel()
+        if (!props.src) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
       })
       return iiifManifest
     }
