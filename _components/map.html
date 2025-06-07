@@ -71,6 +71,7 @@
   <script src="https://juncture-digital.github.io/Leaflet.SmoothWheelZoom/Leaflet.SmoothWheelZoom.js"></script>
   <script src="//unpkg.com/leaflet-gesture-handling"></script>
   <script src="https://cdn.jsdelivr.net/npm/@allmaps/leaflet/dist/bundled/allmaps-leaflet-1.9.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
   <script type="module">
 
     import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
@@ -298,6 +299,51 @@
     let zoom = 8
     let caption
 
+    const isQid = (s) => /^Q\d+$/.test(s)
+    const parseLayerStr = (s) => {
+      let tokens = []
+      s.replace(/&/g, ' ').replace(/”/g,'"').replace(/”/g,'"').replace(/’/g,"'").match(/[^\s"]+|"([^"]*)"/gmi)?.filter(t => t).forEach(token => {
+        if (tokens.length > 0 && tokens[tokens.length-1].indexOf('=') === tokens[tokens.length-1].length-1) tokens[tokens.length-1] = `${tokens[tokens.length-1]}${token}`
+        else tokens.push(token)
+      })
+      let parsed = {type:null, kwargs:{}, booleans:[]}
+      let tokenIdx = 0
+      while (tokenIdx < tokens.length) {
+        let token = tokens[tokenIdx].trim()
+        if (['marker', 'allmaps'].includes(token)) parsed.type = token
+        else if (token.indexOf('=') > 0 && /^[\w-:]+=/.test(token)) {
+          let idx = token.indexOf('=')
+          let key = token.slice(0, idx)
+          let value = token.slice(idx+1)
+          value = value[0] === '"' && value[value.length-1] === '"' ? value.slice(1, -1) : value
+          if (parsed.kwargs[key]) parsed.kwargs[key] += `|${value}`
+          else parsed.kwargs[key] = value
+        }
+        else parsed.booleans.push(token)
+        tokenIdx++
+      }
+      return parsed
+    }
+
+    let layerDefs = props.data ? props.data.split('|').map(rec => parseLayerStr(rec)) : []
+    const collectQIDs = () => {
+      let qids = new Set()
+      if (isQid(props.location.split(',')[0])) qids.add(props.location.split(',')[0])
+      layerDefs.forEach(def => { if (def.kwargs.qid) qids.add(def.kwargs.qid)})
+      return qids
+    }
+    const collectManifestURLs = () => {
+      let urls = new Set()
+      layerDefs.forEach(def => { 
+        if (def.kwargs.iiif) {
+          def.kwargs.iiif = decodeURIComponent(def.kwargs.iiif)
+          if (!def.kwargs.iiif.startsWith('http')) def.kwargs.iiif = `https://iiif.mdpress.io/${def.kwargs.iiif}/manifest.json`;
+          if (def.kwargs.iiif) urls.add(def.kwargs.iiif)
+        }
+      })
+      return Array.from(urls)
+    }
+
     const makeLocationCard = (entity) => {
       let card = document.createElement('div')
       card.className = 'card'
@@ -342,6 +388,45 @@
       return url
     }
 
+    const fullUrl = (url) => {
+      // Converts a URL to a full URL if it is relative or uses a shortcode
+      if (url.indexOf('http') === 0) 
+        return url
+      else if (url.indexOf('wc:') === 0 || url.indexOf('wikimedia.org') > -1 || url.indexOf('wikipedia.org') > -1 && url.indexOf('/media/File:') > -1)
+        return mwImage(url, 300)
+      else if (url.indexOf('gh:') === 0)
+        return `https://raw.githubusercontent.com/${url.slice(3)}/main`
+      else if (url[0] === '/') {
+        let [owner, repo, branch, ...rest] = props.ghbase.split('/')
+        return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${url.slice(1)}`
+      } else 
+        return `https://raw.githubusercontent.com/${props.ghbase}/${url}`
+    }
+
+  const getExifFromUrl = async (imageUrl) => {
+    try {
+      const response = await fetch(imageUrl, { mode: 'cors' });
+      const blob = await response.blob();
+
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous'; // required for CORS
+        img.onload = function () {
+          EXIF.getData(img, function () {
+            const allTags = EXIF.getAllTags(this);
+            resolve(allTags);
+          });
+        };
+        img.onerror = function (err) {
+          reject(new Error("Failed to load image"));
+        };
+        img.src = URL.createObjectURL(blob);
+      });
+    } catch (error) {
+      console.error("Failed to fetch or parse image:", error);
+    }
+  }
+
     // Creates a GeoJSON file URL from a Who's on First ID 
   const whosOnFirstUrl = (wof) => {
     let wofParts = []
@@ -351,79 +436,147 @@
     return `https://data.whosonfirst.org/${wofParts.join('/')}/${wof}.geojson`
   }
 
-    window.entityData = {}
-    window.pendingEntityData = new Set()
-    window.customEntityAliases = {}
-    const getEntityData = async (qids, language) => {
-      language = language || 'en'
-      let cached = new Set(qids.filter(qid => window.entityData[qid]))
-      let pending = new Set(qids.filter(qid => window.pendingEntityData.has(qid)))
-      let toGet = qids.filter(qid => !cached.has(qid))
-      if (toGet.length > 0) {
-        Array.from(toGet).forEach(qid => window.pendingEntityData.add(qid))
-        let toGetUrls = toGet.map(qid => `(<http://www.wikidata.org/entity/${qid}>)`)
-        let query = `
-          SELECT ?item ?label ?description ?alias ?image ?logoImage ?coords ?pageBanner ?whosOnFirst ?wikipedia WHERE {
-            VALUES (?item) { ${toGetUrls.join(' ')} }
-            ?item rdfs:label ?label . 
-            FILTER (LANG(?label) = "${language}" || LANG(?label) = "en")
-            OPTIONAL { ?item schema:description ?description . FILTER (LANG(?description) = "${language}" || LANG(?description) = "en")}
-            OPTIONAL { ?item skos:altLabel ?alias . FILTER (LANG(?alias) = "${language}" || LANG(?alias) = "en")}
-            OPTIONAL { ?item wdt:P625 ?coords . }
-            OPTIONAL { ?item wdt:P18 ?image . }
-            OPTIONAL { ?item wdt:P154 ?logoImage . }
-            OPTIONAL { ?item wdt:P948 ?pageBanner . }
-            OPTIONAL { ?item wdt:P6766 ?whosOnFirst . }
-            OPTIONAL { ?wikipedia schema:about ?item; schema:isPartOf <https://${language}.wikipedia.org/> . }
-        }`
-        let resp = await fetch('https://query.wikidata.org/sparql', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/sparql-results+json'
-          },
-          body: `query=${encodeURIComponent(query)}`
-        })
-      if (resp.ok) {
-        let sparqlResp = await resp.json()
-        sparqlResp.results.bindings.forEach( async rec => {
-          let qid = rec.item.value.split('/').pop()
-          let _entityData = window.entityData[qid]
-          if (!_entityData) {
-            _entityData = {id: qid, label: rec.label.value}
-            if (rec.description) _entityData.description = rec.description.value
-            if (rec.alias) {
-              _entityData.aliases = [rec.alias.value]
-              if (window.customEntityAliases[qid]) _entityData.aliases = [...window.customEntityAliases[qid], ..._entityData.aliases]
-            }
-            if (rec.coords) _entityData.coords = rec.coords.value.slice(6,-1).split(' ').reverse().join(',')
-            if (rec.wikipedia) _entityData.wikipedia = rec.wikipedia.value
-            if (rec.pageBanner) _entityData.pageBanner = rec.pageBanner.value
-            if (rec.image) {
-              _entityData.image = rec.image.value
-              _entityData.thumbnail = mwImage(rec.image.value, 300)
-            }
-            if (rec.logoImage) {
-              _entityData.logoImage = rec.logoImage.value
-              if (!_entityData.thumbnail) _entityData.thumbnail = mwImage(rec.logoImage.value, 300)
-            }
-            if (rec.whosOnFirst) _entityData.geojson = whosOnFirstUrl(rec.whosOnFirst.value)
-              window.entityData[qid] = _entityData
+  const getEntityData = async (qids, language) => {
+    language = language || 'en'
+    let entities = {}
+    let summaryUrls = {}
+    let entityUrls = qids.map(qid => `(wd:${qid})`)
+    let query = `
+      SELECT ?item (SAMPLE(?label) AS ?label) (SAMPLE(?description) AS ?description) (GROUP_CONCAT(?alias; separator=" | ") AS ?aliases) 
+          (SAMPLE(?image) AS ?image) (SAMPLE(?logoImage) AS ?logoImage) 
+          (SAMPLE(?coords) AS ?coords) (SAMPLE(?pageBanner) AS ?pageBanner)
+          (SAMPLE(?whosOnFirst) AS ?whosOnFirst) (SAMPLE(?wikipedia) AS ?wikipedia)
+      WHERE {
+        VALUES (?item) { ${entityUrls.join(' ')} }
 
-          } else {
-            if (rec.alias) _entityData.aliases.push(rec.alias.value)
-          }
-        })
-        Array.from(toGet).forEach(qid => window.pendingEntityData.delete(qid))
-        return Object.fromEntries(qids.filter(qid => window.entityData[qid]).map(qid => [qid,window.entityData[qid]]))
+        # BIND(NOW() AS ?timestamp)  # Forces fresh evaluation
+
+        ?item rdfs:label ?label . FILTER (LANG(?label) = "en")
+        OPTIONAL { ?item schema:description ?description . FILTER (LANG(?description) = "en") }
+        OPTIONAL { ?item skos:altLabel ?alias . FILTER (LANG(?alias) = "en") }
+        OPTIONAL { ?item wdt:P625 ?coords . }
+        OPTIONAL { ?item wdt:P18 ?image . }
+        OPTIONAL { ?item wdt:P154 ?logoImage . }
+        OPTIONAL { ?item wdt:P948 ?pageBanner . }
+        OPTIONAL { ?item wdt:P6766 ?whosOnFirst . }
+        OPTIONAL { ?wikipedia schema:about ?item; schema:isPartOf <https://en.wikipedia.org/> . }
       }
+      GROUP BY ?item
+      `
+    let resp = await fetch('https://query.wikidata.org/sparql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/sparql-results+json'
+      },
+      body: `query=${encodeURIComponent(query)}`
+    })
+    if (resp.ok) {
+      let sparqlResp = await resp.json()
+      sparqlResp.results.bindings.forEach(rec => {
+        let qid = rec.item.value.split('/').pop()
+        let _entityData = {id: qid, label: rec.label.value}
+        if (rec.description) _entityData.description = rec.description.value
+        if (rec.alias) _entityData.aliases = [rec.alias.value]
+        if (rec.coords) _entityData.coords = rec.coords.value.slice(6,-1).split(' ').reverse().join(',')
+        if (rec.wikipedia) _entityData.wikipedia = rec.wikipedia.value
+        if (rec.pageBanner) _entityData.pageBanner = rec.pageBanner.value
+        if (rec.image) {
+          _entityData.image = rec.image.value
+          _entityData.thumbnail = mwImage(rec.image.value, 300)
+        }
+        if (rec.logoImage) {
+          _entityData.logoImage = rec.logoImage.value
+          if (!_entityData.thumbnail) _entityData.thumbnail = mwImage(rec.logoImage.value, 300)
+        }
+        if (rec.whosOnFirst) _entityData.geojson = whosOnFirstUrl(rec.whosOnFirst.value)
+        
+        if (_entityData.wikipedia) {
+          let page = _entityData.wikipedia.replace(/\/w\//, '/wiki').split('/wiki/').pop()
+          summaryUrls[`https://${language}.wikipedia.org/api/rest_v1/page/summary/${page}`] = qid
+        }
+        entities[qid] = _entityData
+      })
+      // console.log(entityUrls.length, new Set (sparqlResp.results.bindings.map(rec => rec.item.value)).size, Object.keys(summaryUrls).length)
+      await Promise.all(Object.keys(summaryUrls).map(url => fetch(url)))
+        .then(responses => { return Promise.all(responses.map(resp => resp.json())) })
+        .then(data => {
+          // console.log(data)
+          data.forEach((data, idx) => {
+            let qid = summaryUrls[Object.keys(summaryUrls)[idx]]
+            if (data.extract_html) entities[qid].summaryText = data.extract_html
+            else if (data.extract) entities[qid].summaryText = data.extract
+          })
+        })
+        .catch(err => console.error('Error fetching summaries:', err))
     }
-    return Object.fromEntries(qids.filter(qid => window.entityData[qid]).map(qid => [qid,window.entityData[qid]]))
+    return entities
   }
-  const getEntity = async (qid, language) => {
-    let entities = await getEntityData([qid], language)
-    return entities[qid]
-  }
+
+  let referencedQIDs = collectQIDs()
+  let entities = referencedQIDs.size ? await getEntityData(Array.from(referencedQIDs), props.language) : []
+  const getEntity = (qid) => entities[qid] || {}
+
+  const loadManifest = async (manifestUrl) => {
+    const resp = await fetch(manifestUrl);
+    if (!resp.ok) throw new Error(`Failed to fetch manifest at ${manifestUrl}: ${resp.status} ${resp.statusText}`);
+    const manifest = await resp.json();
+    const contexts = Array.isArray(manifest['@context']) ? manifest['@context'] : [manifest['@context']];
+    const foundV2 = contexts.find(ctx => {
+      const parts = ctx.split('/');
+      const possibleVersionSeg = parts.slice(-2, -1).pop(); 
+      const versionNum = parseFloat(possibleVersionSeg);
+      return ctx.indexOf('shared-canvas.org') > 0 || versionNum < 3;
+    });
+    const isV3Manifest = !foundV2;
+    if (isV3Manifest) return manifest;
+    else {
+      // POST the entire v2 manifest to your converter endpoint
+      const convertedResp = await fetch(`${iiifServiceUrl}/prezi2to3/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(manifest)
+      });
+      if (!convertedResp.ok) throw new Error(`Conversion failed for ${manifestUrl}: ${convertedResp.status}`);
+      return convertedResp.json();
+    }
+  };
+
+  const loadAllManifests = async () => {
+    return await Promise.all( collectManifestURLs().map(url => loadManifest(url)) );
+  };
+  
+  const manifests = await loadAllManifests()
+
+  layerDefs.forEach(def => {
+    if (def.kwargs.qid) {
+      let entity = getEntity(def.kwargs.qid)
+      if (entity) {
+        def.label = entity.label
+        def.description = entity.description
+        def.thumbnail = entity.thumbnail
+        def.coords = entity.coords
+        def.geojson = entity.geojson
+      }
+    } else if (def.kwargs.iiif) {
+      let manifest = manifests.find(m => m['@id'] === def.kwargs.iiif || m.id === def.kwargs.iiif)
+      if (manifest) {
+        def.label = (manifest?.label?.en || manifest?.label?.none || Object.values(manifest.label)).join(' ')
+        def.description = (manifest?.summary?.en || manifest?.summary?.none || Object.values(manifest.summary)).join(' ')
+        def.thumbnail = manifest.thumbnail ? manifest.thumbnail[0].id : null
+        def.coords = manifest.navPlace?.features?.[0].geometry.coordinates.join(',') || null
+        def.geojson = null // IIIF manifests don't have geojson
+      } else {
+        console.warn(`Manifest not found for URL: ${def.kwargs.iiif}`)
+      }
+    } else if (def.kwargs.image) {
+      let imageUrl = fullUrl(def.kwargs.image)
+      console.log(`Image marker found: ${def.kwargs.image} => ${imageUrl}`)
+      console.log(getExifFromUrl(imageUrl))
+    }
+  })
+  console.log(layerDefs)
+
 
   const tokenize = (s) => {
     s = s || ''
@@ -439,7 +592,6 @@
 
   const isCoords = (s) => /^[+-]?\d+(.\d*|\d*),{1}[+-]?\d+(.\d*|\d*)$/.test(s)
   const isZoom = (s) => /^\d{1,2}(\.\d{1})?$/.test(s)
-  const isQid = (s) => /^Q\d+$/.test(s)
 
   const entityToInfoObj = (entity, id) => {
     id = id | ''
@@ -454,6 +606,7 @@
   }
 
   const toObj = async (s) => {
+    let parsed = parseLayerStr(s)
     let tokens = tokenize(s.replace(/&/g, ' ')).map(token => token.trim())
     let obj = {}
     let booleans = new Set(['disabled', 'prefer-geojson'])
@@ -465,14 +618,34 @@
         let value = decodeURIComponent(rest.join('='))
         value = '"' && value[value.length-1] === '"' ? value.slice(1,-1) : value
 
-        if ((key === 'marker' && isQid(value)) || key === 'qid') {
+        if (key === 'marker') {
+          obj.type = 'marker'
+          if (isQid(value)) obj.qid = value
+          else if (isCoords(value)) obj.coords = value
+          else if (value.startsWith('http')) {
+            obj.url = value
+            if (value.indexOf('wc:') === 0) obj.image = mwImage(value.slice(3), 108)
+          } else if (value.startsWith('wof:')) {
+            obj.geojson = whosOnFirstUrl(value.slice(4))
+          } else {
+            console.warn(`Invalid marker value: ${value}`)
+          }
+          obj.type = 'marker'
+          obj.qid = value
+          /*
           let entity = await getEntity(value)
-          obj = {...entityToInfoObj(entity, token), ...obj}
-          obj.type = 'marker' 
+          if (entity) {
+            obj = {...entityToInfoObj(entity, token), ...obj}
+            obj.type = 'marker' 
+          } else {
+            console.warn(`Entity not found for QID: ${value}`)
+          }
+          */
         }
         else if (key === 'iiif') {
-          let manifest = await getManifest(token)
-          obj = {...manifestToInfoObj(manifest, token), ...obj}
+          obj.type = 'marker'
+          // let manifest = await getManifest(token)
+          // obj = {...manifestToInfoObj(manifest, token), ...obj}
         } else {
           obj[key === 'layer' ? 'layerName' : key] = value
         }
@@ -724,9 +897,7 @@
       let markersByLayer = {}
       let geoJsonLayers = {}
 
-      let layerDefs = await Promise.all(props.data.split('|').map(rec => toObj(rec)))
       layerDefs.forEach(layerDef => {
-        console.log(layerDef)
         if (layerDef.allmaps) {
           addWarpedMap(layerDef)
         } else if (layerDef.type === 'marker') { 

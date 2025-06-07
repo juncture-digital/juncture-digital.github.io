@@ -488,86 +488,82 @@ const addActionLinks = (rootEl) => {
 ////////// Start Wikidata Entity functions //////////
 
 async function getEntityData(qids, language) {
-  if (!window.entityData) window.entityData = {}
-  if (!window.pendingEntityData) window.pendingEntityData = new Set()
-  if (!window.customEntityAliases) window.customEntityAliases = {}
   language = language || 'en'
-  let cached = new Set(qids.filter(qid => window.entityData[qid]))
-  let pending = new Set(qids.filter(qid => window.pendingEntityData.has(qid)))
-  let toGet = qids .filter(qid => !cached.has(qid) && !pending.has(qid))
-  if (toGet.length > 0) {
-    Array.from(toGet).forEach(qid => window.pendingEntityData.add(qid))
-    let toGetUrls = toGet.map(qid => `(<http://www.wikidata.org/entity/${qid}>)`)
-    let query = `
-      SELECT ?item ?label ?description ?alias ?image ?logoImage ?coords ?pageBanner ?whosOnFirst ?wikipedia WHERE {
-        VALUES (?item) { ${toGetUrls.join(' ')} }
-        ?item rdfs:label ?label . 
-        FILTER (LANG(?label) = "${language}" || LANG(?label) = "en")
-        OPTIONAL { ?item schema:description ?description . FILTER (LANG(?description) = "${language}" || LANG(?description) = "en")}
-        OPTIONAL { ?item skos:altLabel ?alias . FILTER (LANG(?alias) = "${language}" || LANG(?alias) = "en")}
-        OPTIONAL { ?item wdt:P625 ?coords . }
-        OPTIONAL { ?item wdt:P18 ?image . }
-        OPTIONAL { ?item wdt:P154 ?logoImage . }
-        OPTIONAL { ?item wdt:P948 ?pageBanner . }
-        OPTIONAL { ?item wdt:P6766 ?whosOnFirst . }
-        OPTIONAL { ?wikipedia schema:about ?item; schema:isPartOf <https://${language}.wikipedia.org/> . }
-    }`
-    let resp = await fetch('https://query.wikidata.org/sparql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/sparql-results+json'
-      },
-      body: `query=${encodeURIComponent(query)}`
-    })
-    if (resp.ok) {
-      let sparqlResp = await resp.json()
-      sparqlResp.results.bindings.forEach( async rec => {
-        let qid = rec.item.value.split('/').pop()
-        let _entityData = window.entityData[qid]
-        if (!_entityData) {
-          _entityData = {id: qid, label: rec.label.value}
-          if (rec.description) _entityData.description = rec.description.value
-          if (rec.alias) {
-            _entityData.aliases = [rec.alias.value]
-            if (window.customEntityAliases[qid]) _entityData.aliases = [...window.customEntityAliases[qid], ..._entityData.aliases]
-          }
-          if (rec.coords) _entityData.coords = rec.coords.value.slice(6,-1).split(' ').reverse().join(',')
-          if (rec.wikipedia) _entityData.wikipedia = rec.wikipedia.value
-          if (rec.pageBanner) _entityData.pageBanner = rec.pageBanner.value
-          if (rec.image) {
-            _entityData.image = rec.image.value
-            _entityData.thumbnail = mwImage(rec.image.value, 300)
-          }
-          if (rec.logoImage) {
-            _entityData.logoImage = rec.logoImage.value
-            if (!_entityData.thumbnail) _entityData.thumbnail = mwImage(rec.logoImage.value, 300)
-          }
-          // if (rec.whosOnFirst) _entityData.whosOnFirst = whosOnFirstUrl(rec.whosOnFirst.value)
-          if (rec.whosOnFirst) _entityData.geojson = whosOnFirstUrl(rec.whosOnFirst.value)
-              window.entityData[qid] = _entityData
+  let entities = {}
+  let summaryUrls = {}
+  let entityUrls = qids.map(qid => `(wd:${qid})`)
+  let query = `
+    SELECT ?item (SAMPLE(?label) AS ?label) (SAMPLE(?description) AS ?description) (GROUP_CONCAT(?alias; separator=" | ") AS ?aliases) 
+        (SAMPLE(?image) AS ?image) (SAMPLE(?logoImage) AS ?logoImage) 
+        (SAMPLE(?coords) AS ?coords) (SAMPLE(?pageBanner) AS ?pageBanner)
+        (SAMPLE(?whosOnFirst) AS ?whosOnFirst) (SAMPLE(?wikipedia) AS ?wikipedia)
+    WHERE {
+      VALUES (?item) { ${entityUrls.join(' ')} }
 
-        } else {
-          if (rec.alias) _entityData.aliases.push(rec.alias.value)
-        }
-      })
-      // return entityData
-      Array.from(toGet).forEach(qid => window.pendingEntityData.delete(qid))
-      return Object.fromEntries(qids.filter(qid => window.entityData[qid]).map(qid => [qid,window.entityData[qid]]))
+      # BIND(NOW() AS ?timestamp)  # Forces fresh evaluation
+
+      ?item rdfs:label ?label . FILTER (LANG(?label) = "en")
+      OPTIONAL { ?item schema:description ?description . FILTER (LANG(?description) = "en") }
+      OPTIONAL { ?item skos:altLabel ?alias . FILTER (LANG(?alias) = "en") }
+      OPTIONAL { ?item wdt:P625 ?coords . }
+      OPTIONAL { ?item wdt:P18 ?image . }
+      OPTIONAL { ?item wdt:P154 ?logoImage . }
+      OPTIONAL { ?item wdt:P948 ?pageBanner . }
+      OPTIONAL { ?item wdt:P6766 ?whosOnFirst . }
+      OPTIONAL { ?wikipedia schema:about ?item; schema:isPartOf <https://en.wikipedia.org/> . }
     }
-  }
-  // return entityData
-  return Object.fromEntries(qids.filter(qid => window.entityData[qid]).map(qid => [qid,window.entityData[qid]]))
-}
-
-const getSummaryText = async (wikipediaLink, language) => {
-  language = language || 'en'
-  let page = wikipediaLink.replace(/\/w\//, '/wiki').split('/wiki/').pop()
-  let resp = await fetch(`https://${language}.wikipedia.org/api/rest_v1/page/summary/${page}`)
+    GROUP BY ?item
+    `
+  let resp = await fetch('https://query.wikidata.org/sparql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/sparql-results+json'
+    },
+    body: `query=${encodeURIComponent(query)}`
+  })
   if (resp.ok) {
-    let data = await resp.json()
-    return data['extract_html'] || data['extract']
+    let sparqlResp = await resp.json()
+    sparqlResp.results.bindings.forEach(rec => {
+      let qid = rec.item.value.split('/').pop()
+      let _entityData = {id: qid, label: rec.label.value}
+      if (rec.description) _entityData.description = rec.description.value
+      if (rec.alias) _entityData.aliases = [rec.alias.value]
+      if (rec.coords) _entityData.coords = rec.coords.value.slice(6,-1).split(' ').reverse().join(',')
+      if (rec.wikipedia) _entityData.wikipedia = rec.wikipedia.value
+      if (rec.pageBanner) _entityData.pageBanner = rec.pageBanner.value
+      if (rec.image) {
+        _entityData.image = rec.image.value
+        _entityData.thumbnail = mwImage(rec.image.value, 300)
+      }
+      if (rec.logoImage) {
+        _entityData.logoImage = rec.logoImage.value
+        if (!_entityData.thumbnail) _entityData.thumbnail = mwImage(rec.logoImage.value, 300)
+      }
+      if (rec.whosOnFirst) _entityData.geojson = whosOnFirstUrl(rec.whosOnFirst.value)
+      
+      if (_entityData.wikipedia) {
+        let page = _entityData.wikipedia.replace(/\/w\//, '/wiki').split('/wiki/').pop()
+        summaryUrls[`https://${language}.wikipedia.org/api/rest_v1/page/summary/${page}`] = qid
+      }
+      entities[qid] = _entityData
+    })
+    // console.log(entityUrls.length, new Set (sparqlResp.results.bindings.map(rec => rec.item.value)).size, Object.keys(summaryUrls).length)
+    await Promise.all(Object.keys(summaryUrls).map(url => fetch(url)))
+      .then(responses => { return Promise.all(responses.map(resp => resp.json())) })
+      .then(data => {
+        // console.log(data)
+        data.forEach((data, idx) => {
+          let qid = summaryUrls[Object.keys(summaryUrls)[idx]]
+          if (data.extract_html) entities[qid].summaryText = data.extract_html
+          else if (data.extract) entities[qid].summaryText = data.extract
+        })
+      })
+      .catch(err => console.error('Error fetching summaries:', err))
   }
+
+  // console.log(entities)
+  return entities
 }
 
 function mwImage(mwImg, width) {
@@ -635,71 +631,67 @@ export async function imageDataUrl(url, region, dest) {
   })
 }
 
-async function getEntity(qid, language) {
-  language = language || 'en'
-  let entities = await getEntityData([qid], language)
-  let entity = entities[qid]
-  if (entity && !entity.summaryText && entity.wikipedia) {
-    entity.summaryText = await getSummaryText(entity.wikipedia, language)
-  }
-  return entities[qid]
-}
-
-const makeEntityPopups = () => {
+const makeEntityPopups = async () => {
+  let qids = new Set()
   Array.from(document.body.querySelectorAll('a')).forEach(async a => {
     let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
     let qid = path?.find(p => /^Q\d+$/.test(p))
-    if (qid) {
-      let entity = await getEntity(qid)
-      if (!entity) return
-      let dd = document.createElement('sl-dropdown')
-      dd.className = 'entity-popup'
-      dd.setAttribute('placement', 'top')
-      dd.setAttribute('distance', '12')
-      
-      let trigger = document.createElement('div')
-      trigger.setAttribute('slot', 'trigger')
-      trigger.innerHTML = a.textContent
-      dd.appendChild(trigger)
+    if (qid) qids.add(qid)
+  })
+  let entities = await getEntityData(Array.from(qids), 'en')
+  Array.from(document.body.querySelectorAll('a')).forEach(async a => {
+    let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
+    let qid = path?.find(p => /^Q\d+$/.test(p))
+    let entity = entities[qid]
+    if (!entity) return
+    let dd = document.createElement('sl-dropdown')
+    dd.className = 'entity-popup'
+    dd.setAttribute('placement', 'top')
+    dd.setAttribute('distance', '12')
+    
+    let trigger = document.createElement('div')
+    trigger.setAttribute('slot', 'trigger')
+    trigger.innerHTML = a.textContent
+    dd.appendChild(trigger)
 
-      let card = document.createElement('sl-card')
-      card.setAttribute('hoist', '')
-      if (entity.thumbnail) {
-        let img = document.createElement('img')
-        img.setAttribute('slot', 'image')
-        img.src = entity.thumbnail
-        img.setAttribute('alt', entity.label)
-        card.appendChild(img)
-      }
-      let content = document.createElement('div')
-      content.className = 'content'
-      if (entity.label) {
-        let heading = document.createElement('h2')
-        heading.textContent = entity.label
-        content.appendChild(heading)
-      }
-      if (entity.description) {
-        let description = document.createElement('p')
-        description.className = 'description'
-        description.innerHTML = entity.description
-        content.appendChild(description)
-      }
-      if (entity.summaryText) {
-        let summaryText = document.createElement('div')
-        summaryText.className = 'description'
-        summaryText.innerHTML = entity.summaryText
-        content.appendChild(summaryText)
-      }
-      card.appendChild(content)
-      let footer = document.createElement('div')
-      footer.setAttribute('slot', 'footer')
-      if (entity.wikipedia)
-        footer.innerHTML = `<a href="${entity.wikipedia}" target="_blank">View on Wikipedia</a>`
-      card.appendChild(footer)
-      dd.appendChild(card)
-      
-      a.replaceWith(dd)
+    let card = document.createElement('sl-card')
+    card.setAttribute('hoist', '')
+    if (entity.thumbnail) {
+      let img = document.createElement('img')
+      img.setAttribute('slot', 'image')
+      img.src = entity.thumbnail
+      img.setAttribute('alt', entity.label)
+      card.appendChild(img)
     }
+    let content = document.createElement('div')
+    content.className = 'content'
+    if (entity.label) {
+      let heading = document.createElement('h2')
+      heading.textContent = entity.label
+      content.appendChild(heading)
+    }
+    if (entity.description) {
+      let description = document.createElement('p')
+      description.className = 'description'
+      description.innerHTML = entity.description
+      content.appendChild(description)
+    }
+    if (entity.summaryText) {
+      let summaryText = document.createElement('div')
+      summaryText.className = 'description'
+      summaryText.innerHTML = entity.summaryText
+      content.appendChild(summaryText)
+    }
+    card.appendChild(content)
+    let footer = document.createElement('div')
+    footer.setAttribute('slot', 'footer')
+    if (entity.wikipedia)
+      footer.innerHTML = `<a href="${entity.wikipedia}" target="_blank">View on Wikipedia</a>`
+    card.appendChild(footer)
+    dd.appendChild(card)
+    
+    a.replaceWith(dd)
+    
   })
 }
 

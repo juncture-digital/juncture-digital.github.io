@@ -89,6 +89,7 @@
             <div class="required"></div>
             <div class="rights"></div>
             <div class="source wrap"></div>
+            <div class="size"></div>
           </div>
         </sl-tab-panel>
       </sl-tab-group>
@@ -547,7 +548,12 @@
       if (parsed.requiredStatement) document.querySelector('.manifest .required').innerHTML = `<span><b>Attribution:</b></span> <span>${parsed.requiredStatement.value.join(' ')}</span>`
       if (parsed.rights) document.querySelector('.manifest .rights').innerHTML = `<span><b>Reuse rights:</b></span><a href="${parsed.rights.url}">${parsed.rights.code}</a>` + (parsed.rights.badge || '')
       if (parsed.sourceUrl) document.querySelector('.manifest .source').innerHTML = `<span><b>Source:</b></span> <a href="${parsed.sourceUrl}">${parsed.sourceUrl}</a>`
-    
+      if (parsed.imageData) {
+        let windowAspectRatio = main.clientWidth/(main.clientWidth / imageAspect + caption.clientHeight)
+        document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width} × ${parsed.imageData.height} (${windowAspectRatio.toFixed(2)})`
+      } else {
+        document.querySelector('.manifest .size').innerHTML = ''
+      }
       drawer.querySelectorAll('a').forEach(a => {
         a.addEventListener('click', e => {
           e.stopPropagation()
