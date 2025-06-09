@@ -35,9 +35,8 @@ Women of all ages benefited from the greater freedom and healthier lifestyle of 
 `image src=wc:Queen_Victoria_as_a_young_woman%2C_by_F.W._Wilkin_Wellcome_L0012031.jpg caption="Queen Victoria as a young woman, by F.W. Wilkin" aspect=0.71`
 
 #
-{: .columns}
 
-##
+`image src=wc:Venus%27s_bathing%2C_a_woman_swimming_in_the_sea_at_Margate._Wellcome_L0017752.jpg caption="Venus's bathing, a woman swimming in the sea at Margate" aspect=1.15 .right`
 
 The bye-laws in these resorts were notoriously confusing, and not everyone adhered to them, as [Israel Zangwill](/19c/19c-zangwill-biography) noticed in 1893:
 
@@ -45,9 +44,6 @@ The bye-laws in these resorts were notoriously confusing, and not everyone adher
 
 The more restrained [Broadstairs](/dickens/broadstairs-19th-century) on the other hand, had 'a jolly old waterman, who paddles about apparently to pick up exhausted bathers. One morning as I was swimming past his boat he warned me back. “Any danger?” I asked. “Ladies,” he replied, ambiguously enough. It thus transpired that his function is to preserve a scientific frontier between the sexes.'
 
-##
-
-`image src=wc:Venus%27s_bathing%2C_a_woman_swimming_in_the_sea_at_Margate._Wellcome_L0017752.jpg caption="Venus's bathing, a woman swimming in the sea at Margate" aspect=1.15`
 
 #
 {: .columns}

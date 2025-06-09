@@ -549,7 +549,7 @@
       if (parsed.rights) document.querySelector('.manifest .rights').innerHTML = `<span><b>Reuse rights:</b></span><a href="${parsed.rights.url}">${parsed.rights.code}</a>` + (parsed.rights.badge || '')
       if (parsed.sourceUrl) document.querySelector('.manifest .source').innerHTML = `<span><b>Source:</b></span> <a href="${parsed.sourceUrl}">${parsed.sourceUrl}</a>`
       if (parsed.imageData) {
-        let windowAspectRatio = main.clientWidth/(main.clientWidth / imageAspect + caption.clientHeight)
+        let windowAspectRatio = main.clientWidth/(main.clientWidth / (parsed.imageData.width/parsed.imageData.height) + caption.clientHeight)
         document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width} × ${parsed.imageData.height} (${windowAspectRatio.toFixed(2)})`
       } else {
         document.querySelector('.manifest .size').innerHTML = ''
