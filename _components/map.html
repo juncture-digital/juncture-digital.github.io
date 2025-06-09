@@ -516,11 +516,9 @@
         }
         entities[qid] = _entityData
       })
-      // console.log(entityUrls.length, new Set (sparqlResp.results.bindings.map(rec => rec.item.value)).size, Object.keys(summaryUrls).length)
       await Promise.all(Object.keys(summaryUrls).map(url => fetch(url)))
         .then(responses => { return Promise.all(responses.map(resp => resp.json())) })
         .then(data => {
-          // console.log(data)
           data.forEach((data, idx) => {
             let qid = summaryUrls[Object.keys(summaryUrls)[idx]]
             if (data.extract_html) entities[qid].summaryText = data.extract_html
@@ -566,7 +564,6 @@
   };
   
   const manifests = await loadAllManifests()
-  console.log('Loaded manifests:', manifests)
 
   for (const def of layerDefs) {
     if (def.kwargs.qid) {
@@ -951,14 +948,12 @@
           }
           fetch(layerDef.url).then(resp => resp.json())
             .then(data => {
-              console.log('GeoJSON data:', data)
               let geoJsonLayer = toGeoJSONLayer(data)
               addLayerControl(geoJsonLayer, layerDef.layerName || layerDef.label || 'GeoJSON Layer')
               map.addLayer(geoJsonLayer)
             });
         }
       })
-      console.log('Markers by layer:', markersByLayer)
       Object.keys(markersByLayer).forEach(layerName => {
         let layer = markersByLayer[layerName]
         let geoJsonLayer = toGeoJSONLayer(toGeoJSON(layer))
