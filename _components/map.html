@@ -944,9 +944,9 @@
           if (layerDef.url.indexOf('http') !== 0) {
             if (layerDef.url[0] === '/') {
               let [owner, repo, branch, ...path] = props.ghbase.split('/')
-              layerDef.url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${layerDef.geojson}`
+              layerDef.url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${layerDef.url}`
             } else {
-              layerDef.url = `https://raw.githubusercontent.com/${props.ghbase}/${layerDef.geojson}`
+              layerDef.url = `https://raw.githubusercontent.com/${props.ghbase}/${layerDef.url}`
             }
           }
           fetch(layerDef.url).then(resp => resp.json())
