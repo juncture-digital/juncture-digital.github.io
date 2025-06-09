@@ -21,14 +21,15 @@ Major rock formations include [West](image/zoomto/pct:10.94,27.88,21.05,30){: la
 
 ## Geography and geology
 
-`map #map location=Q192017,4 caption="Monument Valley" marker .right .shadow`
+`map #map location=Q192017,5 caption="Monument Valley" .right .shadow`
+`- geojson url=https://spelunker.whosonfirst.org/id/101728219/geojson layer="Monument Valley"`
 `- marker qid=Q118841 layer="National Parks"`
 `- marker qid=Q777183 layer="National Parks"`
 `- marker qid=Q223969 layer="National Parks"`
 `- marker iiif=wc:John_Ford%27s_Point_Monument_Valley_Luca_Galuzzi_2007.jpg layer="Images"`
 `- marker image=Monument_Valley.jpg layer="Images"`
 
-[Monument Valley](map/flyto/Q192017,11) is part of the Colorado Plateau. The elevation of the valley floor ranges from 5,000 to 6,000 feet above sea level. The floor is largely siltstone of the Cutler Group, or sand derived from it, deposited by the meandering rivers that carved the valley. The valley's vivid red coloration comes from iron oxide exposed in the weathered siltstone. The darker, blue-gray rocks in the valley get their color from manganese oxide.  For tourists doing a national park tour, Monument Valley is situated between [Arches National Park](map/flyto/Q223969,12) and the [Grand Canyon](map/flyto/Q118841,12).
+[Monument Valley](map/flyto/37.02828,-110.23819,11) is part of the Colorado Plateau. The elevation of the valley floor ranges from 5,000 to 6,000 feet above sea level. The floor is largely siltstone of the Cutler Group, or sand derived from it, deposited by the meandering rivers that carved the valley. The valley's vivid red coloration comes from iron oxide exposed in the weathered siltstone. The darker, blue-gray rocks in the valley get their color from manganese oxide.  For tourists doing a national park tour, Monument Valley is situated between [Arches National Park](map/flyto/Q223969,12) and the [Grand Canyon](map/flyto/Q118841,12).
 
 The buttes arising from the valley floor are clearly stratified, with three principal layers. The lowest layer is the Organ Rock Shale, the middle is de Chelly Sandstone, and the top layer is the Moenkopi Formation capped by Shinarump Conglomerate. 
 

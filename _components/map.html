@@ -86,6 +86,8 @@
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-group/tab-group.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-panel/tab-panel.js';
 
+    let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
+
     const baseMapsConfigs = {
       CartoDB_DarkMatter: ['https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
               attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -310,7 +312,7 @@
       let tokenIdx = 0
       while (tokenIdx < tokens.length) {
         let token = tokens[tokenIdx].trim()
-        if (['marker', 'allmaps'].includes(token)) parsed.type = token
+        if (['marker', 'allmaps', 'geojson'].includes(token)) parsed.type = token
         else if (token.indexOf('=') > 0 && /^[\w-:]+=/.test(token)) {
           let idx = token.indexOf('=')
           let key = token.slice(0, idx)
@@ -403,27 +405,44 @@
         return `https://raw.githubusercontent.com/${props.ghbase}/${url}`
     }
 
-  const getExifFromUrl = async (imageUrl) => {
+  const getExifLocationFromUrl = async (imageUrl) => {
     try {
       const response = await fetch(imageUrl, { mode: 'cors' });
       const blob = await response.blob();
 
       return new Promise((resolve, reject) => {
         const img = new Image();
-        img.crossOrigin = 'anonymous'; // required for CORS
+        img.crossOrigin = 'anonymous';
         img.onload = function () {
           EXIF.getData(img, function () {
-            const allTags = EXIF.getAllTags(this);
-            resolve(allTags);
+            const lat = EXIF.getTag(this, "GPSLatitude");
+            const lon = EXIF.getTag(this, "GPSLongitude");
+            const latRef = EXIF.getTag(this, "GPSLatitudeRef") || "N";
+            const lonRef = EXIF.getTag(this, "GPSLongitudeRef") || "E";
+
+            if (!lat || !lon) {
+              return resolve(null); // No GPS data
+            }
+
+            const toDecimal = (dms, ref) => {
+              const [deg, min, sec] = dms;
+              let dec = deg + min / 60 + sec / 3600;
+              if (ref === "S" || ref === "W") dec = -dec;
+              return dec;
+            };
+
+            const latDec = toDecimal(lat, latRef);
+            const lonDec = toDecimal(lon, lonRef);
+
+            resolve(`${latDec},${lonDec}`);
           });
         };
-        img.onerror = function (err) {
-          reject(new Error("Failed to load image"));
-        };
+        img.onerror = () => reject(new Error("Failed to load image"));
         img.src = URL.createObjectURL(blob);
       });
-    } catch (error) {
-      console.error("Failed to fetch or parse image:", error);
+    } catch (err) {
+      console.error("Error reading EXIF:", err);
+      return null;
     }
   }
 
@@ -547,8 +566,9 @@
   };
   
   const manifests = await loadAllManifests()
+  console.log('Loaded manifests:', manifests)
 
-  layerDefs.forEach(def => {
+  for (const def of layerDefs) {
     if (def.kwargs.qid) {
       let entity = getEntity(def.kwargs.qid)
       if (entity) {
@@ -569,12 +589,18 @@
       } else {
         console.warn(`Manifest not found for URL: ${def.kwargs.iiif}`)
       }
-    } else if (def.kwargs.image) {
-      let imageUrl = fullUrl(def.kwargs.image)
-      console.log(`Image marker found: ${def.kwargs.image} => ${imageUrl}`)
-      console.log(getExifFromUrl(imageUrl))
+    } else if (def.kwargs.image && !def.kwargs.coords) {
+      let exifCoords = await getExifLocationFromUrl(fullUrl(def.kwargs.image))
+      if (exifCoords) def.coords = exifCoords
     }
-  })
+    if (def.kwargs.image && !def.kwargs.thumbnail) {
+      def.thumbnail = `${imageServiceUrl}/${fullUrl(def.kwargs.image)}/w_300`
+    }
+    for (let [prop, value] of Object.entries(def.kwargs)) {
+      if (['label', 'description', 'thumbnail', 'coords', 'url'].includes(prop)) def[prop] = decodeURIComponent(value)
+    }
+    if (def.kwargs.layer) def.layerName = decodeURIComponent(def.kwargs.layer)
+  }
   console.log(layerDefs)
 
 
@@ -914,24 +940,25 @@
             if (!markersByLayer[layerName]) markersByLayer[layerName] = []
             markersByLayer[layerName].push(layerDef)
           }
-        } else if (layerDef.geojson) {
-          if (layerDef.geojson.indexOf('http') !== 0) {
-            if (layerDef.geojson[0] === '/') {
+        } else if (layerDef.type === 'geojson' && layerDef.url) { 
+          if (layerDef.url.indexOf('http') !== 0) {
+            if (layerDef.url[0] === '/') {
               let [owner, repo, branch, ...path] = props.ghbase.split('/')
-              layerDef.geojson = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${layerDef.geojson}`
+              layerDef.url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${layerDef.geojson}`
             } else {
-              layerDef.geojson = `https://raw.githubusercontent.com/${props.ghbase}/${layerDef.geojson}`
+              layerDef.url = `https://raw.githubusercontent.com/${props.ghbase}/${layerDef.geojson}`
             }
-            fetch(layerDef.geojson).then(resp => resp.json())
-              .then(data => {
-                let geoJsonLayer = toGeoJSONLayer(data)
-                addLayerControl(geoJsonLayer, 'geojson')
-                map.addLayer(geoJsonLayer)
-              });
           }
+          fetch(layerDef.url).then(resp => resp.json())
+            .then(data => {
+              console.log('GeoJSON data:', data)
+              let geoJsonLayer = toGeoJSONLayer(data)
+              addLayerControl(geoJsonLayer, layerDef.layerName || layerDef.label || 'GeoJSON Layer')
+              map.addLayer(geoJsonLayer)
+            });
         }
       })
-  
+      console.log('Markers by layer:', markersByLayer)
       Object.keys(markersByLayer).forEach(layerName => {
         let layer = markersByLayer[layerName]
         let geoJsonLayer = toGeoJSONLayer(toGeoJSON(layer))
