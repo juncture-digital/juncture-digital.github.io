@@ -70,8 +70,8 @@ Here’s how to embed your warped map into a Juncture narrative:
 
 ```juncture
 `map location=51.13224,0.25153,14.53 caption="Tunbridge Wells" opacity=100`
-`- allmaps=7c569bcd9d292a49 name="Tunbridge Wells (c.1870-1890)"`
-`- marker=Q665489`
+`- warped-map allmaps=7c569bcd9d292a49 name="Tunbridge Wells (c.1870-1890)"`
+`- marker qid=Q665489`
 ```
 
 ---
@@ -79,8 +79,8 @@ Here’s how to embed your warped map into a Juncture narrative:
 ## Example
 
 `map location=51.13224,0.25153,14.53 caption="Tunbridge Wells"`
-`- allmaps=7c569bcd9d292a49 name="Tunbridge Wells (c.1870-1890)" opacity=100`
-`- marker=Q665489`
+`- warped-map allmaps=7c569bcd9d292a49 name="Tunbridge Wells (c.1870-1890)" opacity=100`
+`- marker qid=Q665489`
 
 ---
 

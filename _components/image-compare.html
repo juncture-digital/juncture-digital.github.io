@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Compare</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/themes/light.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
+    main {  display: flex; flex-direction: column; width: 100%; }
+  </style>
+</head>
+<body>
+  
+  <main>
+    <sl-image-comparer>
+      <img id="before" slot="before"/>
+      <img id="after" slot="after"/>
+    </sl-image-comparer>
+  </main>
+
+  <script type="module">
+
+    import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/image-comparer/image-comparer.js';
+    
+    let iiifServiceUrl = 'https://iiif.mdpress.io';
+    let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
+
+    const props = {
+      ...{                   // default properties
+        caption: null,
+        position: 50
+      },
+      ...Object.fromEntries( // URLSearchParams to object
+        Array.from(new URLSearchParams(location.search).entries())
+        .map(([key, value]) => [key, (value === 'true' || !value) ? true : value === 'false' ? false : value])
+      )
+    }
+    console.log(props)
+
+    const main = document.querySelector('main');
+    const before = document.getElementById('before')
+    const after = document.getElementById('after')
+
+    // recursive helper for finding items in a IIIF manifest
+    const findItems = (toMatch, current, found) => {
+      found = found || []
+      if (current?.items) {
+        for (let i = 0; i < current.items.length; i++ ) {
+          let item = current.items[i]
+          let isMatch = !Object.entries(toMatch).find(([attr, val]) => item[attr] && item[attr] !== val)
+          if (isMatch) found.push(item)
+          else findItems(toMatch, item, found)
+        }
+      }
+      return found
+    }
+
+    // find an item in a IIIF manifest
+    const findItem = (toMatch, current, seq) => {
+      seq = seq || 1
+      const found = findItems(toMatch, current)
+      return found.length >= seq ? found[seq-1] : null
+    }
+
+    const staticImageUrl = (manifest, width, crop) => {
+      let itemInfo = manifest && findItem({type:'Annotation', motivation:'painting'}, manifest, props.seq).body
+      if (!itemInfo) return ''
+      let url
+      let [region, size, rotation, rest] = props.options?.split('/') || []
+      let [quality, format] = rest?.split('.') || []
+      region = crop || props.region || region || 'full'
+      size = width
+        ? width === 'max'
+          ? 'max'
+          : `${width},`
+        : props.size
+          ? props.size
+          : `${main.clientWidth},`
+      rotation = parseInt(props.rotation || rotation || 0)
+      quality = props.quality || quality || 'default'
+      format = props.format || format || 'jpg'
+      url =`${itemInfo.service[0].id || itemInfo.service[0]['@id']}/${region}/${size}/${rotation}/${quality}.${format}`
+      return url
+    }
+
+    const loadManifest = (manifestUrl) => {
+      if (manifestUrl.indexOf('http') < 0) manifestUrl = `${iiifServiceUrl}/${manifestUrl}/manifest.json`
+      return fetch(manifestUrl).then(resp => resp.json())
+      .then( async manifest => {
+        const contexts = Array.isArray(manifest['@context']) ? manifest['@context'] : [manifest['@context']]
+        const isV3Manifest = contexts.find(ctx => ctx.indexOf('shared-canvas.org') > 0 || parseFloat(ctx.split('/').slice(-2,-1).pop()) < 3) ? false : true
+        return isV3Manifest 
+          ? manifest 
+          : await fetch(`${iiifServiceUrl}/prezi2to3/`, { method: 'POST', body: JSON.stringify(manifest) }).then(resp => resp.json())
+      })
+    }
+
+    if (props.manifest1) loadManifest(props.manifest1).then(manifest => {
+        const imageUrl = `${imageServiceUrl}/${staticImageUrl(manifest, main.clientWidth)}`
+        console.log(imageUrl)
+        before.src = imageUrl
+        before.alt = (manifest?.label?.en || manifest?.label?.none || Object.values(manifest.label)).join(' ')
+      })
+
+    if (props.manifest2) loadManifest(props.manifest2).then(manifest => {
+        const imageUrl = `${imageServiceUrl}/${staticImageUrl(manifest, main.clientWidth)}`
+        console.log(imageUrl)
+        after.src = imageUrl
+        after.alt = (manifest?.label?.en || manifest?.label?.none || Object.values(manifest.label)).join(' ')
+      })
+
+    // before.src = 'https://images.unsplash.com/photo-1517331156700-3c241d2b4d83?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=80&sat=-100&bri=-5'
+    // before.alt = 'Grayscale version of kittens in a basket looking around.'
+    // after.src = 'https://images.unsplash.com/photo-1517331156700-3c241d2b4d83?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=80'
+    // after.alt = 'Color version of kittens in a basket looking around.'
+    
+  </script>
+  
+</body>
+</html>

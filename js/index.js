@@ -141,7 +141,7 @@ const makeIframe = (code) => {
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`), ...(code.booleans || [])
     ].join('&')
 
-  iframe.src = tag === 'iframe' ? code.kwargs.src : `${junctureComponentsPrefix}/${tag}?${args}`
+  iframe.src = tag === 'iframe' ? `${code.kwargs.src}?${args}` : `${junctureComponentsPrefix}/${tag}?${args}`
 
   let isOnlyChild = code.el.parentElement?.children.length === 1 && code.el.parentElement?.children[0] === code.el
   if (isOnlyChild && code.el.parentElement.tagName !== 'SL-DIALOG') code.el.parentElement.replaceWith(iframe)

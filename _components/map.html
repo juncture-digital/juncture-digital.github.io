@@ -274,15 +274,18 @@
 
     const props = {
       ...{              // default properties
+        basemap: 'OpenStreetMap',
         basemaps: 'OpenStreetMap',
         caption: null,   // caption text,
+        center: '51.505,-0.09',
         data: null,
         gestureHandling: true,
         ghbase: null,
         location: '51.505,-0.09,8', // map center and zoom
         marker: false,          // show marker
         popupOnHover: false, // show popup on hover
-        'prefer-geojson': false, // use GeoJSON if available
+        'prefer-geojson': false, // use GeoJSON if available,
+        zoom: 8
       },
       ...Object.fromEntries( // URLSearchParams to object
         Array.from(new URLSearchParams(location.search).entries())
@@ -312,7 +315,7 @@
       let tokenIdx = 0
       while (tokenIdx < tokens.length) {
         let token = tokens[tokenIdx].trim()
-        if (['marker', 'allmaps', 'geojson'].includes(token)) parsed.type = token
+        if (['marker', 'warped-map', 'geojson'].includes(token)) parsed.type = token
         else if (token.indexOf('=') > 0 && /^[\w-:]+=/.test(token)) {
           let idx = token.indexOf('=')
           let key = token.slice(0, idx)
@@ -330,7 +333,7 @@
     let layerDefs = props.data ? props.data.split('|').map(rec => parseLayerStr(rec)) : []
     const collectQIDs = () => {
       let qids = new Set()
-      if (isQid(props.location.split(',')[0])) qids.add(props.location.split(',')[0])
+      if (isQid(props.center)) qids.add(props.center)
       layerDefs.forEach(def => { if (def.kwargs.qid) qids.add(def.kwargs.qid)})
       return qids
     }
@@ -594,7 +597,7 @@
       def.thumbnail = `${imageServiceUrl}/${fullUrl(def.kwargs.image)}/w_300`
     }
     for (let [prop, value] of Object.entries(def.kwargs)) {
-      if (['label', 'description', 'thumbnail', 'coords', 'url'].includes(prop)) def[prop] = decodeURIComponent(value)
+      if (['allmaps', 'label', 'id', 'description', 'thumbnail', 'coords', 'url'].includes(prop)) def[prop] = decodeURIComponent(value)
     }
     if (def.kwargs.layer) def.layerName = decodeURIComponent(def.kwargs.layer)
   }
@@ -688,10 +691,10 @@
   const toGeoJSONLayer = (data) => {
     return L.geoJSON(data, {
       pointToLayer: (feature, _latlng) => {
-        const _props = feature.properties        
+        const _props = feature.properties
         let marker
 
-        if (_props['ve-map-marker'] !== undefined && _props.url) { // image marker
+        if (_props.type === marker && _props.url) { // image marker
           let [width, height] = _props.size
             ? _props.size.split(',').map((item) => Number(item))
             : [100, 100]
@@ -769,6 +772,7 @@
       },
       style: (feature) => {
         const featureProps = feature?.properties
+        // console.log(featureProps)
         const _geometry = feature?.geometry.type
         for (let [prop, value] of Object.entries(featureProps)) {
           if (value === 'null') featureProps[prop] = null
@@ -777,7 +781,7 @@
           color: featureProps.color || '#FB683F',
           weight: featureProps.weight || (_geometry === 'Polygon' || _geometry === 'MultiPolygon' ? 0 : 4),
           opacity: featureProps.opacity || 1,                  
-          fillColor: featureProps.fillColor || '#32C125',
+          fillColor: featureProps.fillColor || featureProps.fill || '#32C125',
           fillOpacity: featureProps.fillOpacity || 0.5,
         }
         return style
@@ -793,17 +797,15 @@
 
   const initMap = async () => {
 
-    let split = props.location.split(',')
     let entity
-    if (isQid(split[0])) {
-      entity = await getEntity(split[0])
+    if (isQid(props.center)) {
+      entity = await getEntity(props.center)
       center = L.latLng(entity.coords.split(',').map(c => parseFloat(c)))
-      zoom = split.length > 1 ? Number(split[1]) : 8
       if (!props.caption) setCaption(entity.label)
-    } else if (split.length > 1) {
-      center = L.latLng(split.slice(0,2).map(c => parseFloat(c)))
-      if (split.length > 2) zoom = parseFloat(split[2])
+    } else {
+      center = L.latLng(props.center.split(',').map(c => parseFloat(c)))
     }
+    zoom = props.zoom
 
     let _basemaps = props.basemaps.split(',').map(name => {
       let [url, options] = baseMapsConfigs[name]
@@ -921,7 +923,7 @@
       let geoJsonLayers = {}
 
       layerDefs.forEach(layerDef => {
-        if (layerDef.allmaps) {
+        if (layerDef.type === 'warped-map') {
           addWarpedMap(layerDef)
         } else if (layerDef.type === 'marker') { 
           let layerName = layerDef.layerName || 'Locations'

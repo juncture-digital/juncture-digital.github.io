@@ -287,15 +287,13 @@
       mwImg = decodeURIComponent(mwImg).replace(/ /g,'_')
       const _md5 = md5(mwImg)
       const extension = mwImg.split('.').pop()
+      console.log(`extension=${extension}`)
       let url = `https://upload.wikimedia.org/wikipedia/commons${width ? '/thumb' : ''}`
       url += `/${_md5.slice(0,1)}/${_md5.slice(0,2)}/${mwImg}`
-      if (width > 0) {
-        url += `/${width}px-${mwImg}`
-        if (extension === 'svg') {
-          url += '.png'
-        } else if (extension === 'tif' || extension === 'tiff') {
-          url += '.jpg'
-        }
+      if (width > 0 || ['svg', 'tif'].includes(extension)) {
+        url += `/${width || 1000}px-${mwImg}`
+        if (extension === 'svg') url += '.png'
+        else if (extension === 'tif' || extension === 'tiff') url += '.jpg'
       }
       return url
     }
