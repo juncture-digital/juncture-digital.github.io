@@ -266,6 +266,7 @@
       let [region, size, rotation, rest] = props.options?.split('/') || []
       let [quality, format] = rest?.split('.') || []
       region = crop || props.region || region || 'full'
+      // console.log(`crop=${crop} props.region=${props.region} region=${region}`)
       size = width
         ? width === 'max'
           ? 'max'
@@ -334,7 +335,7 @@
           ? props.caption
           : iiifManifest
             ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
-            : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.\S+$/,'').replace(/[-_]+/g,' '))
+            : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' '))
       if (props.nocaption === true) {
         caption.style.display = 'none'
       } else {
@@ -351,7 +352,7 @@
         ? props.caption
         : iiifManifest
           ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
-          : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.\S+$/,'').replace(/[-_]+/g,' '))
+          : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' '))
       img.setAttribute('alt', altText)
       img.style.objectFit = props.cover === true ? 'cover' : 'contain'
       img.addEventListener('click', () => {
@@ -434,7 +435,17 @@
       loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     
     } else if (props.manifest) {
-      props.manifest = props.manifest.startsWith('http') ? props.manifest : `${iiifServiceUrl}/${props.manifest}/manifest.json`
+      if (!props.manifest.startsWith('http')) {
+        if (/^[a-z]+:/.test(props.manifest)) props.manifest = `${iiifServiceUrl}/${props.manifest}/manifest.json`
+        else {
+          if (props.manifest[0] === '/') {
+            let [owner, repo, branch, ...rest] = props.ghbase.split('/')
+            props.manifest = `${iiifServiceUrl}/gh:${owner}/${repo}/${branch}${props.manifest}/manifest.json`
+          } else {
+            props.manifest = `${iiifServiceUrl}/gh:${props.ghbase}/${props.manifest}/manifest.json`
+          }
+        }
+      }
       loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     }
 

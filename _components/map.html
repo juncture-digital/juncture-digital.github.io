@@ -274,7 +274,7 @@
 
     const props = {
       ...{              // default properties
-        basemap: 'OpenStreetMap',
+        basemap: null,
         basemaps: 'OpenStreetMap',
         caption: null,   // caption text,
         center: '51.505,-0.09',
@@ -807,7 +807,7 @@
     }
     zoom = props.zoom
 
-    let _basemaps = props.basemaps.split(',').map(name => {
+    let _basemaps = (props.basemap || props.basemaps).split(',').map(name => {
       let [url, options] = baseMapsConfigs[name]
       return [name.replace(/_/,' '), L.tileLayer(url, options)]
     })
