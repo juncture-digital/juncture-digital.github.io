@@ -10,64 +10,9 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-group/tab-group.js';
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
+const isStatic = ['true', ''].includes(new URLSearchParams(window.location.search).get('static'));
+
 let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
-
-const paramToIframe = (param) => {
-  const tag = Array.from(param.attributes).filter(attr => attr.name.startsWith('ve-')).map(attr => attr.name.slice(3))?.[0]
-  if (tag === 'image') {
-    let iframe = document.createElement('iframe')
-    iframe.setAttribute('loading', 'lazy')
-    iframe.setAttribute('allowfullscreen', '')
-    iframe.setAttribute('allow', 'clipboard-write')
-    if (param.id) iframe.id = param.id
-    // if (param.classes.length > 0) iframe.className = param.classes.join(' ')
-
-    let paramArgs = Object.fromEntries(Array.from(param.attributes).map(attr => [attr.name, attr.value]))
-    // console.log(paramArgs)
-
-    let componentArgs = [
-      ...Object.entries(paramArgs)
-        .filter(([key, value]) => key !== 'width' && key !== 'height' && !key.startsWith('ve-')) // iframe attributes not passed to component
-        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-      ].join('&')
-
-    iframe.src = `${junctureComponentsPrefix}/${tag}?${componentArgs}`
-    // param.replaceWith(iframe)
-    return iframe
-  }
-}
-
-// Restructure legacy (v1) content
-const v1Convert = () => {
-  Array.from(content.querySelectorAll('p + param'))
-    .filter(param => Array.from(param.attributes).find(attr => attr.name.startsWith('ve-')))
-    .forEach(param => {
-      let para = param.previousElementSibling
-      let wrapper = document.createElement('div')
-      wrapper.className = 'v1-wrapper'
-      let carousel = document.createElement('sl-carousel')
-      carousel.setAttribute('pagination', '')
-      carousel.setAttribute('navigation', '')
-      carousel.setAttribute('style', '--aspect-ratio: 1;')
-      wrapper.appendChild(para.cloneNode(true))
-      wrapper.appendChild(carousel)
-      para.replaceWith(wrapper)
-
-      let toRemove = []
-      do {
-        toRemove.push(param)
-        let iframe = paramToIframe(param.cloneNode())
-        if (iframe) {
-          let carouselItem = document.createElement('sl-carousel-item')
-          carouselItem.appendChild(iframe)
-          carousel.appendChild(carouselItem)
-        }
-        param = param.nextElementSibling
-        if (param?.tagName !== 'PARAM') break
-      } while (true)
-      toRemove.forEach(param => param.remove())
-    })
-}  
 
 // const classes = new Set('small medium large left right center shadow'.split(' '))
 const parseCodeEl = (el) => {
@@ -125,7 +70,7 @@ const junctureComponentsPrefix = location.port === '4200'
 const makeIframe = (code) => {
   let tag = code.tag || code.kwargs.tag || 'iframe'
   let iframe = document.createElement('iframe')
-  iframe.setAttribute('loading', 'lazy')
+  if (!isStatic) iframe.setAttribute('loading', 'lazy')
   iframe.setAttribute('allowfullscreen', '')
   iframe.setAttribute('allow', 'clipboard-write')
   iframe.setAttribute('title', `${tag} viewer`)
@@ -466,19 +411,24 @@ const addActionLinks = (rootEl) => {
       let path = href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
       const targetIdx = path?.findIndex(p => p == iframe.id)
       if (targetIdx >= 0) {
-        path = path.slice(targetIdx)
-        let action = path[1]
-        let args = path.slice(2)
-        let text = a.getAttribute('label') || a.dataset.label || a.textContent
-        if (a.href) {
-          a.setAttribute('data-href', href)
-          a.classList.add('trigger')
+        if (isStatic) {
           a.removeAttribute('href')
-          a.style.cursor = 'pointer'
-          a.addEventListener('click', () => {
-            let msg = { event: 'action', action, text, args }
-            document.getElementById(iframe.id)?.contentWindow.postMessage(JSON.stringify(msg), '*')
-          })
+          a.style.color = 'inherit'
+        } else{
+          path = path.slice(targetIdx)
+          let action = path[1]
+          let args = path.slice(2)
+          let text = a.getAttribute('label') || a.dataset.label || a.textContent
+          if (a.href) {
+            a.setAttribute('data-href', href)
+            a.classList.add('trigger')
+            a.removeAttribute('href')
+            a.style.cursor = 'pointer'
+            a.addEventListener('click', () => {
+              let msg = { event: 'action', action, text, args }
+              document.getElementById(iframe.id)?.contentWindow.postMessage(JSON.stringify(msg), '*')
+            })
+          }
         }
       }
     })
@@ -636,7 +586,13 @@ const makeEntityPopups = async () => {
   Array.from(document.body.querySelectorAll('a')).forEach(async a => {
     let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
     let qid = path?.find(p => /^Q\d+$/.test(p))
-    if (qid) qids.add(qid)
+    if (qid) {
+      if (isStatic) {
+        a.removeAttribute('href')
+        a.style.color = 'inherit'
+      }
+      else qids.add(qid)
+    }
   })
   let entities = await getEntityData(Array.from(qids), 'en')
   Array.from(document.body.querySelectorAll('a')).forEach(async a => {
@@ -698,7 +654,6 @@ const makeEntityPopups = async () => {
 ////////// End Wikidata Entity functions //////////
 
 const processPage = (content) => {
-  // v1Convert()
   let newContent = restructureMarkdownToSections(content)
   content.innerHTML = newContent.innerHTML
 
@@ -719,7 +674,7 @@ const processPage = (content) => {
       if (!codeEl.inline) makeIframe(codeEl)
     })
 
-  makeDetails(content)
+  if (!isStatic) makeDetails(content)
   makeCards(content)
   makeTabs(content)
   makeEntityPopups()
