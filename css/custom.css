@@ -725,3 +725,12 @@ sl-dialog::part(panel) {
   width: calc(100% - 2em);
 }
   */
+
+@media print {
+  .page-break-before { break-before: page; }
+  .page-break-after { break-after: page; }
+  .keep-together { break-inside: avoid; }
+  .no-break { page-break-inside: avoid; }
+  .page-content { padding-top: 0; }
+  article.post { margin-top: 0; }
+}
