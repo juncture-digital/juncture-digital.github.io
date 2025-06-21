@@ -70,7 +70,8 @@ const junctureComponentsPrefix = location.port === '4200'
 const makeIframe = (code) => {
   let tag = code.tag || code.kwargs.tag || 'iframe'
   let iframe = document.createElement('iframe')
-  iframe.setAttribute('loading', isStatic ? 'eager' : 'lazy')
+  // iframe.setAttribute('loading', isStatic ? 'eager' : 'lazy')
+  iframe.setAttribute('loading', 'lazy')
   iframe.setAttribute('allowfullscreen', '')
   iframe.setAttribute('allow', 'clipboard-write')
   iframe.setAttribute('title', `${tag} viewer`)
