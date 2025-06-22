@@ -288,7 +288,6 @@
       mwImg = decodeURIComponent(mwImg).replace(/ /g,'_')
       const _md5 = md5(mwImg)
       const extension = mwImg.split('.').pop()
-      console.log(`extension=${extension}`)
       let url = `https://upload.wikimedia.org/wikipedia/commons${width ? '/thumb' : ''}`
       url += `/${_md5.slice(0,1)}/${_md5.slice(0,2)}/${mwImg}`
       if (width > 0 || ['svg', 'tif'].includes(extension)) {
@@ -408,7 +407,6 @@
       if (props.src.indexOf('http') === 0) {
         imgUrl = `${imageServiceUrl}/${encodeURIComponent(props.src)}`
         props.manifest = `${iiifServiceUrl}/${encodeURIComponent(props.src)}/manifest.json`
-        console.log(`${imgUrl} ${props.manifest}`)
       } else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1 || props.src.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
         let mwFile = props.src.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
         imgUrl = `${imageServiceUrl}/wc:${mwFile}`

@@ -11,6 +11,7 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
 const isStatic = ['true', ''].includes(new URLSearchParams(window.location.search).get('static'));
+let isMobile = ('ontouchstart' in document.documentElement && /mobi/i.test(navigator.userAgent) )
 
 let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
 
@@ -57,7 +58,6 @@ const parseCodeEl = (el) => {
     let dir = path[0] !== '404.html' ? `/${path.filter(p => !/\.md$/.test(p)).join('/')}` : ''
     parsed.kwargs.ghbase = `${owner}/${repo}/${branch}${dir}`
   }
-  // console.log(parsed)
   return parsed
 }
 
@@ -174,19 +174,28 @@ const restructureMarkdownToSections = (contentEl) => {
       
         // Move the heading into the new section.
         section.appendChild(node);
-        
+
         // Append the new section to the element at the top of the stack.
         stack[stack.length - 1].element.appendChild(section);
         
         // Push the new section onto the stack with its heading level.
         stack.push({ level: headingLevel, element: section });
+
       } else {
         // For non-heading nodes, append them to the current (top of the stack) section.
         stack[stack.length - 1].element.appendChild(node);
       }
     }
   });
-  
+
+  if (!isMobile) {
+    container.querySelectorAll('section.float').forEach(section => {
+      const secondChild = section.children[1];
+      const thirdChild = section.children[2];
+      if (secondChild && thirdChild) section.insertBefore(thirdChild, secondChild);
+    })
+  }
+
   container.querySelector('hr.footnotes-sep')?.remove()
   let footnotes = container.querySelector('section.footnotes')
   if (footnotes) container.appendChild(footnotes)
@@ -499,11 +508,9 @@ async function getEntityData(qids, language) {
       }
       entities[qid] = _entityData
     })
-    // console.log(entityUrls.length, new Set (sparqlResp.results.bindings.map(rec => rec.item.value)).size, Object.keys(summaryUrls).length)
     await Promise.all(Object.keys(summaryUrls).map(url => fetch(url)))
       .then(responses => { return Promise.all(responses.map(resp => resp.json())) })
       .then(data => {
-        // console.log(data)
         data.forEach((data, idx) => {
           let qid = summaryUrls[Object.keys(summaryUrls)[idx]]
           if (data.extract_html) entities[qid].summaryText = data.extract_html
@@ -513,7 +520,6 @@ async function getEntityData(qids, language) {
       .catch(err => console.error('Error fetching summaries:', err))
   }
 
-  // console.log(entities)
   return entities
 }
 
@@ -711,7 +717,6 @@ const processGitHubUrl = (url) => {
   if (new URL(url.trim()).hostname !== 'github.com') return
   let [owner, repo, branch, ...path] = url.split('/').slice(3).filter(p => p !== 'blob' && p !== 'tree')
   path = path.filter(p => p !== 'README.md' && p !== 'index.md').map(p => p.replace(/\.md$/, '')).join('/')
-  // console.log(`owner=${owner} repo=${repo} branch=${branch} path=${path}`)
   let redirect = `${location.origin}/${owner}/${repo}${branch === 'main' ? '' : ('/' + branch)}`
   if (path) redirect += `/${path}`
   location.href = redirect
@@ -752,7 +757,6 @@ document.querySelectorAll('.post-image').forEach((el) => {
 });
 
 let path = rest.slice(0, -1).join('/')
-// console.log(`${owner} ${repo} ${branch} ${path}`)
 document.querySelectorAll('img').forEach((img) => {
   let src = new URL(img.src)
   if (location.origin !== src.origin) return
@@ -763,7 +767,6 @@ document.querySelectorAll('img').forEach((img) => {
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
   img.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${path}/${imgSrc}`
-  // console.log(`img: ${path} src: ${img.src}`)
 });
 
 let selectors = ['.post-content', '.page-content', 'body']
