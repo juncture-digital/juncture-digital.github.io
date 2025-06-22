@@ -269,14 +269,17 @@ iframe[src*="google-book"] {
 
   .large {
     width: 75% !important;
+    flex-grow: 0.75 !important;
   }
 
   .medium {
     width: 50% !important;
+    flex-grow: 0.5 !important;
   }
 
   .small {
     width: 33% !important;
+    flex-grow: 0.33 !important;
   }
 
 }
@@ -733,4 +736,9 @@ sl-dialog::part(panel) {
   .no-break { page-break-inside: avoid; }
   .page-content { padding-top: 0; }
   article.post { margin-top: 0; }
+}
+
+blockquote {
+  font-size: 1rem;
+  line-height: 1.3;
 }

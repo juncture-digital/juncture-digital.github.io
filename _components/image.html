@@ -406,8 +406,9 @@
     if (props.src) {
       let imgUrl
       if (props.src.indexOf('http') === 0) {
-        imgUrl = `${imageServiceUrl}/${props.src}`
-        props.manifest = `${iiifServiceUrl}/${props.src}/manifest.json`
+        imgUrl = `${imageServiceUrl}/${encodeURIComponent(props.src)}`
+        props.manifest = `${iiifServiceUrl}/${encodeURIComponent(props.src)}/manifest.json`
+        console.log(`${imgUrl} ${props.manifest}`)
       } else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1 || props.src.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
         let mwFile = props.src.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
         imgUrl = `${imageServiceUrl}/wc:${mwFile}`

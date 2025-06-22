@@ -586,7 +586,7 @@ const makeEntityPopups = async () => {
   let qids = new Set()
   Array.from(document.body.querySelectorAll('a')).forEach(async a => {
     let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
-    let qid = path?.find(p => /^Q\d+$/.test(p))
+    let qid = path?.find(p => /Q\d+$/.test(p))?.split('#').pop()
     if (qid) {
       if (isStatic) {
         a.removeAttribute('href')
@@ -598,7 +598,7 @@ const makeEntityPopups = async () => {
   let entities = await getEntityData(Array.from(qids), 'en')
   Array.from(document.body.querySelectorAll('a')).forEach(async a => {
     let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
-    let qid = path?.find(p => /^Q\d+$/.test(p))
+    let qid = path?.find(p => /Q\d+$/.test(p))?.split('#').pop()
     let entity = entities[qid]
     if (!entity) return
     let dd = document.createElement('sl-dropdown')
