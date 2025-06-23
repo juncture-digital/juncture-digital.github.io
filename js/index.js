@@ -190,18 +190,17 @@ const restructureMarkdownToSections = (contentEl) => {
   });
 
   if (!isMobile) {
-    container.querySelectorAll('section.float').forEach(section => {
+    container.querySelectorAll('section.wrap').forEach(section => {
       const heading = section.firstElementChild;
       if (!heading) return;
 
-      // Find all direct children that are paragraphs, blockquotes, iframes, or subsections.
+      // Find all direct children (paragraphs, blockquotes, iframes, lists, subsections, etc).
       // The :scope pseudo-class ensures we only select direct children of `section`.
-      const candidates = section.querySelectorAll(':scope > p, :scope > iframe, :scope > section, :scope > blockquote');
+      const children = section.querySelectorAll(':scope > *');
 
-      // If we found any candidate elements...
-      if (candidates.length > 0) {
+      if (children.length > 1) {
         // Get the very last candidate from the list.
-        const lastElementToMove = candidates[candidates.length - 1];
+        const lastElementToMove = children[children.length - 1];
 
         // Use the .after() method to move the last element to be
         // immediately after the heading. This is a clean, modern way to re-insert nodes.

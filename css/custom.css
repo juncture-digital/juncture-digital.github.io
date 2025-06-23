@@ -239,14 +239,14 @@ iframe[src*="google-book"] {
     height: 100% !important;
   }
 
-    .float > iframe, .float > section {
+    .wrap > iframe, .wrap > section {
     float: right;
     margin-left: 1em;
     display: flow-root;
     width: 50%;
   }
 
-  .float.left > iframe, .float.left > section {
+  .wrap.left > iframe, .wrap.left > section {
     float: left;
     margin-right: 1em;
   }
