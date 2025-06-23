@@ -22,7 +22,7 @@ sl-tab-panel::part(base) {
   /* padding: 0; */
 }
 
-iframe ~ p {
+p ~ iframe {
   margin-top: 1em;
 }
 
@@ -131,7 +131,7 @@ iframe[src*="breadcrumbs"] {
 }
 
 iframe[src*="youtube"] {
-  aspect-ratio: 16/9;
+  aspect-ratio: 1.59;
 }
 
 iframe[src*="google.com/maps"] {
@@ -577,13 +577,11 @@ details.example[open] summary::before {
   /* content:"▼"; */
 }
 
-/*
-section:has(> iframe.right), section:has(> iframe.left),
+section.float:has(> iframe),
 .details-content:has(> iframe.right), .details-content:has(> iframe.left) {
   display: flow-root;
   clear: both;
 }
-*/
 
 div.highlight,
 pre.language-juncture {
@@ -756,4 +754,10 @@ sl-dialog::part(panel) {
 blockquote {
   font-size: 1rem;
   line-height: 1.3;
+}
+
+section > section + section {
+  margin-top: 1em;
+  /* border-top: 1px solid #ccc; */
+  padding-top: 2em;
 }

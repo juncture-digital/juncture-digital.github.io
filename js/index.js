@@ -75,6 +75,7 @@ const makeIframe = (code) => {
   iframe.setAttribute('allowfullscreen', '')
   iframe.setAttribute('allow', 'clipboard-write')
   iframe.setAttribute('title', `${tag} viewer`)
+  if (isStatic) code.booleans.push('static')
   if (code.kwargs.width) iframe.setAttribute('width', code.kwargs.width)
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
   if (code.kwargs.aspect) iframe.style.aspectRatio = code.kwargs.aspect
@@ -190,10 +191,23 @@ const restructureMarkdownToSections = (contentEl) => {
 
   if (!isMobile) {
     container.querySelectorAll('section.float').forEach(section => {
-      const secondChild = section.children[1];
-      const thirdChild = section.children[2];
-      if (secondChild && thirdChild) section.insertBefore(thirdChild, secondChild);
-    })
+      const heading = section.firstElementChild;
+      if (!heading) return;
+
+      // Find all direct children that are paragraphs, blockquotes, iframes, or subsections.
+      // The :scope pseudo-class ensures we only select direct children of `section`.
+      const candidates = section.querySelectorAll(':scope > p, :scope > iframe, :scope > section, :scope > blockquote');
+
+      // If we found any candidate elements...
+      if (candidates.length > 0) {
+        // Get the very last candidate from the list.
+        const lastElementToMove = candidates[candidates.length - 1];
+
+        // Use the .after() method to move the last element to be
+        // immediately after the heading. This is a clean, modern way to re-insert nodes.
+        heading.after(lastElementToMove);
+      }
+    });
   }
 
   container.querySelector('hr.footnotes-sep')?.remove()

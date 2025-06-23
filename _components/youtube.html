@@ -18,7 +18,7 @@
     .info .title { font-weight:bold; margin-bottom: 0.5em; }
     .info .thumbnail { width: 40%; max-width:200px; float: left; margin-right: 0.5em; }
 
-    svg { width: 1.3em; height: 1.3em; }
+    svg.drawer-toggle { width: 1.3em; height: 1.3em; }
     
     .drawer-toggle { cursor: pointer; }
     sl-drawer::part(body) { padding: 0; border: 1px solid #ddd; }
@@ -30,6 +30,10 @@
     .wrap { overflow-wrap: break-word; word-wrap: break-word; -ms-word-break: break-all; word-break: break-all; }
     .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .embed { display: flex; margin-bottom: 1em; }
+
+    .videoThumbnail { position: relative; width: 100%; aspect-ratio: 16/9; cursor: pointer; }
+    .videoThumbnail img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .playOverlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px; background: rgba(0, 0, 0, 0.6); border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: background 0.3s ease; }
   </style>
 </head>
 <body>
@@ -37,6 +41,17 @@
   <main>
 
     <figure style="height: 100%;">
+      
+      <!-- Thumbnail container (conditionally shown) -->
+      <div class="videoThumbnail">
+        <img class="thumbnailImg" alt="YouTube thumbnail">
+        <div class="playOverlay">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36" fill="#fff">
+            <polygon points="70,55 70,145 145,100" />
+          </svg>
+        </div>
+      </div>
+
       <iframe id="youtubePlayer" class="content"
         allow="autoplay; encrypted-media"
         allowfullscreen
@@ -84,7 +99,9 @@
 
     const main = document.querySelector('main')
     const figure = main.querySelector('figure')
-    const youtubePlayer = figure.querySelector('iframe')
+    const youtubePlayer = figure.querySelector('#youtubePlayer')
+    const videoThumbnail = figure.querySelector('.videoThumbnail')
+    const thumbnailImg = figure.querySelector('.thumbnailImg')
     const captionEl = figure.querySelector('figcaption')
     const captionLabel = captionEl.querySelector('.label')
     const drawerToggle = captionEl.querySelector('.drawer-toggle')
@@ -105,6 +122,7 @@
         nocaption: false,
         poster: null,
         start: 0,
+        static: false,
         vid: null  // YouTube video id
       },
       ...Object.fromEntries( // URLSearchParams to object
@@ -112,9 +130,12 @@
         .map(([key, value]) => [key, (value === 'true' || !value) ? true : value === 'false' ? false : value])
       )
     }
-    // console.log(props)
+    console.log(props)
 
-    youtubePlayer.setAttribute('src', `https://www.youtube-nocookie.com/embed/${props.vid}?enablejsapi=1`)
+    thumbnailImg.src = `https://img.youtube.com/vi/${props.vid}/hqdefault.jpg`
+    youtubePlayer.src = `https://www.youtube-nocookie.com/embed/${props.vid}?enablejsapi=1`;
+    if (props.static) youtubePlayer.style.display = 'none'
+    else videoThumbnail.style.display = 'none'
 
     let inIframe = window.location !== window.parent.location // flag indicating if the page is in an iframe
     const md2Html = (md) => marked.parse(md).slice(3, -5) // convert markdown to HTML
@@ -156,10 +177,10 @@
     })
     youtubePlayer.addEventListener('load', e => {
       youtubePlayer.contentWindow.postMessage('{"event": "listening"}', '*')
-      setWindowAspect()
+      // setWindowAspect()
       main.style.visibility = 'visible'
       main.style.opacity = '1'
-      new ResizeObserver(() => setWindowAspect() ).observe(document.body)
+      // new ResizeObserver(() => setWindowAspect() ).observe(document.body)
     })
 
     const sendMsg = (func, args) => {
