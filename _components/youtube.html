@@ -14,6 +14,7 @@
     figure { display: grid; grid-template-rows: 1fr auto; margin: 0; }
     .content { display: flex; justify-content: center; align-items: center; overflow: hidden; width: 100%; aspect-ratio: 16/9; }
     figcaption { padding: 6px; font-size: 0.9rem; background-color: #f9f9f9; display: flex; align-items: center; gap: 0.5em; height: 100%; }
+    .expandToggle { width: 1.3rem; height: 1.3rem; cursor: pointer; margin-left: auto; flex-shrink: 0; }
 
     .info .title { font-weight:bold; margin-bottom: 0.5em; }
     .info .thumbnail { width: 40%; max-width:200px; float: left; margin-right: 0.5em; }
@@ -59,6 +60,7 @@
       <figcaption>      
         <svg class="drawer-toggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
         <div class="label clamp"></div>
+        <svg class="expandToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg>
       </figcaption>
 
       <sl-drawer contained class="drawer" no-header style="--size: calc(100% - 32px); display: flex; flex-direction: column; height: 100%;">
@@ -131,6 +133,25 @@
       )
     }
     console.log(props)
+
+    const expandToggle = figure.querySelector('.expandToggle')
+    if (props['in-dialog']) expandToggle.style.display = 'none'
+    else {
+      expandToggle.addEventListener('click', e => {
+        console.log('expand')
+        window.parent.postMessage({ 
+          type: 'showDialog', 
+          props: {
+            kwargs: {
+              ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
+              ...{
+                tag: 'youtube'
+              }
+            }
+          }
+        }, '*');
+      })
+    }
 
     thumbnailImg.src = `https://img.youtube.com/vi/${props.vid}/hqdefault.jpg`
     youtubePlayer.src = `https://www.youtube-nocookie.com/embed/${props.vid}?enablejsapi=1`;

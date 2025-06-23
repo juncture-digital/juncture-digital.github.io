@@ -228,6 +228,10 @@ iframe[src*="google-book"] {
   aspect-ratio: 2 / 3.2 ;
 }
 
+iframe[src*="image-compare"] {
+  aspect-ratio: 0.95;
+}
+
 @media (min-width: 600px) {
 
   sl-card {
@@ -577,7 +581,7 @@ details.example[open] summary::before {
   /* content:"▼"; */
 }
 
-section.float:has(> iframe),
+section.wrap:has(> iframe),
 .details-content:has(> iframe.right), .details-content:has(> iframe.left) {
   display: flow-root;
   clear: both;

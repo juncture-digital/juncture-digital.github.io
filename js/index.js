@@ -372,6 +372,7 @@ const makeDetails = (rootEl) => {
 
 let dialog
 const showDialog = (props) => {
+  // console.log('showDialog', props)
   if (dialog) return
   let aspectRatio = props.kwargs.aspect || 1.0
   let width = aspectRatio > 1.0
@@ -392,6 +393,7 @@ const showDialog = (props) => {
   dialog.appendChild(closeButton)
   let el = document.createElement('div')
   dialog.appendChild(el)
+  props.kwargs['in-dialog'] = ''
   makeIframe({ el, tag: props.tag, kwargs: props.kwargs })
   document.body.appendChild(dialog)
   dialog.show()

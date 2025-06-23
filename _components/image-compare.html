@@ -9,6 +9,10 @@
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
     main {  display: flex; flex-direction: column; width: 100%; }
+    .captionBar { display: flex; align-items: center; gap: 0.2em; height: 36px; margin: 0; background-color: inherit; } 
+    .captionBar svg { width: 1.3em; height: 1.3em; }
+    .expandToggle { width: 1.3rem; height: 1.3rem; cursor: pointer; margin-left: auto; flex-shrink: 0; }
+    .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
   </style>
 </head>
 <body>
@@ -18,12 +22,17 @@
       <img id="before" slot="before"/>
       <img id="after" slot="after"/>
     </sl-image-comparer>
+    <div class="captionBar">
+      <div class="label clamp"></div>
+      <svg class="expandToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg>
+    </div>
   </main>
 
   <script type="module">
 
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/image-comparer/image-comparer.js';
-    
+    import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+
     let iiifServiceUrl = 'https://iiif.mdpress.io';
     let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
 
@@ -42,6 +51,30 @@
     const main = document.querySelector('main');
     const before = document.getElementById('before')
     const after = document.getElementById('after')
+    const captionBar = document.querySelector('.captionBar')
+    
+    const md2Html = (md) => marked.parse(md).slice(3, -5) // convert markdown to HTML
+    const setCaption = (caption) => { captionBar.querySelector('.label').innerHTML = md2Html(caption) }
+    if (props.caption) setCaption(props.caption)
+
+    const expandToggle = captionBar.querySelector('.expandToggle')
+    if (props['in-dialog']) expandToggle.style.display = 'none'
+    else {
+      expandToggle.addEventListener('click', e => {
+        console.log('expand')
+        window.parent.postMessage({ 
+          type: 'showDialog', 
+          props: {
+            kwargs: {
+              ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
+              ...{
+                tag: 'image-compare'
+              }
+            }
+          }
+        }, '*');
+      })
+    }
 
     // recursive helper for finding items in a IIIF manifest
     const findItems = (toMatch, current, found) => {

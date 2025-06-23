@@ -16,13 +16,9 @@
     .content { display: inline-block; overflow: hidden; position: relative; }
     .content img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .content .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1; }
-    figcaption { padding: 10px; font-size: 0.9rem; background-color: #f9f9f9; display: flex; align-items: center; gap: 0.5em; }
+    figcaption { padding: 10px; font-size: 0.9rem; background-color: #f9f9f9; display: flex; align-items: center; gap: 0.5em; font-size: 1rem; }
     svg { width: 1.3em; height: 1.3em; }
     #osd { display:none; height: 100%; width:100%; position: relative; opacity: 0; animation: fadeInOpacity ease 1s; }
-    .a9s-annotationlayer { visibility: hidden; }
-    .r6o-widget.comment { line-height: 1.5; }
-    svg.a9s-annotationlayer .a9s-selection .a9s-inner, svg.a9s-annotationlayer .a9s-annotation .a9s-inner  { stroke-width: 3; stroke: rgba(255,255,0,1.0); }
-    .a9s-selection-mask { stroke: none; fill: rgba(0,0,0,0.4); pointer-events: none; }
     .manifestButton { width: 1.3em; height: 1.3em; cursor: pointer; }
     .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     sl-drawer::part(base) { box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; }
@@ -31,7 +27,8 @@
     sl-tab::part(base) { padding: 0.5em 1em; }
     sl-tab-panel::part(base) { padding: 0.5em; }
     sl-tab-panel[aria-hidden=true] { display: none !important; }
-    .drawer-toggle { width: 1.3em; height: 1.3em; cursor: pointer; }
+    .expandToggle { width: 1.3rem; height: 1.3rem; cursor: pointer; margin-left: auto; flex-shrink: 0; }
+    .drawerToggle { width: 1.3rem; height: 1.3rem; cursor: pointer; }
     pre { white-space: pre-wrap; word-wrap: break-word; }
     .wrap { overflow-wrap: break-word; word-wrap: break-word; -ms-word-break: break-all; word-break: break-all; word-break: break-word; }
     .manifest > * { margin: 0.3em; display: none; font-size: 90%;}
@@ -73,8 +70,9 @@
       </div>
 
       <figcaption>      
-        <svg class="drawer-toggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
+        <svg class="drawerToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
         <div class="title clamp"></div>
+        <svg class="expandToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg>
       </figcaption>
 
     </figure>
@@ -124,7 +122,7 @@
     const osd = figure.querySelector('#osd')
 
     const caption = figure.querySelector('figcaption')
-    const drawerToggle = caption.querySelector('.drawer-toggle')
+    const drawerToggle = caption.querySelector('.drawerToggle')
 
     const captionText = caption.querySelector('.title')
 
@@ -232,9 +230,30 @@
 
     const toggleDrawerOpen = () => drawer.open = !drawer.open
 
-    const drawerButton = caption.querySelector('.drawer-toggle')
+    const drawerButton = caption.querySelector('.drawerToggle')
     drawerButton.addEventListener('click', e => toggleDrawerOpen())
   
+    const expandButton = caption.querySelector('.expandToggle')
+    if (props['in-dialog']) expandButton.style.display = 'none'
+    else {
+      expandButton.addEventListener('click', e => {
+        window.parent.postMessage({ 
+          type: 'showDialog', 
+          props: {
+            kwargs: {
+              ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
+              ...{
+                aspect: imageAspect,
+                tag: 'image',
+                iiif: true,
+                cover: true
+              }
+            }
+          }
+        }, '*');
+      })
+    } 
+
     document.querySelector('.drawer sl-button.close').addEventListener('click', e => toggleDrawerOpen())
 
     // recursive helper for finding items in a IIIF manifest
@@ -430,7 +449,7 @@
           props.manifest = `${iiifServiceUrl}/gh:${props.ghbase}/${props.src}/manifest.json`
         }
       }
-      loadImage(imgUrl)
+      if (!props.iiif) loadImage(imgUrl)
       loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     
     } else if (props.manifest) {
