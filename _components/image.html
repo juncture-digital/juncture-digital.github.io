@@ -16,8 +16,8 @@
     .content { display: inline-block; overflow: hidden; position: relative; }
     .content img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .content .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1; }
-    figcaption { padding: 10px; font-size: 0.9rem; background-color: #f9f9f9; display: flex; align-items: center; gap: 0.5em; font-size: 1rem; }
-    svg { width: 1.3em; height: 1.3em; }
+    figcaption { display: inline-flex; align-items: center; gap: 0.4em; line-height: 1.2; }
+    figcaption svg { width: 1em; height: 1em; flex: none; fill: currentColor; cursor: pointer; }
     #osd { display:none; height: 100%; width:100%; position: relative; opacity: 0; animation: fadeInOpacity ease 1s; }
     .manifestButton { width: 1.3em; height: 1.3em; cursor: pointer; }
     .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
@@ -27,8 +27,7 @@
     sl-tab::part(base) { padding: 0.5em 1em; }
     sl-tab-panel::part(base) { padding: 0.5em; }
     sl-tab-panel[aria-hidden=true] { display: none !important; }
-    .expandToggle { width: 1.3rem; height: 1.3rem; cursor: pointer; margin-left: auto; flex-shrink: 0; }
-    .drawerToggle { width: 1.3rem; height: 1.3rem; cursor: pointer; }
+    .expandToggle { margin-left: auto; flex-shrink: 0; }
     pre { white-space: pre-wrap; word-wrap: break-word; }
     .wrap { overflow-wrap: break-word; word-wrap: break-word; -ms-word-break: break-all; word-break: break-all; word-break: break-word; }
     .manifest > * { margin: 0.3em; display: none; font-size: 90%;}
@@ -88,6 +87,7 @@
             <div class="rights"></div>
             <div class="source wrap"></div>
             <div class="size"></div>
+            <div class="aspect"></div>
           </div>
         </sl-tab-panel>
       </sl-tab-group>
@@ -121,10 +121,10 @@
     const img = figure.querySelector('img')
     const osd = figure.querySelector('#osd')
 
-    const caption = figure.querySelector('figcaption')
-    const drawerToggle = caption.querySelector('.drawerToggle')
+    const figcaption = figure.querySelector('figcaption')
+    const drawerToggle = figcaption.querySelector('.drawerToggle')
 
-    const captionText = caption.querySelector('.title')
+    const captionText = figcaption.querySelector('.title')
 
     const drawer = document.querySelector('.drawer')
     const title = drawer.querySelector('#title')
@@ -230,13 +230,13 @@
 
     const toggleDrawerOpen = () => drawer.open = !drawer.open
 
-    const drawerButton = caption.querySelector('.drawerToggle')
-    drawerButton.addEventListener('click', e => toggleDrawerOpen())
+    const drawerButton = figcaption.querySelector('.drawerToggle')
+    drawerButton?.addEventListener('click', e => toggleDrawerOpen())
   
-    const expandButton = caption.querySelector('.expandToggle')
-    if (props['in-dialog']) expandButton.style.display = 'none'
+    const expandToggle = figcaption.querySelector('.expandToggle')
+    if (props['in-dialog'] && expandToggle) expandToggle.style.display = 'none'
     else {
-      expandButton.addEventListener('click', e => {
+      expandToggle?.addEventListener('click', e => {
         window.parent.postMessage({ 
           type: 'showDialog', 
           props: {
@@ -355,10 +355,10 @@
             ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
             : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' '))
       if (props.nocaption === true) {
-        caption.style.display = 'none'
+        figcaption.style.display = 'none'
       } else {
         captionText.innerHTML = md2Html(text)    
-        caption.style.display = 'flex'
+        // figcaption.style.display = 'flex'
       }
       img.setAttribute('atl', props.alt || text)
     }
@@ -568,6 +568,54 @@
       return parsed
     }
 
+    /**
+    * Compute:
+    *   • the vw‐coefficients you need for font-size and padding
+    *   • the exact aspect-ratio number for the parent <iframe>
+    *
+    * @param {number} widthPx       – baseline iframe width (e.g. 400)
+    * @param {number} fontPx        – caption font-size you want at that width
+    * @param {number} paddingPx     – caption padding *per side* at that width
+    * @param {number} imgAspect     – image width ÷ height  (e.g. 1.5 for 3 : 2)
+    * @param {number} lineHeight    – (optional) line-height multiplier, default 1.2
+    * @returns {{
+    *   fontVW:    number,   // coefficient for `clamp(..., Xvw, fontPx)`
+    *   padVW:     number,   // coefficient for `clamp(..., Yvw, paddingPx)`
+    *   aspect:    number    // iframe aspect-ratio (width / height, 4-decimals)
+    * }}
+    */
+    function calcIframeMeta(
+      widthPx,
+      fontPx,
+      paddingPx,
+      imgAspect,
+      lineHeight = 1.2
+    ) {
+      // 1. vw coefficients ( 100 × px / baseline-width )
+      const fontVW = (fontPx / widthPx) * 100;
+      const padVW  = (paddingPx / widthPx) * 100;
+
+      // 2. absolute heights at the baseline width
+      const imgH  = widthPx / imgAspect;
+      const capH  = fontPx * lineHeight + paddingPx * 2;
+
+      // 3. iframe aspect-ratio (width / total-height)
+      const aspect = +(widthPx / (imgH + capH)).toFixed(4);
+
+      return { fontVW, padVW, aspect };
+
+      // How to apply the output
+      //  figcaption {
+      //    font-size: clamp(0.8rem, 4vw, 16px);   /* 4vw from meta.fontVW */
+      //    padding-block: clamp(4px, 2vw, 8px);   /* 2vw from meta.padVW */
+      //    line-height: 1.2;
+      //  }
+      //  figcaption svg { width: 1em; height: 1em; }
+
+      /* clamp( minimum,  preferred,  maximum ) = The browser takes the preferred value only if it falls between the minimum and the maximum.  Otherwise it picks whichever bound was crossed.
+      */
+    }
+
     const updateManifestPanel = () => {
       let parsed = parseManifest()      
       if (parsed.label) document.querySelector('.manifest .label').innerHTML = parsed.label.join(' ')
@@ -576,8 +624,19 @@
       if (parsed.rights) document.querySelector('.manifest .rights').innerHTML = `<span><b>Reuse rights:</b></span><a href="${parsed.rights.url}">${parsed.rights.code}</a>` + (parsed.rights.badge || '')
       if (parsed.sourceUrl) document.querySelector('.manifest .source').innerHTML = `<span><b>Source:</b></span> <a href="${parsed.sourceUrl}">${parsed.sourceUrl}</a>`
       if (parsed.imageData) {
-        let windowAspectRatio = main.clientWidth/(main.clientWidth / (parsed.imageData.width/parsed.imageData.height) + caption.clientHeight)
-        document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width} × ${parsed.imageData.height} (${windowAspectRatio.toFixed(2)})`
+        if (!imageAspect) imageAspect = parsed.imageData.width/parsed.imageData.height
+        let iframeMeta = calcIframeMeta(
+          400, // baseline width
+          16, // font size
+          8,  // padding
+          imageAspect,
+          1.2 // line height
+        )
+        figcaption.style.fontSize = `clamp(0.8rem, ${iframeMeta.fontVW}vw, 16px)`
+        figcaption.style.paddingBlock = `clamp(4px, ${iframeMeta.padVW}vw, 8px)`
+        window.parent.postMessage({ type: 'setAspect', aspect: props.nocaption ? imageAspect : iframeMeta.aspect }, '*');
+        document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width} × ${parsed.imageData.height}`
+        document.querySelector('.manifest .aspect').innerHTML = `<span><b>Aspect ratios: </b></span><span>image: ${imageAspect.toFixed(3)}</span><span> Aspect ratio with caption: ${iframeMeta.aspect.toFixed(3)}</span>`
       } else {
         document.querySelector('.manifest .size').innerHTML = ''
       }

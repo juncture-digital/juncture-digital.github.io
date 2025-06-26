@@ -15,6 +15,35 @@ let isMobile = ('ontouchstart' in document.documentElement && /mobi/i.test(navig
 
 let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
 
+/**
+ * Parse a CSS style string into a plain object.
+ * @param {string} styleString — e.g. "color: red; margin: 10px;"
+ * @returns {Object} — { color: "red", margin: "10px" }
+ */
+const parseStyleString = (styleString) => {
+  return styleString
+    .split(';')
+    .map(s => s.trim())
+    .filter(s => s.length)
+    .reduce((obj, declaration) => {
+      const [prop, ...vals] = declaration.split(':');
+      obj[prop.trim()] = vals.join(':').trim();
+      return obj;
+    }, {});
+}
+
+/**
+ * Serialize a style-object back into a CSS style string.
+ * @param {Object} styleObj — e.g. { color: "red", margin: "10px" }
+ * @returns {string} — "color: red; margin: 10px;"
+ */
+const serializeStyleObject = (styleObj) => {
+  return Object
+    .entries(styleObj)
+    .map(([prop, value]) => `${prop}: ${value};`)
+    .join(' ');
+}
+
 // const classes = new Set('small medium large left right center shadow'.split(' '))
 const parseCodeEl = (el) => {
   let tokens = []
@@ -23,6 +52,8 @@ const parseCodeEl = (el) => {
     else tokens.push(token)
   })
   let parsed = {el, tag:null, id:null, kwargs:{}, classes:[], booleans:[], data:[]}
+  let styleAttr = el.parentElement.getAttribute('style')
+  if (styleAttr) parsed.style = parseStyleString(styleAttr)
   let tokenIdx = 0
   while (tokenIdx < tokens.length) {
     let token = tokens[tokenIdx].replace(/<em>/g, '_').replace(/<\/em>/g, '_')
@@ -76,7 +107,7 @@ const makeIframe = (code) => {
   iframe.setAttribute('allow', 'clipboard-write')
   iframe.setAttribute('title', `${tag} viewer`)
   if (isStatic) code.booleans.push('static')
-  if (code.kwargs.width) iframe.setAttribute('width', code.kwargs.width)
+  iframe.setAttribute('width', code.kwargs.width || '100%')
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
   if (code.kwargs.aspect) iframe.style.aspectRatio = code.kwargs.aspect
   if (tag === 'audio') iframe.setAttribute('allow', 'autoplay')
@@ -94,8 +125,8 @@ const makeIframe = (code) => {
   if (isOnlyChild && code.el.parentElement.tagName !== 'SL-DIALOG') code.el.parentElement.replaceWith(iframe)
   else {
     let nonCodeElements = Array.from(code.el.parentElement?.children).filter(c => c.tagName !== 'CODE').length
-    if (!nonCodeElements) code.el.parentElement.classList.add('iframe-container')
-      code.el.replaceWith(iframe)
+    if (!nonCodeElements) code.el.parentElement.classList.add('flex-grid')
+    code.el.replaceWith(iframe)
   }
 }
 
@@ -403,7 +434,10 @@ const addMessageHandler = () => {
   window.addEventListener('message', (event) => {
     if (event.data.type === 'setAspect') {
       const sendingIframe = Array.from(document.querySelectorAll('iframe')).find((iframe) => iframe.contentWindow === event.source)
-      if (sendingIframe) sendingIframe.style.aspectRatio = event.data.aspect
+      if (sendingIframe) {
+        console.log(sendingIframe, event.data.aspect)
+        sendingIframe.style.aspectRatio = event.data.aspect
+      }
     } else if (event.data.type === 'showDialog') {
       // if (event.origin !== location.origin) return;
       showDialog(event.data.props)
@@ -458,6 +492,80 @@ const addActionLinks = (rootEl) => {
       }
     })
   })
+}
+
+/**
+ * Pack a list of elements (with CSS aspectRatio set) into rows that
+ * exactly fill a given width—unless there’s only one row. In that case
+ * we still try to fill it, but cap the height at 150% of the target.
+ *
+ * @param {HTMLElement[]} elements  Array of iframes (or other elements).
+ * @param {number} rowWidth         Total width of each row (in px).
+ * @param {number} spacing          Spacing between items and between rows (in px).
+ */
+function packIframes(elements, rowWidth, spacing) {
+  const TARGET_ROW_HEIGHT = 260;
+  const MAX_SINGLE_ROW_HEIGHT = TARGET_ROW_HEIGHT * 1.5;
+
+  // 1. Build rows the same way
+  let rows = [], current = [], sumAR = 0;
+  elements.forEach((el, idx) => {    
+    let [w, h] = (el.style.aspectRatio || '1.325 / 1').split('/').map(n => parseFloat(n));
+    let ar = w / h;
+    let projected = (sumAR + ar) * TARGET_ROW_HEIGHT + spacing * current.length;
+
+    if (projected > rowWidth && current.length > 0) {
+      rows.push({ items: current, totalAR: sumAR, isLast: false });
+      current = [{ el, ar }];
+      sumAR = ar;
+    } else {
+      current.push({ el, ar });
+      sumAR += ar;
+    }
+
+    if (idx === elements.length - 1) {
+      rows.push({ items: current, totalAR: sumAR, isLast: true });
+    }
+  });
+
+  // 2. If there's exactly one row, try to fully justify it up to the max height
+  if (rows.length === 1) {
+    let row = rows[0],
+        n = row.items.length,
+        fullH = (rowWidth - spacing * (n - 1)) / row.totalAR,
+        H = Math.min(fullH, MAX_SINGLE_ROW_HEIGHT);
+
+    row.items.forEach(({ el, ar }, i) => {
+      el.style.width  = `${ar * H}px`;
+      el.style.height = `${H}px`;
+      el.style.marginRight  = i < n - 1 ? `${spacing}px` : '0';
+      el.style.marginBottom = '0';
+    });
+    return;
+  }
+
+  // 3. Otherwise, lay out multiple rows normally
+  rows.forEach(row => {
+    if (!row.isLast) {
+      // full justify
+      let H = (rowWidth - spacing * (row.items.length - 1)) / row.totalAR;
+      row.items.forEach(({ el, ar }, i) => {
+        el.style.width  = `${ar * H}px`;
+        el.style.height = `${H}px`;
+        el.style.marginRight  = i < row.items.length - 1 ? `${spacing}px` : '0';
+        el.style.marginBottom = `${spacing}px`;
+      });
+    } else {
+      // last row (left-aligned at target height)
+      row.items.forEach(({ el, ar }, i) => {
+        let H = TARGET_ROW_HEIGHT;
+        el.style.width  = `${ar * H}px`;
+        el.style.height = `${H}px`;
+        el.style.marginRight  = i < row.items.length - 1 ? `${spacing}px` : '0';
+        el.style.marginBottom = `${spacing}px`;
+      });
+    }
+  });
 }
 
 ////////// Start Wikidata Entity functions //////////
@@ -701,31 +809,12 @@ const processPage = (content) => {
   makeTabs(content)
   makeEntityPopups()
   addActionLinks(content)
-}
 
-// processPage(document.querySelector('.post-content') || document.body)
-
-/*
-let content = document.querySelector('.post-content') || document.body
-if (content) {
-  processPage(content)
-} else {
-
-  let observer = new MutationObserver((mutations) => {
-    mutations.forEach(mutation => {
-      mutation.addedNodes.forEach(node => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          if (node.matches(contentSelector)) {
-            observer.disconnect()
-            processPage(node)
-          }
-        }
-      })
-    })
+  document.querySelectorAll('.flex-grid').forEach(container => {
+    // console.log(iframeGridLayout(Array.from(container.children), content.clientWidth))
+    packIframes(Array.from(container.children), content.clientWidth, 8)
   })
-  observer.observe(document.body, { childList: true, subtree: true })
 }
-*/
 
 // Handle drag-and-drop and copy/paste URLs from GitHub.  This provides a convenient way to view Juncture pages using a GitHub source.
 const processGitHubUrl = (url) => {

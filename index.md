@@ -11,7 +11,7 @@ Welcome to Juncture – your fast, free gateway to building engaging, interactiv
 ## Create Websites That Captivate
 
 ![](/static/images/Juncture_Features.svg)
-{: .right .shadow}
+{: .float .medium .shadow}
 
 - **Quick & Accessible:** Launch your website in minutes without costly licenses or steep learning curves. Juncture provides all the tools you need to design a polished, interactive site.
 
