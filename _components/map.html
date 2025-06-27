@@ -10,12 +10,68 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     @keyframes fadeInOpacity { 0% { opacity: 0; } 100% { opacity: 1; } }
-    body { margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
-    main { display: flex; flex-direction: column; width: 100%; aspect-ratio: 1 / 1; visibility: hidden; }
+    
+    /* ------------------------------------------------------------------
+      Global reset so the iframe box behaves predictably
+    ------------------------------------------------------------------ */
+    html, body {
+      margin: 0;
+      height: 100%;               /* let the flexbox fill the iframe */
+      box-sizing: border-box;
+      font-family: system-ui, sans-serif;
+    }
+    main { height: 100%; display: flex; flex-direction: column; width: 100%; visibility: hidden; } 
+
+    /* ------------------------------------------------------------------
+      Layout: figure stretches to full iframe height, image flexes,
+      caption is a fixed-height band (16 px text, 8 px padding each side)
+    ------------------------------------------------------------------ */
+    figure {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    figure { display: grid; grid-template-rows: 1fr auto; height: 100%; margin: 0; }
+
+    figure #map {
+      width: 100%;
+      height: 100%;               /* keeps natural aspect */
+      flex: 1 0 0;                /* consume whatever height is left */
+    }
+
+    /* ---- caption ------------------------------------------------------- */
+    figcaption {
+      font-size: 16px;            /* fixed across all iframes */
+      line-height: 1.2;
+      padding: 8px 0;             /* 8 px top + bottom (fixed) */
+      text-align: left;          /* left-align text */
+      display: flex;
+      align-items: center;
+      /* optional styling niceties */
+      background: #fff;           /* keeps text readable over dark images */
+    }
+
+    /* ---- any inline SVG icons in the caption --------------------------- */
+    figcaption svg {
+      width: 1em;                 /* 1 × font-size → scales with 16 px text */
+      height: 1em;
+      margin-inline: .3em;
+      flex: none;                 /* don’t let flexbox shrink it */
+      fill: currentColor;         /* inherit text colour automatically */
+    }
+    
+    /*
+    body { height:100dvh; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
+    main { height: 100%; display: flex; flex-direction: column; width: 100%; visibility: hidden; } 
+    figure { display: grid; grid-template-rows: 1fr auto; height: 100%; margin: 0; }
     #content { position:relative; flex: 1; width: 100%; z-index: 2;}
-    .captionBar { display: flex; align-items: center; gap: 0.2em; height: 36px; margin: 0; background-color: inherit; } 
-    .captionBar svg { width: 1.3em; height: 1.3em; }
-    .expandToggle { width: 1.3rem; height: 1.3rem; cursor: pointer; margin-left: auto; flex-shrink: 0; }
+    figcaption { display: inline-flex; align-items: center; gap: 0.4em; line-height: 1.2; }
+    figcaption svg { width: 1em; height: 1em; flex: none; fill: currentColor; cursor: pointer; }
+    #map { width:100%; height:100%; cursor:pointer; }
+    */
+    .expandToggle { cursor: pointer; margin-left: auto; flex-shrink: 0; }
     sl-drawer::part(body) { padding: 0; margin: 3px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; }
     sl-tab::part(base) { padding: 0.5em 1em; }
     sl-tab-panel::part(base) { padding: 0.5em; }
@@ -24,7 +80,6 @@
     .wrap { overflow-wrap: break-word; word-wrap: break-word; -ms-word-break: break-all; word-break: break-all; word-break: break-word; }
     .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     h4 { margin: 0 0 0.5em 0; }
-    #map { width:100%; height:100%; cursor:pointer; }
     #coords { font-size: .8em; opacity: 0; position: absolute; top: 0; right: 0; background-color: rgba(255, 255, 255, 0.5); border: 1px solid #ccc; padding: 0.5em; z-index: 500; transition: all 0.5s ease-out; }
     #coords:hover { opacity:1; transition: all 0.3s ease-in; cursor: copy; }
 
@@ -40,18 +95,29 @@
 <body>
   
   <main>
-    <div id="content">
-      <div id="coords">Coords</div>
-      <div id="map"></div>
-    </div>
-    
-    <sl-drawer contained class="drawer" no-header style="--size: calc(100% - 30px);">
+
+    <figure>
+      <div id="content">
+        <div id="coords">Coords</div>
+        <div id="map"></div>
+      </div>
+
+      <figcaption>      
+        <svg class="drawerToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
+        <div class="title clamp"></div>
+        <svg class="expandToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg>
+      </figcaption>
+
+    </figure>
+
+     <sl-drawer contained class="drawer" no-header style="--size: calc(100% - 30px);">
       <sl-tab-group>
         <sl-tab slot="nav" active panel="about">About</sl-tab>
         <sl-tab slot="nav" panel="embed">Embed</sl-tab>
         <sl-tab-panel active name="about">
           <h4>About the Juncture IFrame Components</h4>
-          For more information, visit <a href="https://juncture-digital.io">juncture-digital.io</a>.
+          For more information, visit <a href="https://juncture-digital.io">juncture-digital.io</a>
+          <div class="aspect"></div>
         </sl-tab-panel>
         <sl-tab-panel name="embed">
           <h4>Embedding components</h4>
@@ -60,12 +126,6 @@
         </sl-tab-panel>
       </sl-tab-group>
     </sl-drawer>
-
-    <div class="captionBar">
-      <svg class="drawerToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
-      <div class="label clamp"></div>
-      <svg class="expandToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg>
-    </div>
 
   </main>
 
@@ -249,8 +309,10 @@
     }
 
     const main = document.querySelector('main')
+    const figure = main.querySelector('figure')
     const content = document.querySelector('#content')
-    const captionBar = document.querySelector('.captionBar')
+    const figcaption = figure.querySelector('figcaption')
+
     const coords = document.querySelector('#coords')
     const mapEl = document.querySelector('#map')
 
@@ -258,6 +320,7 @@
     let latLngZoom
     let zoomed
     let priorLoc
+    let windowAspectRatio = 0.919
 
     const isMobile = ('ontouchstart' in document.documentElement && /mobi/i.test(navigator.userAgent) )
 
@@ -271,7 +334,7 @@
     coords.addEventListener('click', e => copyTextToClipboard(coords.textContent))
 
     const drawer = document.querySelector('.drawer')
-    const drawerToggle = captionBar.querySelector('.drawerToggle')
+    const drawerToggle = figcaption.querySelector('.drawerToggle')
     drawerToggle.addEventListener('click', e => drawer.open = !drawer.open)
 
     const props = {
@@ -299,25 +362,25 @@
     let inIframe = window.location !== window.parent.location // flag indicating if the page is in an iframe
     const md2Html = (md) => marked.parse(md).slice(3, -5) // convert markdown to HTML
 
-    const setCaption = (caption) => { captionBar.querySelector('.label').innerHTML = md2Html(caption) }
+    const setCaption = (caption) => { figcaption.querySelector('.title').innerHTML = md2Html(caption) }
     const docReady = (fn) => { if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(fn, 1); else document.addEventListener('DOMContentLoaded', fn) }
     
     let center
     let zoom = 8
     let caption
 
-    const expandToggle = captionBar.querySelector('.expandToggle')
+    const expandToggle = figcaption.querySelector('.expandToggle')
     if (props['in-dialog']) expandToggle.style.display = 'none'
     else {
       expandToggle.addEventListener('click', e => {
-        console.log('expand')
         window.parent.postMessage({ 
           type: 'showDialog', 
           props: {
             kwargs: {
               ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
               ...{
-                tag: 'map'
+                tag: 'map',
+                aspect: windowAspectRatio,
               }
             }
           }
@@ -622,7 +685,7 @@
     }
     if (def.kwargs.layer) def.layerName = decodeURIComponent(def.kwargs.layer)
   }
-  console.log(layerDefs)
+  // console.log(layerDefs)
 
 
   const tokenize = (s) => {
@@ -935,7 +998,12 @@
 
     if (props.caption) setCaption(props.caption)
     main.style.visibility = 'visible'
-    
+
+    let mapAspectRatio = parseFloat(props.aspect || 1)
+    windowAspectRatio = main.clientWidth/(main.clientWidth / mapAspectRatio + figcaption.clientHeight)
+    window.parent.postMessage({ type: 'setAspect', aspect: windowAspectRatio }, '*');
+    document.querySelector('.aspect').innerHTML = `<span><b>Aspect ratio: </b></span> ${mapAspectRatio.toFixed(2)}`
+
     map = await initMap()
 
    if (props.data) {

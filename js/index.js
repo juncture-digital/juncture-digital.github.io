@@ -109,7 +109,8 @@ const makeIframe = (code) => {
   if (isStatic) code.booleans.push('static')
   iframe.setAttribute('width', code.kwargs.width || '100%')
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
-  if (code.kwargs.aspect) iframe.style.aspectRatio = code.kwargs.aspect
+  // if (code.kwargs.aspect) iframe.style.aspectRatio = code.kwargs.aspect
+  if (code.kwargs.aspect) iframe.dataset.aspect = code.kwargs.aspect
   if (tag === 'audio') iframe.setAttribute('allow', 'autoplay')
   if (code.id) iframe.id = code.id
   if (code.classes?.length > 0) iframe.className = code.classes.join(' ')
@@ -403,8 +404,8 @@ const makeDetails = (rootEl) => {
 
 let dialog
 const showDialog = (props) => {
-  // console.log('showDialog', props)
   if (dialog) return
+  console.log('props')
   let aspectRatio = props.kwargs.aspect || 1.0
   let width = aspectRatio > 1.0
     ? window.innerWidth * 0.93
@@ -435,7 +436,6 @@ const addMessageHandler = () => {
     if (event.data.type === 'setAspect') {
       const sendingIframe = Array.from(document.querySelectorAll('iframe')).find((iframe) => iframe.contentWindow === event.source)
       if (sendingIframe) {
-        console.log(sendingIframe, event.data.aspect)
         sendingIframe.style.aspectRatio = event.data.aspect
       }
     } else if (event.data.type === 'showDialog') {
@@ -495,32 +495,55 @@ const addActionLinks = (rootEl) => {
 }
 
 /**
- * Pack a list of elements (with CSS aspectRatio set) into rows that
- * exactly fill a given width—unless there’s only one row. In that case
- * we still try to fill it, but cap the height at 150% of the target.
+ * Pack an array of IFRAMES into rows of equal total height.
+ * Each iframe may show or hide its caption:
+ *   – default = caption ON  (fixed 16-px text + 8-px padding each side)
+ *   – add '?nocaption' to the src URL ⇒ caption OFF
  *
- * @param {HTMLElement[]} elements  Array of iframes (or other elements).
- * @param {number} rowWidth         Total width of each row (in px).
- * @param {number} spacing          Spacing between items and between rows (in px).
+ * @param {HTMLElement[]} elements  array of <iframe> or <figure>
+ * @param {number}        rowWidth  available width for every row (px)
+ * @param {number}        spacing   gap between items and between rows (px)
  */
 function packIframes(elements, rowWidth, spacing) {
-  const TARGET_ROW_HEIGHT = 260;
-  const MAX_SINGLE_ROW_HEIGHT = TARGET_ROW_HEIGHT * 1.5;
+  /* --- caption metrics -------------------------------------------------- */
+  const CAP_FONT = 16;          // px
+  const LINE_H   = 1.2;         // multiplier
+  const PAD      = 8;           // px (per side)
 
-  // 1. Build rows the same way
-  let rows = [], current = [], sumAR = 0;
-  elements.forEach((el, idx) => {    
-    let [w, h] = (el.style.aspectRatio || '1.325 / 1').split('/').map(n => parseFloat(n));
-    let ar = w / h;
-    let projected = (sumAR + ar) * TARGET_ROW_HEIGHT + spacing * current.length;
+  const CAPTION_H = CAP_FONT * LINE_H + PAD * 2; // 35.2 px
 
-    if (projected > rowWidth && current.length > 0) {
+  /* --- row policy -------------------------------------------------------- */
+  const TARGET_ROW_H     = 260;                 // desired total iframe height
+  const MAX_SINGLE_ROW_H = TARGET_ROW_H * 1.5;  // cap when only one row
+
+  /* -----------------------------------------------------------------------
+     1.  Build rows greedily (as before, using TARGET_ROW_H for projection)
+         For each element store its image aspect and its caption height
+  ------------------------------------------------------------------------*/
+  const rows = [];
+  let current = [], sumAR = 0;
+
+  const hasNoCaption = src => {
+    try   { return new URL(src, location.href).searchParams.has('nocaption'); }
+    catch { return false; }   // malformed URL? assume caption present
+  };
+
+  elements.forEach((el, idx) => {
+    const imgAR = parseFloat(el.dataset.aspect || '1.5');
+    const capH  = hasNoCaption(el.getAttribute('src')) ? 0 : CAPTION_H;
+
+    const proj =
+      sumAR * (TARGET_ROW_H - capH) +
+      imgAR * (TARGET_ROW_H - capH) +
+      spacing * current.length;
+
+    if (proj > rowWidth && current.length) {
       rows.push({ items: current, totalAR: sumAR, isLast: false });
-      current = [{ el, ar }];
-      sumAR = ar;
+      current = [{ el, imgAR, capH }];
+      sumAR   = imgAR;
     } else {
-      current.push({ el, ar });
-      sumAR += ar;
+      current.push({ el, imgAR, capH });
+      sumAR += imgAR;
     }
 
     if (idx === elements.length - 1) {
@@ -528,43 +551,50 @@ function packIframes(elements, rowWidth, spacing) {
     }
   });
 
-  // 2. If there's exactly one row, try to fully justify it up to the max height
-  if (rows.length === 1) {
-    let row = rows[0],
-        n = row.items.length,
-        fullH = (rowWidth - spacing * (n - 1)) / row.totalAR,
-        H = Math.min(fullH, MAX_SINGLE_ROW_HEIGHT);
+  /* -----------------------------------------------------------------------
+     2.  Helper to compute the *exact* row height that will justify a row,
+         given its members (some with caption, some without).
+         Formula:  H = ( W - gaps + Σ(imgAR·capH) ) / Σ(imgAR)
+  ------------------------------------------------------------------------*/
+  const justifyRowHeight = (row, isSingleRow = false) => {
+    const gaps = spacing * (row.items.length - 1);
+    const sumAR_cap = row.items.reduce((t, it) => t + it.imgAR * it.capH, 0);
+    const fullH = (rowWidth - gaps + sumAR_cap) / row.totalAR;
+    if (isSingleRow) return Math.min(fullH, MAX_SINGLE_ROW_H);
+    return fullH;
+  };
 
-    row.items.forEach(({ el, ar }, i) => {
-      el.style.width  = `${ar * H}px`;
-      el.style.height = `${H}px`;
-      el.style.marginRight  = i < n - 1 ? `${spacing}px` : '0';
+  /* -----------------------------------------------------------------------
+     3.  Single-row case  (fill width, but respect the 150 % cap)
+  ------------------------------------------------------------------------*/
+  if (rows.length === 1) {
+    const row   = rows[0];
+    const H     = justifyRowHeight(row, true);
+
+    row.items.forEach(({ el, imgAR, capH }, i) => {
+      const imgH = H - capH;
+      el.style.width        = `${imgAR * imgH}px`;
+      el.style.height       = `${H}px`;
+      el.style.marginRight  = i < row.items.length - 1 ? `${spacing}px` : '0';
       el.style.marginBottom = '0';
     });
     return;
   }
 
-  // 3. Otherwise, lay out multiple rows normally
+  /* -----------------------------------------------------------------------
+     4.  Multi-row layout: fully justify every row except the last
+  ------------------------------------------------------------------------*/
   rows.forEach(row => {
-    if (!row.isLast) {
-      // full justify
-      let H = (rowWidth - spacing * (row.items.length - 1)) / row.totalAR;
-      row.items.forEach(({ el, ar }, i) => {
-        el.style.width  = `${ar * H}px`;
-        el.style.height = `${H}px`;
-        el.style.marginRight  = i < row.items.length - 1 ? `${spacing}px` : '0';
-        el.style.marginBottom = `${spacing}px`;
-      });
-    } else {
-      // last row (left-aligned at target height)
-      row.items.forEach(({ el, ar }, i) => {
-        let H = TARGET_ROW_HEIGHT;
-        el.style.width  = `${ar * H}px`;
-        el.style.height = `${H}px`;
-        el.style.marginRight  = i < row.items.length - 1 ? `${spacing}px` : '0';
-        el.style.marginBottom = `${spacing}px`;
-      });
-    }
+    const isLast = row.isLast;
+    const H = isLast ? TARGET_ROW_H : justifyRowHeight(row, false);
+
+    row.items.forEach(({ el, imgAR, capH }, i) => {
+      const imgH = H - capH;
+      el.style.width        = `${imgAR * imgH}px`;
+      el.style.height       = `${H}px`;
+      el.style.marginRight  = i < row.items.length - 1 ? `${spacing}px` : '0';
+      el.style.marginBottom = `${spacing}px`;
+    });
   });
 }
 
@@ -811,7 +841,6 @@ const processPage = (content) => {
   addActionLinks(content)
 
   document.querySelectorAll('.flex-grid').forEach(container => {
-    // console.log(iframeGridLayout(Array.from(container.children), content.clientWidth))
     packIframes(Array.from(container.children), content.clientWidth, 8)
   })
 }

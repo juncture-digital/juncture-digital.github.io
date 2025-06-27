@@ -10,14 +10,65 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     @keyframes fadeInOpacity { 0% { opacity: 0; } 100% { opacity: 1; } }
-    body { height:100dvh; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
+    
+    /* ------------------------------------------------------------------
+      Global reset so the iframe box behaves predictably
+    ------------------------------------------------------------------ */
+    html, body {
+      margin: 0;
+      height: 100%;               /* let the flexbox fill the iframe */
+      box-sizing: border-box;
+      font-family: system-ui, sans-serif;
+    }
+
+    /* ------------------------------------------------------------------
+      Layout: figure stretches to full iframe height, image flexes,
+      caption is a fixed-height band (16 px text, 8 px padding each side)
+    ------------------------------------------------------------------ */
+    figure {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    figure img {
+      width: 100%;
+      height: auto;               /* keeps natural aspect */
+      flex: 1 0 0;                /* consume whatever height is left */
+      object-fit: contain;        /* never crop; add 'cover' if you prefer */
+    }
+
+    /* ---- caption ------------------------------------------------------- */
+    figcaption {
+      font-size: 16px;            /* fixed across all iframes */
+      line-height: 1.2;
+      padding: 8px 0;             /* 8 px top + bottom (fixed) */
+      text-align: left;          /* left-align text */
+      display: flex;
+      align-items: center;
+      /* optional styling niceties */
+      background: #fff;           /* keeps text readable over dark images */
+    }
+
+    /* ---- any inline SVG icons in the caption --------------------------- */
+    figcaption svg {
+      width: 1em;                 /* 1 × font-size → scales with 16 px text */
+      height: 1em;
+      margin-inline: .3em;
+      flex: none;                 /* don’t let flexbox shrink it */
+      fill: currentColor;         /* inherit text colour automatically */
+    }
     main { height: 100%; display: flex; flex-direction: column; width: 100%; visibility: hidden; } 
+    .content { display: inline-block; overflow: hidden; position: relative; height:100%; }
+    /*
+    body { height:100dvh; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
     figure { display: grid; grid-template-rows: 1fr auto; height: 100%; margin: 0; }
-    .content { display: inline-block; overflow: hidden; position: relative; }
-    .content img { display: block; width: 100%; height: 100%; object-fit: contain; }
-    .content .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1; }
     figcaption { display: inline-flex; align-items: center; gap: 0.4em; line-height: 1.2; }
     figcaption svg { width: 1em; height: 1em; flex: none; fill: currentColor; cursor: pointer; }
+    .content img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .content .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1; }
+    */
     #osd { display:none; height: 100%; width:100%; position: relative; opacity: 0; animation: fadeInOpacity ease 1s; }
     .manifestButton { width: 1.3em; height: 1.3em; cursor: pointer; }
     .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
@@ -168,6 +219,7 @@
 
     let id;
     let imageAspect;
+    let windowAspectRatio;
     const docReady = (fn) => { if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(fn, 1); else document.addEventListener('DOMContentLoaded', fn) }
     docReady(function() {
       
@@ -243,7 +295,7 @@
             kwargs: {
               ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
               ...{
-                aspect: imageAspect,
+                aspect: windowAspectRatio,
                 tag: 'image',
                 iiif: true,
                 cover: true
@@ -380,7 +432,7 @@
             kwargs: {
               ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
               ...{
-                aspect: imageAspect,
+                aspect: windowAspectRatio,
                 tag: 'image',
                 iiif: true,
                 cover: true
@@ -568,54 +620,6 @@
       return parsed
     }
 
-    /**
-    * Compute:
-    *   • the vw‐coefficients you need for font-size and padding
-    *   • the exact aspect-ratio number for the parent <iframe>
-    *
-    * @param {number} widthPx       – baseline iframe width (e.g. 400)
-    * @param {number} fontPx        – caption font-size you want at that width
-    * @param {number} paddingPx     – caption padding *per side* at that width
-    * @param {number} imgAspect     – image width ÷ height  (e.g. 1.5 for 3 : 2)
-    * @param {number} lineHeight    – (optional) line-height multiplier, default 1.2
-    * @returns {{
-    *   fontVW:    number,   // coefficient for `clamp(..., Xvw, fontPx)`
-    *   padVW:     number,   // coefficient for `clamp(..., Yvw, paddingPx)`
-    *   aspect:    number    // iframe aspect-ratio (width / height, 4-decimals)
-    * }}
-    */
-    function calcIframeMeta(
-      widthPx,
-      fontPx,
-      paddingPx,
-      imgAspect,
-      lineHeight = 1.2
-    ) {
-      // 1. vw coefficients ( 100 × px / baseline-width )
-      const fontVW = (fontPx / widthPx) * 100;
-      const padVW  = (paddingPx / widthPx) * 100;
-
-      // 2. absolute heights at the baseline width
-      const imgH  = widthPx / imgAspect;
-      const capH  = fontPx * lineHeight + paddingPx * 2;
-
-      // 3. iframe aspect-ratio (width / total-height)
-      const aspect = +(widthPx / (imgH + capH)).toFixed(4);
-
-      return { fontVW, padVW, aspect };
-
-      // How to apply the output
-      //  figcaption {
-      //    font-size: clamp(0.8rem, 4vw, 16px);   /* 4vw from meta.fontVW */
-      //    padding-block: clamp(4px, 2vw, 8px);   /* 2vw from meta.padVW */
-      //    line-height: 1.2;
-      //  }
-      //  figcaption svg { width: 1em; height: 1em; }
-
-      /* clamp( minimum,  preferred,  maximum ) = The browser takes the preferred value only if it falls between the minimum and the maximum.  Otherwise it picks whichever bound was crossed.
-      */
-    }
-
     const updateManifestPanel = () => {
       let parsed = parseManifest()      
       if (parsed.label) document.querySelector('.manifest .label').innerHTML = parsed.label.join(' ')
@@ -625,18 +629,10 @@
       if (parsed.sourceUrl) document.querySelector('.manifest .source').innerHTML = `<span><b>Source:</b></span> <a href="${parsed.sourceUrl}">${parsed.sourceUrl}</a>`
       if (parsed.imageData) {
         if (!imageAspect) imageAspect = parsed.imageData.width/parsed.imageData.height
-        let iframeMeta = calcIframeMeta(
-          400, // baseline width
-          16, // font size
-          8,  // padding
-          imageAspect,
-          1.2 // line height
-        )
-        figcaption.style.fontSize = `clamp(0.8rem, ${iframeMeta.fontVW}vw, 16px)`
-        figcaption.style.paddingBlock = `clamp(4px, ${iframeMeta.padVW}vw, 8px)`
-        window.parent.postMessage({ type: 'setAspect', aspect: props.nocaption ? imageAspect : iframeMeta.aspect }, '*');
-        document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width} × ${parsed.imageData.height}`
-        document.querySelector('.manifest .aspect').innerHTML = `<span><b>Aspect ratios: </b></span><span>image: ${imageAspect.toFixed(3)}</span><span> Aspect ratio with caption: ${iframeMeta.aspect.toFixed(3)}</span>`
+        windowAspectRatio = main.clientWidth/(main.clientWidth / (parsed.imageData.width/parsed.imageData.height) + figcaption.clientHeight)
+        window.parent.postMessage({ type: 'setAspect', aspect: windowAspectRatio }, '*');
+        document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width.toLocaleString()} × ${parsed.imageData.height.toLocaleString()}`
+        document.querySelector('.manifest .aspect').innerHTML = `<span><b>Aspect ratio: </b></span> ${imageAspect.toFixed(2)}`
       } else {
         document.querySelector('.manifest .size').innerHTML = ''
       }
@@ -1085,11 +1081,12 @@
         if (props.region) {
           let rect = viewer.viewport.imageToViewportRectangle(...Object.values(parseRegionString(props.region)))
           setTimeout(() => viewer.viewport.fitBounds(rect, true), 0)
+        } else{
+          setTimeout(() => { viewer.viewport.goHome(true) }, 100)
         }
       })
 
       viewer.addHandler("open", () => boundingBoxHandler())
-
       return new Promise((resolve, reject) => {
         
         // Listen for the 'open' event which fires when the initial image is loaded
