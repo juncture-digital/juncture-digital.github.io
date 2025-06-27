@@ -631,6 +631,7 @@
         if (!imageAspect) imageAspect = parsed.imageData.width/parsed.imageData.height
         windowAspectRatio = main.clientWidth/(main.clientWidth / (parsed.imageData.width/parsed.imageData.height) + figcaption.clientHeight)
         window.parent.postMessage({ type: 'setAspect', aspect: windowAspectRatio }, '*');
+        // TODO: compute aspect ratio
         document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width.toLocaleString()} × ${parsed.imageData.height.toLocaleString()}`
         document.querySelector('.manifest .aspect').innerHTML = `<span><b>Aspect ratio: </b></span> ${imageAspect.toFixed(2)}`
       } else {

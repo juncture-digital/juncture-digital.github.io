@@ -109,8 +109,8 @@ const makeIframe = (code) => {
   if (isStatic) code.booleans.push('static')
   iframe.setAttribute('width', code.kwargs.width || '100%')
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
-  // if (code.kwargs.aspect) iframe.style.aspectRatio = code.kwargs.aspect
-  if (code.kwargs.aspect) iframe.dataset.aspect = code.kwargs.aspect
+  if (code.kwargs.aspect) iframe.style.aspectRatio = code.kwargs.aspect
+  // if (code.kwargs.aspect) iframe.dataset.aspect = code.kwargs.aspect
   if (tag === 'audio') iframe.setAttribute('allow', 'autoplay')
   if (code.id) iframe.id = code.id
   if (code.classes?.length > 0) iframe.className = code.classes.join(' ')
@@ -529,7 +529,8 @@ function packIframes(elements, rowWidth, spacing) {
   };
 
   elements.forEach((el, idx) => {
-    const imgAR = parseFloat(el.dataset.aspect || '1.5');
+    // const imgAR = parseFloat(el.dataset.aspect || '1.5');
+    const imgAR = parseFloat(new URL(el.src).searchParams.get('aspect')) || 1.5;
     const capH  = hasNoCaption(el.getAttribute('src')) ? 0 : CAPTION_H;
 
     const proj =
