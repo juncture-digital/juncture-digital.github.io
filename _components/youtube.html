@@ -138,14 +138,16 @@
     if (props['in-dialog']) expandToggle.style.display = 'none'
     else {
       expandToggle.addEventListener('click', e => {
-        console.log('expand')
+        let ytAspectRatio = parseFloat(props.aspect || 1.78)
+        let aspect = main.clientWidth/(main.clientWidth / ytAspectRatio + captionEl.clientHeight)
         window.parent.postMessage({ 
           type: 'showDialog', 
           props: {
             kwargs: {
               ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
               ...{
-                tag: 'youtube'
+                tag: 'youtube',
+                aspect
               }
             }
           }

@@ -500,11 +500,13 @@ const addActionLinks = (rootEl) => {
  *   – default = caption ON  (fixed 16-px text + 8-px padding each side)
  *   – add '?nocaption' to the src URL ⇒ caption OFF
  *
- * @param {HTMLElement[]} elements  array of <iframe> or <figure>
- * @param {number}        rowWidth  available width for every row (px)
- * @param {number}        spacing   gap between items and between rows (px)
+ * @param {HTMLElement[]} elements        array of <iframe> or <figure>
+ * @param {number}        rowWidth        available width for every row (px)
+ * @param {number}        spacing         gap between items and between rows (px)
+ * @param {number}        targetRowHeight desired total iframe height (px)
  */
-function packIframes(elements, rowWidth, spacing) {
+function packIframes(elements, rowWidth, spacing, targetRowHeight) {
+  console.log('packIframes', elements.length, rowWidth, spacing, targetRowHeight)
   /* --- caption metrics -------------------------------------------------- */
   const CAP_FONT = 16;          // px
   const LINE_H   = 1.2;         // multiplier
@@ -513,7 +515,7 @@ function packIframes(elements, rowWidth, spacing) {
   const CAPTION_H = CAP_FONT * LINE_H + PAD * 2; // 35.2 px
 
   /* --- row policy -------------------------------------------------------- */
-  const TARGET_ROW_H     = 260;                 // desired total iframe height
+  const TARGET_ROW_H     = targetRowHeight;     // desired total iframe height
   const MAX_SINGLE_ROW_H = TARGET_ROW_H * 1.5;  // cap when only one row
 
   /* -----------------------------------------------------------------------
@@ -842,7 +844,7 @@ const processPage = (content) => {
   addActionLinks(content)
 
   document.querySelectorAll('.flex-grid').forEach(container => {
-    packIframes(Array.from(container.children), content.clientWidth, 8)
+    packIframes(Array.from(container.children), content.clientWidth, 8, container.dataset?.target || 260)
   })
 }
 

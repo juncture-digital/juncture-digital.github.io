@@ -131,7 +131,7 @@ iframe[src*="breadcrumbs"] {
 }
 
 iframe[src*="youtube"] {
-  aspect-ratio: 1.59;
+  aspect-ratio: 1.78;
 }
 
 iframe[src*="google.com/maps"] {
@@ -779,5 +779,5 @@ blockquote {
 section > section + section {
   margin-top: 1em;
   /* border-top: 1px solid #ccc; */
-  padding-top: 2em;
+  /* padding-top: 2em; */
 }
