@@ -209,7 +209,7 @@ iframe[src*="header"] {
   aspect-ratio: 3.76;
 }
 
-iframe[src*="image"],
+iframe[src*="image?"],
 iframe[src*="map"],
 iframe[src*="google-book"] {
   min-width: unset;
@@ -225,7 +225,7 @@ iframe[src*="chatlog"] {
   height: 200dvh;
 }
 
-iframe[src*="image"] {
+iframe[src*="image?"] {
   aspect-ratio: 1;
 }
 

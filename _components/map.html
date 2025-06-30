@@ -1040,7 +1040,7 @@
           fetch(layerDef.url).then(resp => resp.json())
             .then(data => {
               let geoJsonLayer = toGeoJSONLayer(data)
-              addLayerControl(geoJsonLayer, layerDef.layerName || layerDef.label || 'GeoJSON Layer')
+              addLayerControl(geoJsonLayer, layerDef.layerName || layerDef.label || layerDef.url.split('/').pop().split('.').shift().replace(/[_-]/g, ' ').replace(/^./, c => c.toUpperCase()))
               map.addLayer(geoJsonLayer)
             });
         }

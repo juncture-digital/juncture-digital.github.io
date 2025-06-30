@@ -181,7 +181,7 @@
       
         let manifestUrl
         if (props.img.indexOf('http') === 0) {
-          props.img = `${imageServiceUrl}/${props.img}`
+          props.imgl = `${imageServiceUrl}/${encodeURIComponent(props.img)}`
           manifestUrl = `${iiifServiceUrl}/${props.img}/manifest.json`
         } else if (props.img.indexOf('wc:') === 0 || props.img.indexOf('wikimedia.org') > -1 || props.img.indexOf('wikipedia.org') > -1 && props.img.indexOf('/media/File:') > -1) {
           let mwFile = props.img.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
