@@ -36,7 +36,7 @@
       width: 100%;
       height: auto;               /* keeps natural aspect */
       flex: 1 0 0;                /* consume whatever height is left */
-      object-fit: contain;        /* never crop; add 'cover' if you prefer */
+      /* object-fit: contain;  */      /* never crop; add 'cover' if you prefer */
     }
 
     /* ---- caption ------------------------------------------------------- */
@@ -61,7 +61,8 @@
       cursor: pointer;
     }
     main { height: 100%; display: flex; flex-direction: column; width: 100%; visibility: hidden; } 
-    .content { display: inline-block; overflow: hidden; position: relative; height:100%; }
+    .content { display: inline-block; overflow: hidden; position: relative; height: 100%; }
+    .content img { display: block; width: 100%; height: 100%; object-fit: cover; }
     /*
     body { height:100dvh; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
     figure { display: grid; grid-template-rows: 1fr auto; height: 100%; margin: 0; }
@@ -90,7 +91,7 @@
     .page-info:hover { opacity: 1; }
     .pageid { cursor: copy; }
     .thumbnail { cursor: move; width: 100%; }
-    img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    /* img { max-width: 100%; max-height: 100%; object-fit: contain; } */
     /* styles used by bounding box drawing */
     #osd-container { position: relative; width: 100%; height: 100%; user-select: none; }
     #drawing-overlay { position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; }
@@ -105,7 +106,7 @@
   </style>
 </head>
 <body>
-  <main style="aspect-ratio:1;">
+  <main>
     
     <figure>
       <div class="content">
@@ -219,7 +220,6 @@
 
     let id;
     let imageAspect;
-    let windowAspectRatio;
     const docReady = (fn) => { if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(fn, 1); else document.addEventListener('DOMContentLoaded', fn) }
     docReady(function() {
       
@@ -295,7 +295,7 @@
             kwargs: {
               ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
               ...{
-                aspect: windowAspectRatio,
+                aspect: imageAspect,
                 tag: 'image',
                 iiif: true,
                 cover: true
@@ -424,7 +424,7 @@
           ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
           : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' '))
       img.setAttribute('alt', altText)
-      img.style.objectFit = props.cover === true ? 'cover' : 'contain'
+      // img.style.objectFit = props.cover === true ? 'cover' : 'contain'
       img.addEventListener('click', () => {
         window.parent.postMessage({ 
           type: 'showDialog', 
@@ -432,7 +432,7 @@
             kwargs: {
               ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
               ...{
-                aspect: windowAspectRatio,
+                aspect: imageAspect,
                 tag: 'image',
                 iiif: true,
                 cover: true
@@ -456,7 +456,7 @@
         iiifManifest = manifest
         setCaption()
         updateManifestPanel()
-        if (!props.src) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
+        if (!props.src || props.region) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
       })
       return iiifManifest
     }
@@ -501,7 +501,7 @@
           props.manifest = `${iiifServiceUrl}/gh:${props.ghbase}/${props.src}/manifest.json`
         }
       }
-      if (!props.iiif) loadImage(imgUrl)
+      if (!props.iiif && !props.region) loadImage(imgUrl)
       loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     
     } else if (props.manifest) {
@@ -629,8 +629,6 @@
       if (parsed.sourceUrl) document.querySelector('.manifest .source').innerHTML = `<span><b>Source:</b></span> <a href="${parsed.sourceUrl}">${parsed.sourceUrl}</a>`
       if (parsed.imageData) {
         if (!imageAspect) imageAspect = parsed.imageData.width/parsed.imageData.height
-        windowAspectRatio = main.clientWidth/(main.clientWidth / (parsed.imageData.width/parsed.imageData.height) + figcaption.clientHeight)
-        window.parent.postMessage({ type: 'setAspect', aspect: windowAspectRatio }, '*');
         document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width.toLocaleString()} × ${parsed.imageData.height.toLocaleString()} (${imageAspect.toFixed(2)})`
       } else {
         document.querySelector('.manifest .size').innerHTML = ''

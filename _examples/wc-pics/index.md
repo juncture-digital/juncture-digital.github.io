@@ -4,7 +4,7 @@ description: Wikimedia Commons pictures of the year 2019-2023.  The Commons Pict
 author: Ron Snyder
 date: 2025-01-01
 tags: sample
-thumbnail: wc:Wikimedia_Commons_Wide.png
+thumbnail: wc:Incense_in_Vietnam.jpg
 layout: post
 permalink: /examples/wc-pics
 published: true

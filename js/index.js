@@ -98,10 +98,17 @@ const junctureComponentsPrefix = location.port === '4200'
     ? 'http://localhost:3000/_components'
     : 'https://www.juncture-digital.io/components'
 
+const computedCaption = (code) => {
+  let captionHeight = code.booleans?.indexOf('nocaption') >= 0 ? 0 : 35.2 // 16px font * 1.2 line height + 8px padding * 2 sides
+  let contentAspect = code.kwargs.aspect || 1
+  let contentWidth = code.kwargs.width || code.el.parentElement.clientWidth || '100%'
+  let contentHeight = code.kwargs.height || contentWidth / contentAspect
+  return contentWidth/(contentWidth / (contentWidth/contentHeight) + captionHeight)
+}
+
 const makeIframe = (code) => {
   let tag = code.tag || code.kwargs.tag || 'iframe'
   let iframe = document.createElement('iframe')
-  // iframe.setAttribute('loading', isStatic ? 'eager' : 'lazy')
   iframe.setAttribute('loading', 'lazy')
   iframe.setAttribute('allowfullscreen', '')
   iframe.setAttribute('allow', 'clipboard-write')
@@ -109,8 +116,7 @@ const makeIframe = (code) => {
   if (isStatic) code.booleans.push('static')
   iframe.setAttribute('width', code.kwargs.width || '100%')
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
-  if (code.kwargs.aspect) iframe.style.aspectRatio = code.kwargs.aspect
-  // if (code.kwargs.aspect) iframe.dataset.aspect = code.kwargs.aspect
+  if (code.kwargs.aspect && !['header'].includes(tag)) iframe.style.aspectRatio = computedCaption(code)
   if (tag === 'audio') iframe.setAttribute('allow', 'autoplay')
   if (code.id) iframe.id = code.id
   if (code.classes?.length > 0) iframe.className = code.classes.join(' ')
@@ -405,7 +411,6 @@ const makeDetails = (rootEl) => {
 let dialog
 const showDialog = (props) => {
   if (dialog) return
-  console.log('props')
   let aspectRatio = props.kwargs.aspect || 1.0
   let width = aspectRatio > 1.0
     ? window.innerWidth * 0.93
@@ -426,6 +431,7 @@ const showDialog = (props) => {
   let el = document.createElement('div')
   dialog.appendChild(el)
   props.kwargs['in-dialog'] = ''
+  props.kwargs.width = width
   makeIframe({ el, tag: props.tag, kwargs: props.kwargs })
   document.body.appendChild(dialog)
   dialog.show()
@@ -506,7 +512,6 @@ const addActionLinks = (rootEl) => {
  * @param {number}        targetRowHeight desired total iframe height (px)
  */
 function packIframes(elements, rowWidth, spacing, targetRowHeight) {
-  console.log('packIframes', elements.length, rowWidth, spacing, targetRowHeight)
   /* --- caption metrics -------------------------------------------------- */
   const CAP_FONT = 16;          // px
   const LINE_H   = 1.2;         // multiplier

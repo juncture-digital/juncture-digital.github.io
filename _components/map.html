@@ -34,6 +34,7 @@
     }
 
     figure { display: grid; grid-template-rows: 1fr auto; height: 100%; margin: 0; }
+    #content { position:relative; flex: 1; width: 100%; z-index: 2;}
 
     figure #map {
       width: 100%;
@@ -72,7 +73,9 @@
     #map { width:100%; height:100%; cursor:pointer; }
     */
     .expandToggle { cursor: pointer; margin-left: auto; flex-shrink: 0; }
-    sl-drawer::part(body) { padding: 0; margin: 3px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; }
+    sl-drawer::part(base) { box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; }
+    sl-drawer::part(body) { padding: 0; margin: 3px; }
+    sl-drawer::part(footer) { padding: 0.5em; border-top: 1px solid #ccc; }
     sl-tab::part(base) { padding: 0.5em 1em; }
     sl-tab-panel::part(base) { padding: 0.5em; }
     .drawerToggle { cursor: pointer; flex-shrink: 0; }
@@ -110,22 +113,15 @@
 
     </figure>
 
-     <sl-drawer contained class="drawer" no-header style="--size: calc(100% - 30px);">
+    <sl-drawer contained class="drawer" no-header style="--size: calc(100% - 30px);">
       <sl-tab-group>
-        <sl-tab slot="nav" active panel="about">About</sl-tab>
-        <sl-tab slot="nav" panel="embed">Embed</sl-tab>
-        <sl-tab-panel active name="about">
-          <h4>About the Juncture IFrame Components</h4>
-          For more information, visit <a href="https://juncture-digital.io">juncture-digital.io</a>
-          <div class="aspect"></div>
-        </sl-tab-panel>
-        <sl-tab-panel name="embed">
-          <h4>Embedding components</h4>
-          For more information, visit <a href="https://juncture-digital.io/#/?id=embedding-components" target="_blank">juncture-digital.io</a>.
-          <pre><code>&lt;iframe src="https://juncture-digital.io/template?caption=Hello+World"&gt;&lt;/iframe&gt;</code></pre>
+        <sl-tab slot="nav" active panel="map-info">Map info</sl-tab>
+        <sl-tab-panel active name="map-info">
+          <div class="size"></div>
         </sl-tab-panel>
       </sl-tab-group>
-    </sl-drawer>
+      <sl-button slot="footer" variant="primary" size="small" class="close">Close</sl-button>
+    </sl-drawer>  
 
   </main>
 
@@ -143,6 +139,7 @@
     import '../js/turf.min.js'
 
     // import any needed Shoelace components (https://shoelace.style/)
+    import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/button/button.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/drawer/drawer.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab/tab.js';
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/components/tab-group/tab-group.js';
@@ -334,6 +331,8 @@
     coords.addEventListener('click', e => copyTextToClipboard(coords.textContent))
 
     const drawer = document.querySelector('.drawer')
+    const toggleDrawerOpen = () => drawer.open = !drawer.open
+
     const drawerToggle = figcaption.querySelector('.drawerToggle')
     drawerToggle.addEventListener('click', e => drawer.open = !drawer.open)
 
@@ -364,7 +363,8 @@
 
     const setCaption = (caption) => { figcaption.querySelector('.title').innerHTML = md2Html(caption) }
     const docReady = (fn) => { if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(fn, 1); else document.addEventListener('DOMContentLoaded', fn) }
-    
+    document.querySelector('.drawer sl-button.close').addEventListener('click', e => toggleDrawerOpen())
+
     let center
     let zoom = 8
     let caption
@@ -1002,7 +1002,7 @@
     let mapAspectRatio = parseFloat(props.aspect || 1)
     windowAspectRatio = main.clientWidth/(main.clientWidth / mapAspectRatio + figcaption.clientHeight)
     window.parent.postMessage({ type: 'setAspect', aspect: windowAspectRatio }, '*');
-    document.querySelector('.aspect').innerHTML = `<span><b>Aspect ratio: </b></span> ${mapAspectRatio.toFixed(2)}`
+    document.querySelector('.size').innerHTML = `<span><b>Aspect ratio: </b></span> ${mapAspectRatio.toFixed(2)}`
 
     map = await initMap()
 
