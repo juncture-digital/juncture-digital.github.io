@@ -416,7 +416,14 @@
     }
 
     const loadImage = (url) => {
-      img.onload = (e) => { imageAspect = img.naturalWidth/img.naturalHeight }
+      img.onload = (e) => {
+        imageAspect = img.naturalWidth/img.naturalHeight
+        if (!props.aspect) {
+          let width = props.width || main.clientWidth
+          let aspect = width/(width / imageAspect + figcaption.clientHeight)
+          window.parent.postMessage({ type: 'setAspect', aspect }, '*')
+        }
+      }
       img.src = url
       let altText = props.caption
         ? props.caption
