@@ -7,26 +7,40 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/themes/light.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif; animation: fadeInOpacity ease 1s; background-color: white; }    
-    main {  display: flex; flex-direction: column; width: 100%; }
-    .captionBar { display: flex; align-items: center; gap: 0.2em; height: 36px; margin: 0; background-color: inherit; } 
-    .captionBar svg { width: 1.3em; height: 1.3em; }
-    .expandToggle { width: 1.3rem; height: 1.3rem; cursor: pointer; margin-left: auto; flex-shrink: 0; }
+    /* ------------------------------------------------------------------
+      Global reset so the iframe box behaves predictably
+    ------------------------------------------------------------------ */
+    html, body { margin: 0; height: 100%; box-sizing: border-box; font-family: system-ui, sans-serif; }
+    figure { height: 100%; margin: 0; display: flex; flex-direction: column; }
+    figcaption { font-size: 16px; line-height: 1.2; padding: 8px 0;  text-align: left; display: flex; align-items: center; background: #fff; }
+    figcaption svg { width: 1em; height: 1em; margin-inline: .3em; flex: none; fill: currentColor; cursor: pointer; }
+    
+    /*
+    sl-image-comparer { width: 100%; height: 100%; }
+    sl-image-comparer::part(base) { width: 100%; height: 100%; }
+    sl-image-comparer::part(base) div { width: 100%; height: 100%; }
+    sl-image-comparer::part(after), sl-image-comparer::part(before) { width: 100%; height: 300px }
+    sl-image-comparer img { width: 100%; height: 100%; } 
+    */
+
     .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
   </style>
 </head>
 <body>
-  
-  <main>
+
+  <figure>
     <sl-image-comparer>
       <img id="before" slot="before"/>
       <img id="after" slot="after"/>
     </sl-image-comparer>
-    <div class="captionBar">
+
+    <figcaption>      
+      <svg class="drawerToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
       <div class="label clamp"></div>
       <svg class="expandToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg>
-    </div>
-  </main>
+    </figcaption>
+  
+  </figure>
 
   <script type="module">
 
@@ -39,7 +53,15 @@
     const props = {
       ...{                   // default properties
         caption: null,
-        position: 50
+        position: 50,
+        before: null,
+        after: null,
+        beforeManifest: null,
+        afterManifest: null,
+        beforeRegion: null,
+        afterRegion: null,
+        beforeAlt: 'Before image',
+        afterAlt: 'After image'
       },
       ...Object.fromEntries( // URLSearchParams to object
         Array.from(new URLSearchParams(location.search).entries())
@@ -48,16 +70,16 @@
     }
     console.log(props)
 
-    const main = document.querySelector('main');
+    const figure = document.querySelector('figure')
+    const figcaption = document.querySelector('figcaption')
     const before = document.getElementById('before')
     const after = document.getElementById('after')
-    const captionBar = document.querySelector('.captionBar')
     
     const md2Html = (md) => marked.parse(md).slice(3, -5) // convert markdown to HTML
-    const setCaption = (caption) => { captionBar.querySelector('.label').innerHTML = md2Html(caption) }
+    const setCaption = (caption) => { figcaption.querySelector('.label').innerHTML = md2Html(caption) }
     if (props.caption) setCaption(props.caption)
 
-    const expandToggle = captionBar.querySelector('.expandToggle')
+    const expandToggle = figcaption.querySelector('.expandToggle')
     if (props['in-dialog']) expandToggle.style.display = 'none'
     else {
       expandToggle.addEventListener('click', e => {
@@ -118,6 +140,24 @@
       return url
     }
 
+    const makeManifestUrl = (s) => {
+      if (s.indexOf('http') === 0) {
+        return `${iiifServiceUrl}/${encodeURIComponent(s)}/manifest.json`
+      } else if (s.indexOf('wc:') === 0 || s.indexOf('wikimedia.org') > -1 || s.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
+        let mwFile = s.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
+        return `${iiifServiceUrl}/wc:${mwFile}/manifest.json`
+      } else if (s.indexOf('gh:') === 0) {
+        return `${iiifServiceUrl}/${s}/manifest.json`
+      } else {
+        if (s[0] === '/') {
+          let [owner, repo, branch, ...rest] = props.ghbase.split('/')
+          return `${iiifServiceUrl}/gh:${owner}/${repo}/${branch}${s}/manifest.json`
+        } else {
+          return `${iiifServiceUrl}/gh:${props.ghbase}/${s}/manifest.json`
+        }
+      }
+    }
+
     const loadManifest = (manifestUrl) => {
       if (manifestUrl.indexOf('http') < 0) manifestUrl = `${iiifServiceUrl}/${manifestUrl}/manifest.json`
       return fetch(manifestUrl).then(resp => resp.json())
@@ -130,24 +170,27 @@
       })
     }
 
-    if (props.manifest1) loadManifest(props.manifest1).then(manifest => {
+    if (props.beforeManifest) {
+      loadManifest(makeManifestUrl(props.beforeManifest)).then(manifest => {
         const imageUrl = `${imageServiceUrl}/${staticImageUrl(manifest, main.clientWidth)}`
-        console.log(imageUrl)
         before.src = imageUrl
-        before.alt = (manifest?.label?.en || manifest?.label?.none || Object.values(manifest.label)).join(' ')
+        before.alt = props.beforeAlt || (manifest?.label?.en || manifest?.label?.none || Object.values(manifest.label)).join(' ')
       })
+    } else if (props.before) {
+      before.src = props.before
+      before.alt = props.beforeAlt
+    }
 
-    if (props.manifest2) loadManifest(props.manifest2).then(manifest => {
+    if (props.afterManifest) {
+      loadManifest(makeManifestUrl(props.afterManifest)).then(manifest => {
         const imageUrl = `${imageServiceUrl}/${staticImageUrl(manifest, main.clientWidth)}`
-        console.log(imageUrl)
         after.src = imageUrl
-        after.alt = (manifest?.label?.en || manifest?.label?.none || Object.values(manifest.label)).join(' ')
+        after.alt = props.afterAlt || (manifest?.label?.en || manifest?.label?.none || Object.values(manifest.label)).join(' ')
       })
-
-    // before.src = 'https://images.unsplash.com/photo-1517331156700-3c241d2b4d83?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=80&sat=-100&bri=-5'
-    // before.alt = 'Grayscale version of kittens in a basket looking around.'
-    // after.src = 'https://images.unsplash.com/photo-1517331156700-3c241d2b4d83?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=80'
-    // after.alt = 'Color version of kittens in a basket looking around.'
+    } else if (props.after) {
+      after.src = props.after
+      after.alt = props.afterAlt
+    }
     
   </script>
   
