@@ -11,7 +11,7 @@ github:
   owner_name: juncture-digital
   repository_name: juncture-digital.github.io
   source:
-    branch: image-compare-enhancement
+    branch: main
 
 collections:
   components:
