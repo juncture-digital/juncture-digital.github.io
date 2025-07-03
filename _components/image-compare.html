@@ -7,36 +7,26 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/themes/light.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      height: 100%;
-    }
-
-    figure {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
+    html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
+    figure { margin: 0; width: 100%; height: 100%; display: flex; flex-direction: column;}
+    figure > *:not(figcaption) { flex: 1; }
+    figcaption { font-size: 16px; line-height: 1.2; padding: 8px 0; text-align: left; display: flex; align-items: center; background: #fff; }
+    figcaption svg { width: 1em; height: 1em; margin-inline: .3em; flex: none; fill: currentColor; cursor: pointer; }
+    .expandToggle { margin-left: auto; flex-shrink: 0; }
     .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
   </style>
 </head>
 <body>
   
     <figure>
-      <sl-image-comparer position="50">
+      <sl-image-comparer class="content" position="50">
         <img slot="before" src="" alt="Before image">
         <img slot="after" src="" alt="After image">
       </sl-image-comparer>
       <figcaption>      
-        <!--
         <svg class="drawerToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
-        -->
         <div class="label clamp"></div>
-        <!--
         <svg class="expandToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"/></svg>
-        -->
       </figcaption>
     </figure>
 
@@ -53,6 +43,7 @@
     const props = {
       ...{                   // default properties
         caption: null,
+        nocaption: false,
         position: 50,
         before: null,
         after: null,
@@ -69,23 +60,21 @@
     console.log(props)
 
     const figure = document.querySelector('figure');
+    const content = figure.querySelector('.content');
     const before = figure.querySelector('[slot="before"]')
     const after = figure.querySelector('[slot="after"]')
     const figcaption = figure.querySelector('figcaption')
-
-    console.log(figure.clientWidth)
-    
-    console.log(figure, before, after, figcaption)
+    const captionText = figcaption.querySelector('.label')
 
     const md2Html = (md) => marked.parse(md).slice(3, -5) // convert markdown to HTML
-    const setCaption = (caption) => { figcaption.querySelector('.label').innerHTML = md2Html(caption) }
-    if (props.caption) setCaption(props.caption)
+
+    if (props.nocaption === true) figcaption.style.display = 'none'
+    else captionText.innerHTML = md2Html(props.caption)
 
     const expandToggle = figcaption.querySelector('.expandToggle')
     if (props['in-dialog']) expandToggle.style.display = 'none'
     else {
       expandToggle?.addEventListener('click', e => {
-        console.log('expand')
         window.parent.postMessage({ 
           type: 'showDialog', 
           props: {
@@ -100,17 +89,16 @@
       })
     }
 
-    const staticImageUrl = (options) => {
+    const staticImageUrlArgs = (options) => {
       let [region, size, rotation, rest] = (options || '').split('/') || []
       let [quality, format] = rest?.split('.') || []
       region = region || 'full'
       size = ['max', 'full'].includes(size)
         ? size
-        : `${figure.clientWidth},${figure.clientHeight}`
+        : `${content.clientWidth},${content.clientHeight}`
       rotation = parseInt(rotation || 0)
       quality = quality || 'default'
       format = format || 'jpg'
-      console.log(region, size, rotation, quality, format)
       return `${region}/${size}/${rotation}/${quality}.${format}`
     }
 
@@ -133,7 +121,7 @@
     }
 
     const wcImageUrl = (wcTitle) => {
-      // Converts Wikimedia commons image URL to a thumbnail link
+      // Converts Wikimedia commons image title to URL
       wcTitle = decodeURIComponent(wcTitle).replace(/ /g,'_')
       const _md5 = md5(wcTitle)
       const extension = wcTitle.split('.').pop()
@@ -181,7 +169,7 @@
     
     before.alt = props.beforeAlt
     sha256(getImageUrl(props.before)).then(hash => {
-      let iiifImageUrl = `${iiifImageBaseUrl}/${hash}/${staticImageUrl(props.beforeRegion)}`
+      let iiifImageUrl = `${iiifImageBaseUrl}/${hash}/${staticImageUrlArgs(props.beforeRegion)}`
       before.src = `${imageServiceUrl}/${iiifImageUrl}`
       // before.src = iiifImageUrl
       fetch(iiifImageUrl, {method: 'HEAD'}).then(resp => { if (!resp.ok) loadManifest(makeManifestUrl(props.before)) })
@@ -189,7 +177,7 @@
 
     after.alt = props.afterAlt
     sha256(getImageUrl(props.after)).then(hash => {
-      let iiifImageUrl = `${iiifImageBaseUrl}/${hash}/${staticImageUrl(props.afterRegion)}`
+      let iiifImageUrl = `${iiifImageBaseUrl}/${hash}/${staticImageUrlArgs(props.afterRegion)}`
       after.src = `${imageServiceUrl}/${iiifImageUrl}`
       // after.src = iiifImageUrl
       fetch(iiifImageUrl, {method: 'HEAD'}).then(resp => { if (!resp.ok) loadManifest(makeManifestUrl(props.after)) })
