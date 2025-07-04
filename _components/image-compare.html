@@ -69,7 +69,7 @@
     const md2Html = (md) => marked.parse(md).slice(3, -5) // convert markdown to HTML
 
     if (props.nocaption === true) figcaption.style.display = 'none'
-    else captionText.innerHTML = md2Html(props.caption)
+    else if (props.caption) captionText.innerHTML = md2Html(props.caption)
 
     const expandToggle = figcaption.querySelector('.expandToggle')
     if (props['in-dialog']) expandToggle.style.display = 'none'

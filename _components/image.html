@@ -192,7 +192,7 @@
       ...{ // default properties
         alt: null,    // Alt text string
         base: null,     // base URL for relative links
-        caption: null,  // caption text
+        caption: '',  // caption text
         cover: false,
         format: null,
         ghbase: null,
@@ -405,14 +405,10 @@
           ? props.caption
           : iiifManifest
             ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
-            : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' '))
-      if (props.nocaption === true) {
-        figcaption.style.display = 'none'
-      } else {
-        captionText.innerHTML = md2Html(text)    
-        // figcaption.style.display = 'flex'
-      }
-      img.setAttribute('atl', props.alt || text)
+            : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' ').replace(/^default$/g,''))
+      if (props.nocaption === true) figcaption.style.display = 'none'
+      else captionText.innerHTML = md2Html(text)    
+      img.setAttribute('alt', props.alt || text)
     }
 
     const loadImage = (url) => {
@@ -429,7 +425,7 @@
         ? props.caption
         : iiifManifest
           ? (iiifManifest?.label?.en || iiifManifest?.label?.none || Object.values(iiifManifest.label)).join(' ')
-          : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' '))
+          : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' ').replace(/^default$/g,''))
       img.setAttribute('alt', altText)
       // img.style.objectFit = props.cover === true ? 'cover' : 'contain'
       img.addEventListener('click', () => {
@@ -529,7 +525,7 @@
     setCaption()
 
     const parseManifest = () =>{
-
+      console.log(iiifManifest)
       const valueOf = (langObj, language) => {
         language = language || props.language
         return typeof langObj === 'object' && !Array.isArray(langObj)
@@ -613,7 +609,11 @@
         .replace(/\/info\.json$/,'')}/info.json`
         if (iiifManifest.requiredStatement) {
           let rs = iiifManifest.requiredStatement
-          // parsed.requiredStatement = {label: valueOf(rs.label)[0], value: valueOf(rs.value)}
+          try {
+            parsed.requiredStatement = {label: 'Attribution', value: [rs.attribution]}
+          } catch (e) {
+            console.error('Error parsing requiredStatement', e)
+          }
         }
   
       if (iiifManifest.homepage) {
