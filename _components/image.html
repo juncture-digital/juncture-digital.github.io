@@ -331,7 +331,7 @@
     const staticImageUrl = (width, crop) => {
       let itemInfo = iiifManifest && findItem({type:'Annotation', motivation:'painting'}, iiifManifest, props.seq).body
       if (!itemInfo) return ''
-      if (!imageAspect) imageAspect = itemInfo.width/itemInfo.height
+      if (!imageAspect) imageAspect = props.rotation === 90 ? itemInfo.height/itemInfo.width : itemInfo.width/itemInfo.height
       let url
       let [region, size, rotation, rest] = props.options?.split('/') || []
       let [quality, format] = rest?.split('.') || []
@@ -347,6 +347,7 @@
       rotation = parseInt(props.rotation || rotation || 0)
       quality = props.quality || quality || 'default'
       format = props.format || format || 'jpg'
+      console.log(`staticImageUrl: region=${region}, size=${size}, rotation=${rotation}, quality=${quality}, format=${format}`)
       url =`${itemInfo.service[0].id || itemInfo.service[0]['@id']}/${region}/${size}/${rotation}/${quality}.${format}`
       return url
     }
@@ -412,7 +413,7 @@
 
     const loadImage = (url) => {
       img.onload = (e) => {
-        imageAspect = img.naturalWidth/img.naturalHeight
+        imageAspect = props.rotation === 90 ? img.naturalHeight/img.naturalWidth : img.naturalWidth/img.naturalHeight
         if (!props.aspect) {
           let width = props.width || main.clientWidth
           let aspect = width/(width / imageAspect + figcaption.clientHeight)
@@ -458,7 +459,7 @@
         iiifManifest = manifest
         setCaption()
         updateManifestPanel()
-        if (!props.src || props.region) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
+        if (!props.src || props.region || props.rotation) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
       })
       return iiifManifest
     }
@@ -524,7 +525,6 @@
     setCaption()
 
     const parseManifest = () =>{
-      console.log(iiifManifest)
       const valueOf = (langObj, language) => {
         language = language || props.language
         return typeof langObj === 'object' && !Array.isArray(langObj)
@@ -634,7 +634,7 @@
       if (parsed.rights) document.querySelector('.manifest .rights').innerHTML = `<span><b>Reuse rights:</b></span><a href="${parsed.rights.url}">${parsed.rights.code}</a>` + (parsed.rights.badge || '')
       if (parsed.sourceUrl) document.querySelector('.manifest .source').innerHTML = `<span><b>Source:</b></span> <a href="${parsed.sourceUrl}">${parsed.sourceUrl}</a>`
       if (parsed.imageData) {
-        if (!imageAspect) imageAspect = parsed.imageData.width/parsed.imageData.height
+        if (!imageAspect) imageAspect = props.rotation === 90 ? parsed.imageData.height/parsed.imageData.width : parsed.imageData.width/parsed.imageData.height
         document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width.toLocaleString()} × ${parsed.imageData.height.toLocaleString()} (${imageAspect.toFixed(2)})`
       } else {
         document.querySelector('.manifest .size').innerHTML = ''
