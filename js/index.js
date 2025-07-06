@@ -119,6 +119,7 @@ const makeIframe = (code) => {
   if (code.kwargs.aspect && !['header'].includes(tag)) iframe.style.aspectRatio = computedCaption(code)
   if (tag === 'audio') iframe.setAttribute('allow', 'autoplay')
   if (code.id) iframe.id = code.id
+  else if (code.kwargs.id) iframe.id = code.kwargs.id
   if (code.classes?.length > 0) iframe.className = code.classes.join(' ')
   let args = [
     ...Object.entries(code.kwargs)
@@ -450,19 +451,23 @@ const addMessageHandler = () => {
     } else if (event.data.type === 'openLink') {
       window.open(event.data.url, event.data.newtab ? '_blank' : '_self')
     } else if (event.data.type === 'getPath') {
-      if (event.origin !== location.origin) return;
+      // if (event.origin !== location.origin) return;
       let msg = { event: 'path', path: location.pathname }
       event.source.postMessage(JSON.stringify(msg), '*')
-    } else if (event.data.type === 'getID') {
-      if (event.origin !== location.origin) return;
+    } else if (event.data.type === 'getId') {
+      // if (event.origin !== location.origin) return;
       const iframes = document.querySelectorAll('iframe');
       for (const iframe of iframes) {
         if (iframe.contentWindow === event.source) {
-          let msg = { event: 'id', id: iframe.id }
+          let msg = { event: 'id', id: iframe.id || iframe.getAttribute('data-id') }
           event.source.postMessage(JSON.stringify(msg), '*')
           break;
         }
       }
+    } else if (event.data.type === 'getElementById') {
+      // if (event.origin !== location.origin) return;
+      let el = document.getElementById(event.data.id)
+      event.source.postMessage(JSON.stringify({ event: 'element', id: event.data.id, html: el?.outerHTML }), '*')
     }
   })
 }
@@ -922,3 +927,5 @@ for (let selector of selectors) {
     break
   }
 }
+
+// document.querySelectorAll('[id$="-csv"],[id$="-tsv"]').forEach(el => { console.log(el.textContent) })

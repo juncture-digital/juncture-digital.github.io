@@ -25,7 +25,7 @@
 <body>
   
     <figure>
-      <img src="https://picsum.photos/600/400" alt="Random Image">
+      <div class="content"></div>
       <figcaption>      
         <svg class="drawerToggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
         <div class="label clamp"></div>
@@ -43,6 +43,8 @@
       <sl-button slot="footer" variant="primary" size="small" class="close">Close</sl-button>
     </sl-drawer>  
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-network.min.js" integrity="sha512-GE9mKnPrTn2DY5AZuIC9yE6K4FF8T+9lsO7jwHn+RW9rEjnHzF/in0oGwlPzRwjhQ+oJiawmtfvleX+l6h5/cA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
   <script type="module">
     import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/button/button.js';
@@ -52,35 +54,36 @@
     import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
     const md2Html = (md) => marked.parse(md).slice(3, -5) // convert markdown to HTML
+    const kebabToCamel = (input) => input.replace(/-([a-z])/g, function (g) {return g[1].toUpperCase()})
 
     const props = {
       ...{                   // default properties
         caption: null,
-        nocaption: false      },
+        nocaption: false,
+        dataId: null,
+      },  
       ...Object.fromEntries( // URLSearchParams to object
         Array.from(new URLSearchParams(location.search).entries())
-        .map(([key, value]) => [key, (value === 'true' || !value) ? true : value === 'false' ? false : value])
+        .map(([key, value]) => [kebabToCamel(key), (value === 'true' || !value) ? true : value === 'false' ? false : value])
       )
     }
     console.log(props)
-
+  
     const figure = document.querySelector('figure');
-    const content = figure.firstElementChild;
+    const content = figure.firstElementChild
     const figcaption = figure.querySelector('figcaption')
     const captionText = figcaption.querySelector('.label')
     const drawer = document.querySelector('.drawer')
+    let id
 
     if (props.nocaption === true) figcaption.style.display = 'none'
     else if (props.caption) captionText.innerHTML = md2Html(props.caption)
 
     const drawerToggle = figcaption.querySelector('.drawerToggle')
-    drawerToggle?.addEventListener('click', e => {
-      console.log('drawerToggle clicked', drawer.open)
-      drawer.open = !drawer.open
-    })
+    drawerToggle?.addEventListener('click', e => drawer.open = !drawer.open )
 
     const expandToggle = figcaption.querySelector('.expandToggle')
-    if (props['in-dialog']) expandToggle.style.display = 'none'
+    if (props.inDialog) expandToggle.style.display = 'none'
     else {
       expandToggle?.addEventListener('click', e => {
         window.parent.postMessage({ 
@@ -89,14 +92,54 @@
             kwargs: {
               ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
               ...{
-                tag: 'template',
-                'in-dialog': true,
+                tag: 'vis-network<div',
+                dataId: `dialog-${id}`,
+                inDialog: true,
               }
             }
           }
         }, '*');
       })
     }
+
+    const buildGraph = (csv) => {
+      let nodes = []
+      let edges = []
+      const { data, errors } = Papa.parse(csv, {
+        header: false,        // treat first row as keys
+        dynamicTyping: true,  // convert "123" → 123
+        skipEmptyLines: true,   
+      });
+      data.forEach(row => {
+        if (row[0] === 'node') nodes.push({ id: row[1], label: row[2], image: row[2] })
+        else if (row[0] === 'edge') edges.push( {from: row[1], to: row[2], label: row[3] })
+      })
+      let options = {
+        autoResize: false,    // don’t constantly reflow
+        height: '100%'        // only set once, up front
+      }
+      let network = new vis.Network(content, {
+        nodes: new vis.DataSet(nodes),
+        edges: new vis.DataSet(edges),
+      }, options);
+    }
+
+    // get the nodes and edges from the parent window using iframe ID
+    window.addEventListener('message', (event) => {
+      let eventData = JSON.parse(event.data)
+      if (eventData.event === 'id') {
+        id = eventData.id
+        window.parent.postMessage({type: 'getElementById', id: `${id}-csv`}, '*')      
+      } if (eventData.event === 'element' && eventData.html) {
+        buildGraph(new DOMParser().parseFromString(eventData.html, 'text/html').querySelector('body').firstElementChild.textContent)
+      }
+    });
+    if (props.dataId) {
+      let id = props.dataId.startsWith('dialog-') ? props.dataId.slice(7) : props.dataId
+      window.parent.postMessage({type: 'getElementById', id: `${id}-csv`}, '*')      
+    } else
+    window.parent.postMessage({type: 'getId'}, '*')
+
     
   </script>
   

@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Component</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.18.0/cdn/themes/light.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@recogito/annotorious-openseadragon@2.7.14/dist/annotorious.min.css">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -223,7 +222,7 @@
     const docReady = (fn) => { if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(fn, 1); else document.addEventListener('DOMContentLoaded', fn) }
     docReady(function() {
       
-      window.parent.postMessage({ type: 'getID' }, '*');
+      window.parent.postMessage({ type: 'getId' }, '*');
       window.addEventListener('message', (event) => {
         let eventData = JSON.parse(event.data)
         let action = eventData.action?.toLowerCase()

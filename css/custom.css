@@ -781,3 +781,5 @@ section > section + section {
   /* border-top: 1px solid #ccc; */
   /* padding-top: 2em; */
 }
+
+[id$="-csv"] { display: none; }
