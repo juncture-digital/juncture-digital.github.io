@@ -681,11 +681,11 @@
       def.thumbnail = `${imageServiceUrl}/${fullUrl(def.kwargs.image)}/w_300`
     }
     for (let [prop, value] of Object.entries(def.kwargs)) {
-      if (['allmaps', 'label', 'id', 'description', 'thumbnail', 'coords', 'url'].includes(prop)) def[prop] = decodeURIComponent(value)
+      if (['allmaps', 'circle', 'label', 'id', 'description', 'thumbnail', 'coords', 'url'].includes(prop)) def[prop] = decodeURIComponent(value)
     }
     if (def.kwargs.layer) def.layerName = decodeURIComponent(def.kwargs.layer)
   }
-  // console.log(layerDefs)
+  console.log(layerDefs)
 
 
   const tokenize = (s) => {
@@ -778,7 +778,7 @@
         const _props = feature.properties
         let marker
 
-        if (_props.type === marker && _props.url) { // image marker
+        if (_props.type === 'marker' && _props.url) { // image marker
           let [width, height] = _props.size
             ? _props.size.split(',').map((item) => Number(item))
             : [100, 100]

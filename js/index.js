@@ -121,9 +121,11 @@ const makeIframe = (code) => {
   if (code.id) iframe.id = code.id
   else if (code.kwargs.id) iframe.id = code.kwargs.id
   if (code.classes?.length > 0) iframe.className = code.classes.join(' ')
+  let ignoreArgs = ['width', 'height']
+  if (tag === 'iframe') ignoreArgs.push('src', 'tag', 'ghbase', 'in-dialog', 'aspect', 'id')
   let args = [
     ...Object.entries(code.kwargs)
-      .filter(([key, value]) => key !== 'width' && key !== 'height') // iframe attributes not passed to component
+      .filter(([key, value]) => !ignoreArgs.includes(key)) // iframe attributes not passed to component
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`), ...(code.booleans || [])
     ].join('&')
 
@@ -413,9 +415,14 @@ let dialog
 const showDialog = (props) => {
   if (dialog) return
   let aspectRatio = props.kwargs.aspect || 1.0
-  let width = aspectRatio > 1.0
+
+  // Aspect ratio with caption height
+  let aspectRatioWithCaption = window.innerWidth/(window.innerWidth/aspectRatio + 36)
+
+  let width = aspectRatioWithCaption > 1.0
     ? window.innerWidth * 0.93
-    : window.innerHeight * aspectRatio * 0.93
+    : window.innerHeight * aspectRatioWithCaption * 0.93
+
   dialog = document.createElement('sl-dialog')
   dialog.id = 'junctureDialog'
   dialog.setAttribute('size', 'large')

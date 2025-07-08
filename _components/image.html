@@ -191,7 +191,7 @@
       ...{ // default properties
         alt: null,    // Alt text string
         base: null,     // base URL for relative links
-        caption: '',  // caption text
+        caption: null,  // caption text
         cover: false,
         format: null,
         ghbase: null,
@@ -347,7 +347,7 @@
       rotation = parseInt(props.rotation || rotation || 0)
       quality = props.quality || quality || 'default'
       format = props.format || format || 'jpg'
-      console.log(`staticImageUrl: region=${region}, size=${size}, rotation=${rotation}, quality=${quality}, format=${format}`)
+      // console.log(`staticImageUrl: region=${region}, size=${size}, rotation=${rotation}, quality=${quality}, format=${format}`)
       url =`${itemInfo.service[0].id || itemInfo.service[0]['@id']}/${region}/${size}/${rotation}/${quality}.${format}`
       return url
     }
@@ -494,6 +494,12 @@
           props.manifest = `${iiifServiceUrl}/wc:${mwFile}/manifest.json`
           setCaption()
         })
+      } else if (props.src.indexOf('ia:') === 0) {
+        let iaId = props.src.slice(3)
+        let iaImageUrl = `https://iiif.archive.org/image/iiif/3/${iaId}%2F${iaId}_jp2.zip%2F${iaId}_jp2%2F${iaId}_${String(props.seq).padStart(4, '0')}.jp2/full/${main.clientWidth},/0/default.jpg`
+        // imgUrl = `${imageServiceUrl}/${encodeURIComponent(iaImageUrl)}`
+        imgUrl = iaImageUrl
+        props.manifest = `https://iiif.archive.org/iiif/${iaId}/manifest.json`
       } else {
         if (props.src[0] === '/') {
           let [owner, repo, branch, ...rest] = props.ghbase.split('/')
@@ -602,8 +608,17 @@
           return logoObj
         })
       }
-  
-      parsed.imageData = findItem({type:'Annotation', motivation:'painting'}, iiifManifest, props.seq)?.body
+      let itemCanvas = findItems({type:'Canvas'}, iiifManifest)[props.seq-1]
+      let itemAnnotationBody = findItem({type:'Annotation', motivation:'painting'}, itemCanvas)?.body
+
+      parsed.imageData = {
+        id: itemAnnotationBody.id,
+        format: itemAnnotationBody.format,
+        height: itemAnnotationBody.height || itemCanvas.height,
+        width: itemAnnotationBody.width || itemCanvas.width,
+        service: itemAnnotationBody.service,
+        label: (itemCanvas?.label?.en || itemCanvas?.label?.none || Object.values(itemCanvas.label || {})).join(' ')
+      }
       parsed.service = parsed.imageData.service && `${(parsed.imageData.service[0].id || parsed.imageData.service[0]['@id'])
         .replace(/\/info\.json$/,'')}/info.json`
         if (iiifManifest.requiredStatement) {
@@ -627,15 +642,15 @@
     }
 
     const updateManifestPanel = () => {
-      let parsed = parseManifest()      
-      if (parsed.label) document.querySelector('.manifest .label').innerHTML = parsed.label.join(' ')
+      let parsed = parseManifest()
+      if (parsed.label) document.querySelector('.manifest .label').innerHTML = parsed.label.join(' ') + (parsed.imageData?.label ? ` (${parsed.imageData.label})` : '')
       if (parsed.summary) document.querySelector('.manifest .summary').innerHTML = parsed.summary.join(' ')
       if (parsed.requiredStatement) document.querySelector('.manifest .required').innerHTML = `<span><b>Attribution:</b></span> <span>${parsed.requiredStatement.value.join(' ')}</span>`
       if (parsed.rights) document.querySelector('.manifest .rights').innerHTML = `<span><b>Reuse rights:</b></span><a href="${parsed.rights.url}">${parsed.rights.code}</a>` + (parsed.rights.badge || '')
       if (parsed.sourceUrl) document.querySelector('.manifest .source').innerHTML = `<span><b>Source:</b></span> <a href="${parsed.sourceUrl}">${parsed.sourceUrl}</a>`
       if (parsed.imageData) {
         if (!imageAspect) imageAspect = props.rotation === 90 ? parsed.imageData.height/parsed.imageData.width : parsed.imageData.width/parsed.imageData.height
-        document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width.toLocaleString()} × ${parsed.imageData.height.toLocaleString()} (${imageAspect.toFixed(2)})`
+        document.querySelector('.manifest .size').innerHTML = `<span><b>Size:</b></span> ${parsed.imageData.width?.toLocaleString()} × ${parsed.imageData.height?.toLocaleString()} (${imageAspect.toFixed(2)})`
       } else {
         document.querySelector('.manifest .size').innerHTML = ''
       }
