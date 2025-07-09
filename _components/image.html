@@ -287,22 +287,7 @@
     const expandToggle = figcaption.querySelector('.expandToggle')
     if (props['in-dialog'] && expandToggle) expandToggle.style.display = 'none'
     else {
-      expandToggle?.addEventListener('click', e => {
-        window.parent.postMessage({ 
-          type: 'showDialog', 
-          props: {
-            kwargs: {
-              ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
-              ...{
-                aspect: imageAspect,
-                tag: 'image',
-                iiif: true,
-                cover: true
-              }
-            }
-          }
-        }, '*');
-      })
+      expandToggle?.addEventListener('click', () => showDialog())
     } 
 
     document.querySelector('.drawer sl-button.close').addEventListener('click', e => toggleDrawerOpen())
@@ -411,6 +396,19 @@
       img.setAttribute('alt', props.alt || text)
     }
 
+    const showDialog = () => {
+      let parsed = parseManifest()
+      let source = parsed.metadata.find((item) => item.label == 'source_url' || item.label == 'source')?.value[0]
+      let isInternetArchiveResource = source.indexOf('https://archive.org/') === 0
+      let tag = isInternetArchiveResource ? 'iframe' : 'image'
+      let aspect = isInternetArchiveResource ? 1 : imageAspect
+      let kwargs = isInternetArchiveResource
+        ? { tag, aspect, src: source }
+        : { ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
+            ...{aspect, tag, iiif: true, cover: true } }
+      window.parent.postMessage({ type: 'showDialog', props: { kwargs } }, '*');
+    }
+
     const loadImage = (url) => {
       img.onload = (e) => {
         imageAspect = props.rotation === 90 ? img.naturalHeight/img.naturalWidth : img.naturalWidth/img.naturalHeight
@@ -428,22 +426,7 @@
           : decodeURI(img.src.split('/').pop().replace(/^\d+px-/,'').replace(/\.(jpg|jpeg|png|gif)$/,'').replace(/[-_]+/g,' ').replace(/^default$/g,''))
       img.setAttribute('alt', altText)
       // img.style.objectFit = props.cover === true ? 'cover' : 'contain'
-      img.addEventListener('click', () => {
-        window.parent.postMessage({ 
-          type: 'showDialog', 
-          props: {
-            kwargs: {
-              ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
-              ...{
-                aspect: imageAspect,
-                tag: 'image',
-                iiif: true,
-                cover: true
-              }
-            }
-          }
-        }, '*');
-      })
+      img.addEventListener('click', () => showDialog())
     }
 
     const loadManifest = (manifestUrl) => {
