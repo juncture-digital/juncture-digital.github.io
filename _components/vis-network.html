@@ -92,7 +92,7 @@
             kwargs: {
               ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
               ...{
-                tag: 'vis-network<div',
+                tag: 'vis-network',
                 dataId: `dialog-${id}`,
                 inDialog: true,
               }
