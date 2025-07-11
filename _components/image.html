@@ -190,20 +190,27 @@
     const props = {
       ...{ // default properties
         alt: null,    // Alt text string
+        attribution: null,
         base: null,     // base URL for relative links
         caption: null,  // caption text
         cover: false,
+        description: null,
         format: null,
         ghbase: null,
         iiif: false,
+        label: null,
+        license: null,
         language: 'en',
         manifest: null,
         nocaption: false,
         options: null,  // IIIF region, size, rotation, quality, format
         quality: null,
+        refresh: false,
         region: null,   // initial region to zoom to
         rotation: 0,
         seq: 1,         // sequence number of image in multi-image manifest, default is 1 for first image
+        source: null,
+        summary: null,
         size: null,     // size of image to display
         src: null
       },
@@ -399,7 +406,7 @@
     const showDialog = () => {
       let parsed = parseManifest()
       let source = parsed.metadata.find((item) => item.label == 'source_url' || item.label == 'source')?.value[0]
-      let isInternetArchiveResource = source.indexOf('https://archive.org/') === 0
+      let isInternetArchiveResource = source?.indexOf('https://archive.org/') === 0
       let tag = isInternetArchiveResource ? 'iframe' : 'image'
       let aspect = isInternetArchiveResource ? 1 : imageAspect
       let kwargs = isInternetArchiveResource
@@ -429,22 +436,44 @@
       img.addEventListener('click', () => showDialog())
     }
 
-    const loadManifest = (manifestUrl) => {
-      return fetch(manifestUrl).then(resp => resp.json())
-      .then( async manifest => {
-        const contexts = Array.isArray(manifest['@context']) ? manifest['@context'] : [manifest['@context']]
-        const isV3Manifest = contexts.find(ctx => ctx.indexOf('shared-canvas.org') > 0 || parseFloat(ctx.split('/').slice(-2,-1).pop()) < 3) ? false : true
-        return isV3Manifest 
-          ? manifest 
-          : await fetch(`${iiifServiceUrl}/prezi2to3/`, { method: 'POST', body: JSON.stringify(manifest) }).then(resp => resp.json())
-      })
-      .then(manifest => {
-        iiifManifest = manifest
-        setCaption()
-        updateManifestPanel()
-        if (!props.src || props.region || props.rotation) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
-      })
-      return iiifManifest
+    const loadManifest = async (manifestUrl) => {
+      let iiifAttrKeys = ['attribution', 'description', 'label', 'license', 'rights', 'source', 'summary']
+      let foundKeys = iiifAttrKeys.filter(key => props[key])
+      if (foundKeys.length) {
+        let iiifAttrs = {
+          ...Object.fromEntries(foundKeys.filter(key => key in props && props[key]).map(key => [key, props[key]])), 
+          ...{
+            url: props.url,
+            label: props.label || props.title || props.caption
+        } };
+        ['attribution', 'description', 'label', 'summary'].forEach(key => {
+          if (iiifAttrs[key]) iiifAttrs[key] = md2Html(iiifAttrs[key])
+        })
+        return fetch(`${iiifServiceUrl}/manifest${props.refresh ? '?refresh' : ''}`, { method: 'POST', body: JSON.stringify(iiifAttrs)} ).then(resp => resp.json())
+        .then(manifest => {
+          iiifManifest = manifest
+          setCaption()
+          updateManifestPanel()
+          if (!props.src || props.region || props.rotation) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
+          return manifest
+        })
+      } else {
+        return fetch(manifestUrl).then(resp => resp.json())
+        .then( async manifest => {
+          const contexts = Array.isArray(manifest['@context']) ? manifest['@context'] : [manifest['@context']]
+          const isV3Manifest = contexts.find(ctx => ctx.indexOf('shared-canvas.org') > 0 || parseFloat(ctx.split('/').slice(-2,-1).pop()) < 3) ? false : true
+          return isV3Manifest 
+            ? manifest 
+            : await fetch(`${iiifServiceUrl}/prezi2to3/`, { method: 'POST', body: JSON.stringify(manifest) }).then(resp => resp.json())
+        })
+        .then(manifest => {
+          iiifManifest = manifest
+          setCaption()
+          updateManifestPanel()
+          if (!props.src || props.region || props.rotation) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
+          return manifest
+        })
+      }
     }
 
     const getTileSources = () => {
@@ -462,22 +491,27 @@
     if (props.src) {
       let imgUrl
       if (props.src.indexOf('http') === 0) {
+        props.url = props.src
         imgUrl = `${imageServiceUrl}/${encodeURIComponent(props.src)}`
         props.manifest = `${iiifServiceUrl}/${encodeURIComponent(props.src)}/manifest.json`
       } else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1 || props.src.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
         let mwFile = props.src.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
+        props.url = `wc:${mwFile}`
         imgUrl = `${imageServiceUrl}/wc:${mwFile}`
         props.manifest = `${iiifServiceUrl}/wc:${mwFile}/manifest.json`
       } else if (props.src.indexOf('gh:') === 0) {
+        props.url = props.src
         imgUrl = `${imageServiceUrl}/${props.src}`
         props.manifest = `${iiifServiceUrl}/${props.src}/manifest.json`
       } else if (props.src.indexOf('wd:') === 0 || /^Q[0-9]+$/.test(props.src)) {
+        props.url = props.src
         const qid = props.src.replace(/^wd:/, '')
         wdImage(qid).then(mwFile => {
           props.manifest = `${iiifServiceUrl}/wc:${mwFile}/manifest.json`
           setCaption()
         })
       } else if (props.src.indexOf('ia:') === 0) {
+        props.url = props.src
         let iaId = props.src.slice(3)
         let iaImageUrl = `https://iiif.archive.org/image/iiif/3/${iaId}%2F${iaId}_jp2.zip%2F${iaId}_jp2%2F${iaId}_${String(props.seq).padStart(4, '0')}.jp2/full/${main.clientWidth},/0/default.jpg`
         // imgUrl = `${imageServiceUrl}/${encodeURIComponent(iaImageUrl)}`
@@ -486,9 +520,11 @@
       } else {
         if (props.src[0] === '/') {
           let [owner, repo, branch, ...rest] = props.ghbase.split('/')
+          props.url = `gh:${owner}/${repo}/${branch}${props.src}`
           imgUrl = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}${props.src}`
           props.manifest = `${iiifServiceUrl}/gh:${owner}/${repo}/${branch}${props.src}/manifest.json`
         } else {
+          props.url = `gh:${props.ghbase}/${props.src}`
           imgUrl = `${imageServiceUrl}/gh:${props.ghbase}/${props.src}`
           props.manifest = `${iiifServiceUrl}/gh:${props.ghbase}/${props.src}/manifest.json`
         }
@@ -607,7 +643,8 @@
         if (iiifManifest.requiredStatement) {
           let rs = iiifManifest.requiredStatement
           try {
-            parsed.requiredStatement = {label: 'Attribution', value: [rs.attribution]}
+            if (rs.attribution) parsed.requiredStatement = {label: 'Attribution', value: [rs.attribution]}
+            else parsed.requiredStatement = { label: valueOf(rs.label), value: valueOf(rs.value)}
           } catch (e) {
             console.error('Error parsing requiredStatement', e)
           }
@@ -620,7 +657,7 @@
       if (iiifManifest.seeAlso) {
         parsed.seeAlso = iiifManifest.seeAlso.map((seeAlso) => ({label: seeAlso.label ? valueOf(seeAlso.label) : seeAlso.id, href: seeAlso.id}))
       }
-      
+      // console.log(parsed)
       return parsed
     }
 

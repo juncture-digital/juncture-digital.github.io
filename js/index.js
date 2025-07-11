@@ -11,6 +11,7 @@ import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab
 import 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace/cdn/components/tab-panel/tab-panel.js';
 
 const isStatic = ['true', ''].includes(new URLSearchParams(window.location.search).get('static'));
+const refresh = ['true', ''].includes(new URLSearchParams(window.location.search).get('refresh'));
 let isMobile = ('ontouchstart' in document.documentElement && /mobi/i.test(navigator.userAgent) )
 
 let imageServiceUrl = 'https://d1co2zgwaj21sl.cloudfront.net/image';
@@ -114,6 +115,7 @@ const makeIframe = (code) => {
   iframe.setAttribute('allow', 'clipboard-write')
   iframe.setAttribute('title', `${tag} viewer`)
   if (isStatic) code.booleans.push('static')
+  if (refresh) code.booleans.push('refresh')
   iframe.setAttribute('width', code.kwargs.width || '100%')
   if (code.kwargs.height) iframe.setAttribute('height', code.kwargs.height)
   if (code.kwargs.aspect && !['header'].includes(tag)) iframe.style.aspectRatio = computedCaption(code)
@@ -440,7 +442,7 @@ const showDialog = (props) => {
   dialog.appendChild(el)
   props.kwargs['in-dialog'] = ''
   props.kwargs.width = width
-  makeIframe({ el, tag: props.tag, kwargs: props.kwargs })
+  makeIframe({ el, tag: props.tag, kwargs: props.kwargs, booleans: [] })
   document.body.appendChild(dialog)
   dialog.show()
 }
