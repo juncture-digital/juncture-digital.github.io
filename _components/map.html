@@ -920,7 +920,9 @@
     coords.textContent = latLngZoom
     map.on('click', (e) => {
       getLatLngZoom(e)
-      copyTextToClipboard(latLngZoom.split(',').join(','))
+      let lat,lng,zoom = atLngZoom.split(',')
+      // copyTextToClipboard(latLngZoom.split(',').join(','))
+      copyTextToClipboard(`center=${lat},${lng} zoom=${zoom}`)
     })
     map.on('movestart', () => { mapEl.style.cursor = 'move' })
     map.on('moveend', (e) => {

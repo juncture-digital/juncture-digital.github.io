@@ -437,8 +437,10 @@
     }
 
     const loadManifest = async (manifestUrl) => {
+      console.log(manifestUrl)
       let iiifAttrKeys = ['attribution', 'description', 'label', 'license', 'rights', 'source', 'summary']
       let foundKeys = iiifAttrKeys.filter(key => props[key])
+      console.log(foundKeys)
       if (foundKeys.length) {
         let iiifAttrs = {
           ...Object.fromEntries(foundKeys.filter(key => key in props && props[key]).map(key => [key, props[key]])), 
@@ -972,13 +974,13 @@
         boxEl.appendChild(icon);
         icon.addEventListener('click', () => {
           if (document.hasFocus()) {
-            navigator.clipboard.writeText('Hello world!')
-              .catch(err => console.error('Copy failed:', err));
+            navigator.clipboard.writeText('Hello world!').catch(err => console.error('Copy failed:', err));
           } else {
             alert('Please click on the window to focus it before copying.');
           }
           const regionPct = `pct:${(rect.x*100).toFixed(2)},${(rect.y*100*imageAspect).toFixed(2)},${(rect.width*100).toFixed(2)},${(rect.height*100*imageAspect).toFixed(2)}`
-          navigator.clipboard.writeText(`${id}/zoomto/${regionPct}`);
+          // navigator.clipboard.writeText(`${id}/zoomto/${regionPct}`);
+          navigator.clipboard.writeText(regionPct);
         });
 
         // Define updateOverlay function
