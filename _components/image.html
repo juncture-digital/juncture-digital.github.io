@@ -335,7 +335,9 @@
           : `${width},`
         : props.size
           ? props.size
-          : `${main.clientWidth},`
+          : props.region
+            ? 'max'
+            : `${main.clientWidth},`
       rotation = parseInt(props.rotation || rotation || 0)
       quality = props.quality || quality || 'default'
       format = props.format || format || 'jpg'
