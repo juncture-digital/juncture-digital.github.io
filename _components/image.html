@@ -568,6 +568,8 @@
             badgeHeight: 31,
             badgeTemplate: 'https://licensebuttons.net/l/${this.rightsCode}${this.rightsCode === "publicdomain" ? "" : "/"+this.version}/${this.badgeWidth}x${this.badgeHeight}.png'
           },
+          // pdm https://licensebuttons.net/l/publicdomain/88x31.png
+          // cc0 https://licensebuttons.net/l/zero/1.0/88x31.png
           rs: {
             badgeTemplate: 'https://rightsstatements.org/files/buttons/${this.rightsCode}.white.svg',
             backgroundColor: '318ac7'
@@ -578,7 +580,9 @@
         let badgeHtml = ''
         let [rightsType, _, rightsCode, version] = rights.split('/').slice(2)
         if (rightsType === 'creativecommons.org') {
-          rightsCode = rightsCode === 'zero' ? 'publicdomain' : rightsCode
+          rightsCode = rightsCode === 'mark' 
+            ? 'publicdomain'
+            : rightsCode
           // rightsCode = rightsCode === 'zero' ? 'publicdomain' : `CC ${rightsCode}`
           badgeHtml = `<img src="${fillTemplate(config.cc.badgeTemplate, {...config.cc, ...{rightsCode, version}})}"/>` 
         } else if (rightsType === 'rightsstatements.org') {
@@ -647,8 +651,8 @@
         if (iiifManifest.requiredStatement) {
           let rs = iiifManifest.requiredStatement
           try {
-            if (rs.attribution) parsed.requiredStatement = {label: 'Attribution', value: [rs.attribution]}
-            else parsed.requiredStatement = { label: valueOf(rs.label), value: valueOf(rs.value)}
+            if (rs.attribution) parsed.requiredStatement = {label: 'Attribution', value: [md2Html(rs.attribution)]}
+            else parsed.requiredStatement = { label: valueOf(rs.label), value: valueOf(rs.value)?.map(v => md2Html(v)) || []}
           } catch (e) {
             console.error('Error parsing requiredStatement', e)
           }
