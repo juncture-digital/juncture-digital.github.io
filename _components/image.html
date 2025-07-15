@@ -407,7 +407,7 @@
 
     const showDialog = () => {
       let parsed = parseManifest()
-      let source = parsed.metadata.find((item) => item.label == 'source_url' || item.label == 'source')?.value[0]
+      let source = props.source || parsed.metadata.find((item) => item.label == 'source_url' || item.label == 'source')?.value[0]
       let isInternetArchiveResource = source?.indexOf('https://archive.org/') === 0
       let tag = isInternetArchiveResource ? 'iframe' : 'image'
       let aspect = isInternetArchiveResource ? 1 : imageAspect
@@ -439,10 +439,8 @@
     }
 
     const loadManifest = async (manifestUrl) => {
-      console.log(manifestUrl)
       let iiifAttrKeys = ['attribution', 'description', 'label', 'license', 'rights', 'source', 'summary']
       let foundKeys = iiifAttrKeys.filter(key => props[key])
-      console.log(foundKeys)
       if (foundKeys.length) {
         let iiifAttrs = {
           ...Object.fromEntries(foundKeys.filter(key => key in props && props[key]).map(key => [key, props[key]])), 
@@ -611,7 +609,7 @@
       if (iiifManifest.metadata) {
         parsed.metadata = iiifManifest.metadata.map((item) => ({label: valueOf(item.label)[0], value: valueOf(item.value)}))
         let sourceUrl = parsed.metadata.find((item) => item.label == 'source_url' || item.label == 'source')
-        parsed.sourceUrl = sourceUrl ? sourceUrl.value[0] : null
+        parsed.sourceUrl = sourceUrl ? sourceUrl.value[0] : props.source
   
         let depicts = parsed.metadata.find((md) => md.label === 'depicts')
         if (depicts) parsed.depicts = depicts.value

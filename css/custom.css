@@ -320,6 +320,7 @@ iframe[src*="image-compare"] {
   margin-top: 2em;
   font-size: 80%;
   background-color: #f8f8f8;
+  width: 100%;
 }
 .footnotes::before {
   content: "References";
@@ -501,6 +502,10 @@ flex: 1 1 200px;        /*
 
 .columns > *.larger {
   flex: 2 1 400px;
+}
+
+.columns > iframe {
+  min-width: 200px;
 }
 
 /* iframe.right + p { margin-top: 0; } */
