@@ -122,6 +122,8 @@ iframe {
 
 iframe[src*="header"] {
   margin-bottom: 1.5em;
+  width: 100%;
+  line-height: 1;
 }
 
 iframe[src*="breadcrumbs"] {
@@ -169,13 +171,6 @@ pre { white-space: pre-wrap; word-wrap: break-word; }
   text-align: center;
 }
 
-/* Adjust layout for smaller screens */
-@media (max-width: 600px) {
-  .iframe-container iframe {
-    flex: 1 1 100%; /* Each item takes full width on smaller screens */
-  }
-}
-
 .flex-grid {
   display: flex;
   flex-wrap: wrap;
@@ -206,7 +201,7 @@ iframe[src*="header"] {
   position: sticky;
   top: -40px;
   z-index: 1;
-  aspect-ratio: 3.76;
+  /* aspect-ratio: 3.76; */
 }
 
 iframe[src*="image?"],
@@ -241,7 +236,29 @@ iframe[src*="image-compare"] {
   aspect-ratio: 0.95;
 }
 
+
+@media (max-width: 600px) {
+  .iframe-container iframe {
+    flex: 1 1 100%; /* Each item takes full width on smaller screens */
+  }
+  article.post {
+    margin-top: 0;
+  }
+  iframe[src*="header"] {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* Adjust layout for smaller screens */
 @media (min-width: 600px) {
+
+  .iframe-container iframe {
+    flex: 1 1 100%; /* Each item takes full width on smaller screens */
+  }
+  article.post {
+    margin-top: 0;
+  }
 
   sl-card {
     max-width: 300px;
