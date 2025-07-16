@@ -233,7 +233,7 @@ const restructureMarkdownToSections = (contentEl) => {
     }
   });
 
-  if (!isMobile) {
+  // if (!isMobile) {
     container.querySelectorAll('section.wrap').forEach(section => {
       const heading = section.firstElementChild;
       if (!heading) return;
@@ -251,7 +251,7 @@ const restructureMarkdownToSections = (contentEl) => {
         heading.after(lastElementToMove);
       }
     });
-  }
+  // }
 
   container.querySelector('hr.footnotes-sep')?.remove()
   let footnotes = container.querySelector('section.footnotes')
@@ -864,7 +864,7 @@ const processPage = (content) => {
   addActionLinks(content)
 
   document.querySelectorAll('.flex-grid').forEach(container => {
-    packIframes(Array.from(container.children), content.clientWidth, 8, container.dataset?.target || 260)
+    packIframes(Array.from(container.children), content.clientWidth, 8, container.dataset?.target || (isMobile ? 160 : 200))
   })
 }
 
