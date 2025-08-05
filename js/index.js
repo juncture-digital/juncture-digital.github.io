@@ -912,6 +912,7 @@ document.querySelectorAll('.post-image').forEach((el) => {
   }
 });
 
+/*
 let path = rest.slice(0, -1).join('/')
 document.querySelectorAll('img').forEach((img) => {
   let src = new URL(img.src)
@@ -924,6 +925,7 @@ document.querySelectorAll('img').forEach((img) => {
   img.width = width
   img.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${path}/${imgSrc}`
 });
+*/
 
 let selectors = ['.post-content', '.page-content', 'body']
 if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
