@@ -923,6 +923,7 @@ document.querySelectorAll('img').forEach((img) => {
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
   img.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${path}/${imgSrc}`
+  console.log(owner, repo, branch, path, imgSrc)
 });
 
 let selectors = ['.post-content', '.page-content', 'body']
