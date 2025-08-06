@@ -915,6 +915,7 @@ document.querySelectorAll('.post-image').forEach((el) => {
 let path = rest.slice(0, -1).join('/')
 document.querySelectorAll('img').forEach((img) => {
   let src = new URL(img.src)
+  console.log(src)
   if (location.origin !== src.origin) return
   let imgSrc = src.pathname.split('/').pop()
   if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
@@ -923,7 +924,7 @@ document.querySelectorAll('img').forEach((img) => {
   let width = img.clientWidth || img.parentElement.clientWidth || 1000
   img.width = width
   img.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${path}/${imgSrc}`
-  console.log(owner, repo, branch, path, imgSrc)
+  console.log(src.pathname, owner, repo, branch, path, imgSrc, img.src)
 });
 
 let selectors = ['.post-content', '.page-content', 'body']
