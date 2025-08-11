@@ -912,21 +912,6 @@ document.querySelectorAll('.post-image').forEach((el) => {
   }
 });
 
-/*
-let path = rest.slice(0, -1).join('/')
-document.querySelectorAll('img').forEach((img) => {
-  let src = new URL(img.src)
-  if (location.origin !== src.origin) return
-  let imgSrc = src.pathname.split('/').pop()
-  if (['favicon.ico', 'favicon.png', 'favicon.svg'].includes(imgSrc)) return
-  let extension = imgSrc.split('.').pop()
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(extension) < 0) return
-  let width = img.clientWidth || img.parentElement.clientWidth || 1000
-  img.width = width
-  img.src = `${imageServiceUrl}/gh:${owner}/${repo}/${branch}/${path}/${imgSrc}`
-});
-*/
-
 let selectors = ['.post-content', '.page-content', 'body']
 if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
 for (let selector of selectors) {

@@ -370,13 +370,11 @@ pre > code {
 /**
  * Clearfix
  */
-/*
 .wrapper:after {
   content: "";
   display: table;
   clear: both;
 }
-*/
 
 /**
  * Icons
@@ -448,14 +446,12 @@ table td {
   font-size: 1.625rem;
   font-weight: 300;
   letter-spacing: -1px;
-  /*
   margin-bottom: 0;
   float: left;
-  */
 }
 @media screen and (max-width: 600px) {
   .site-title {
-    /* padding-right: 45px; */
+    padding-right: 45px;
   }
 }
 .site-title, .site-title:visited {
