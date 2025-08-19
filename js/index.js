@@ -193,7 +193,7 @@ const restructureMarkdownToSections = (contentEl) => {
 
       // Check if heading (H1 - H6)
       if (/^H[1-6]$/.test(node.tagName)) {
-        node.textContent = node.textContent.replace(/^\s+$/, '')
+        node.innerHTML = node.innerHTML.replace(/^\s+$/, '')
         // Determine the heading level (e.g., "H2" -> 2)
         const headingLevel = parseInt(node.tagName[1], 10);
         
@@ -206,7 +206,7 @@ const restructureMarkdownToSections = (contentEl) => {
         const section = document.createElement('section');
         
         // Transfer any id, class, and style attributes from the heading to the section.
-        ['id', 'class', 'style'].forEach(attr => {
+        ['id', 'class', 'style', 'click'].forEach(attr => {
           if (node.hasAttribute(attr)) {
             section.setAttribute(attr, node.getAttribute(attr));
             node.removeAttribute(attr);
@@ -448,6 +448,7 @@ const showDialog = (props) => {
   dialog.show()
 }
 
+
 const addMessageHandler = () => {
   window.addEventListener('message', (event) => {
     if (event.data.type === 'setAspect') {
@@ -511,6 +512,19 @@ const addActionLinks = (rootEl) => {
           }
         }
       }
+    })
+  })
+}
+
+const addClickHandlers = (rootEl) => {
+  rootEl.querySelectorAll('[click]').forEach(node => {
+    let href = node.getAttribute('click')
+    let isExternal = (href.startsWith('http') || href.startsWith('//')) && !href.startsWith(location.origin)
+    node.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (isExternal) window.open(href, '_blank') 
+      else location.href = href 
     })
   })
 }
@@ -857,6 +871,7 @@ const processPage = (content) => {
       if (!codeEl.inline) makeIframe(codeEl)
     })
 
+  addClickHandlers(content)
   if (!isStatic) makeDetails(content)
   makeCards(content)
   makeTabs(content)
@@ -917,8 +932,8 @@ if (document.getElementById('junctureScript')?.dataset.selector) selectors = [do
 for (let selector of selectors) {
   let el = document.querySelector(selector)
   if (el) {
-    document.body.style.opacity = 0;
-    document.body.transition = 'opacity 0.5s ease-in-out';
+    // document.body.style.opacity = 0;
+    // document.body.style.transition = 'opacity 0.5s ease-in-out';
     processPage(el)
     document.body.style.opacity = 1
     break

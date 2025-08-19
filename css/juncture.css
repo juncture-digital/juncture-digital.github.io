@@ -3,7 +3,7 @@
 @import 'cards.css';
 
 section {
-  margin: 2rem 0;
+  margin: 30px 0;
 }
 
 p:has(> img) {
