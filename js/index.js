@@ -348,6 +348,29 @@ const makeCards = (rootEl) => {
   })
 }
 
+const makeGrid = (rootEl) => {
+  rootEl.querySelectorAll('section.grid').forEach(gridSection => {
+
+    // Create a container for the grid elements.
+    const gridContainer = document.createElement('div');
+    gridContainer.className = 'grid-container';
+
+    // Get all direct sub-sections within the grid section (skip the main heading).
+    const subsections = Array.from(gridSection.querySelectorAll('section'));
+
+    subsections.forEach(gridElement => {
+      // Add the element to the grid container.
+      gridContainer.appendChild(gridElement);
+    });
+
+    // Optionally, remove the original sub-sections.
+    // subsections.forEach(sub => sub.remove());
+
+    // Append the card grid to the cards section.
+    gridSection.appendChild(gridContainer);
+  })
+}
+
 const makeTabs = (rootEl) => {
   rootEl.querySelectorAll('section.tabs').forEach(section => {
     let tabGroup = document.createElement('sl-tab-group');
@@ -874,6 +897,7 @@ const processPage = (content) => {
   addClickHandlers(content)
   if (!isStatic) makeDetails(content)
   makeCards(content)
+  makeGrid(content)
   makeTabs(content)
   makeEntityPopups()
   addActionLinks(content)
