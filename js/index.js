@@ -206,7 +206,7 @@ const restructureMarkdownToSections = (contentEl) => {
         const section = document.createElement('section');
         
         // Transfer any id, class, and style attributes from the heading to the section.
-        ['id', 'class', 'style', 'click'].forEach(attr => {
+        ['id', 'class', 'style', 'click', 'target'].forEach(attr => {
           if (node.hasAttribute(attr)) {
             section.setAttribute(attr, node.getAttribute(attr));
             node.removeAttribute(attr);
@@ -546,7 +546,7 @@ const addClickHandlers = (rootEl) => {
     node.addEventListener('click', (e) => {
       e.preventDefault()
       e.stopPropagation()
-      if (isExternal) window.open(href, '_blank') 
+      if (isExternal || node.getAttribute('target') === '_blank') window.open(href, '_blank') 
       else location.href = href 
     })
   })

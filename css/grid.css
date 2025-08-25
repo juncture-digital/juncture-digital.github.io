@@ -1,8 +1,9 @@
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
   gap: 1rem;
   padding: 0 0;
+  line-height: 1.2;
 }
 .grid-container > section {
   margin: 0;
@@ -11,6 +12,7 @@
   padding: 0.5em;
   min-height: 200px;
   border: 0.5px #ccc solid;
+  font-size: clamp(0.5rem, 4vw, 1rem);
 }
 .grid-container > section > h1, 
 .grid-container > section > h2, 
@@ -22,7 +24,7 @@
   align-items: center;
   gap: 0.5em;
   margin-top: 0 !important;
-  line-height: 1;
+  font-size: clamp(0.5rem, 5vw, 1.5rem);
 }
 .grid-container > section > h1 img, 
 .grid-container > section > h2 img, 
@@ -34,6 +36,14 @@
 }
 .grid-container > section > sl-button {
   margin-top: auto;
+}
+.grid-container > section > ul, 
+.grid-container > section > ol {
+  margin-left: 16px;
+}
+.grid-container > section > ul > li , 
+.grid-container > section > ol > li {
+  margin: 0.5em 0;
 }
 [click]:hover {
   cursor: pointer;
