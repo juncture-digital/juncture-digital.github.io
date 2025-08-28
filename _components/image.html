@@ -229,8 +229,9 @@
     const docReady = (fn) => { if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(fn, 1); else document.addEventListener('DOMContentLoaded', fn) }
     docReady(function() {
       
-      window.parent.postMessage({ type: 'getId' }, '*');
+      window.parent.postMessage(JSON.stringify({ type: 'getId' }), '*');
       window.addEventListener('message', (event) => {
+        if (!event.data) return;
         let eventData = JSON.parse(event.data)
         let action = eventData.action?.toLowerCase()
         let text = eventData.text
@@ -472,7 +473,8 @@
           iiifManifest = manifest
           setCaption()
           updateManifestPanel()
-          if (!props.src || props.region || props.rotation) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
+          // if (!props.src || props.region || props.rotation) loadImage(`${imageServiceUrl}/${staticImageUrl()}`)
+          if (!props.src || props.region || props.rotation) loadImage(staticImageUrl())
           return manifest
         })
       }
