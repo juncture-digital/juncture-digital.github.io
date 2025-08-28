@@ -431,7 +431,7 @@
       layerDefs.forEach(def => { 
         if (def.kwargs.iiif) {
           def.kwargs.iiif = decodeURIComponent(def.kwargs.iiif)
-          if (!def.kwargs.iiif.startsWith('http')) def.kwargs.iiif = `https://iiif.mdpress.io/${def.kwargs.iiif}/manifest.json`;
+          if (!def.kwargs.iiif.startsWith('http')) def.kwargs.iiif = `https://iiif.juncture-digital.io/${def.kwargs.iiif}/manifest.json`;
           if (def.kwargs.iiif) urls.add(def.kwargs.iiif)
         }
       })
