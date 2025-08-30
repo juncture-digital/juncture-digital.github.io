@@ -19,6 +19,9 @@ section.wrap {
   display: flow-root;
 }
 
+.wrap > iframe {
+  margin-bottom: 1em;
+}
 .wrap > iframe, .wrap > p > img, .wrap > section {
   float: right;
   margin-left: 1rem;
@@ -67,11 +70,12 @@ iframe[src*="google-book"] {
 
 iframe[src*="header"] {
   position: sticky;
-  top: -24px;
+  top: -173px;
   z-index: 1;
   margin-bottom: 1.5rem;
   width: 100%;
   line-height: 1;
+  height: 300px;
 }
 
 iframe[src*="image?"] {
@@ -87,8 +91,11 @@ iframe[src*="map"] {
 }
 
 iframe[src*="youtube"] {
-  width: 100%;
   aspect-ratio: 1.6;
+}
+
+iframe[src*="knightlab.com"] {
+  width: 100%;
 }
 
 /* ****** End iframe ****** */
@@ -209,4 +216,62 @@ a.trigger {
 
 a.trigger:hover {
   background-color: rgba(250, 128, 114, 0.2)
+}
+
+/* larger screens */
+@media (min-width: 600px) {
+
+  .iframe-container iframe {
+    flex: 1 1 100%; /* Each item takes full width on smaller screens */
+  }
+
+  sl-card {
+    max-width: 300px;
+  }
+
+  .fill {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .float {
+    float: right;
+    margin-left: 1rem;
+    display: flow-root;
+  }
+
+  .center {
+      display: block;
+      margin: 0 auto;
+  }
+
+  .shadow,
+  .box-shadow {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+  }
+
+  .large {
+    width: 75% !important;
+    flex-grow: 0.75 !important;
+  }
+
+  .medium {
+    width: 50% !important;
+    flex-grow: 0.5 !important;
+  }
+
+  .small {
+    width: 33% !important;
+    flex-grow: 0.33 !important;
+  }
+
+}
+
+@media print {
+  .page-break-before { break-before: page; }
+  .page-break-after { break-after: page; }
+  .keep-together { break-inside: avoid; }
+  .no-break { page-break-inside: avoid; }
+  .page-content { padding-top: 0; }
+  article.post { margin-top: 0; }
 }
