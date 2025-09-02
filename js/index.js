@@ -233,7 +233,7 @@ const restructureMarkdownToSections = (contentEl) => {
     }
   });
 
-  // if (!isMobile) {
+  if (!isMobile) {
     container.querySelectorAll('section.wrap').forEach(section => {
       const heading = section.firstElementChild;
       if (!heading) return;
@@ -251,7 +251,7 @@ const restructureMarkdownToSections = (contentEl) => {
         heading.after(lastElementToMove);
       }
     });
-  // }
+  }
 
   container.querySelector('hr.footnotes-sep')?.remove()
   let footnotes = container.querySelector('section.footnotes')
@@ -453,7 +453,7 @@ const showDialog = (props) => {
   dialog.id = 'junctureDialog'
   dialog.setAttribute('size', 'large')
   dialog.setAttribute('no-header', '')
-  dialog.setAttribute('style', `--width: ${width}px;`)
+  // dialog.setAttribute('style', `--width: ${width}px;`)
   dialog.addEventListener('sl-after-hide', () => dialog = dialog.remove())
   let closeButton = document.createElement('sl-button')
   closeButton.setAttribute('slot', 'footer')
@@ -465,7 +465,9 @@ const showDialog = (props) => {
   let el = document.createElement('div')
   dialog.appendChild(el)
   props.kwargs['in-dialog'] = ''
-  props.kwargs.width = width
+  props.kwargs.width = '100%'
+  props.kwargs.height = '100%'
+  props.kwargs.cover = false
   makeIframe({ el, tag: props.tag, kwargs: props.kwargs, booleans: [] })
   document.body.appendChild(dialog)
   dialog.show()

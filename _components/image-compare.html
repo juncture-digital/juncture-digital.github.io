@@ -168,7 +168,8 @@
     }
     
     before.alt = props.beforeAlt
-    sha256(getImageUrl(props.before)).then(hash => {
+    sha256(encodeURI(getImageUrl(props.before))).then(hash => {
+      console.log(encodeURI(getImageUrl(props.before)), hash)
       let iiifImageUrl = `${iiifImageBaseUrl}/${hash}/${staticImageUrlArgs(props.beforeRegion)}`
       before.src = `${imageServiceUrl}/${iiifImageUrl}`
       // before.src = iiifImageUrl
@@ -177,6 +178,7 @@
 
     after.alt = props.afterAlt
     sha256(getImageUrl(props.after)).then(hash => {
+      console.log(encodeURI(getImageUrl(props.after)), hash)
       let iiifImageUrl = `${iiifImageBaseUrl}/${hash}/${staticImageUrlArgs(props.afterRegion)}`
       after.src = `${imageServiceUrl}/${iiifImageUrl}`
       // after.src = iiifImageUrl

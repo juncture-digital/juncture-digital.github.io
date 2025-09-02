@@ -19,13 +19,15 @@ section.wrap {
   display: flow-root;
 }
 
+/* ****** iframe ****** */
+
 .wrap > iframe {
   margin-bottom: 1em;
 }
 .wrap > iframe, .wrap > p > img, .wrap > section {
   float: right;
   margin-left: 1rem;
-  width: 33%;
+  width: 100%;
 }
 
 .wrap.left > iframe, .wrap.left > p > img, .wrap.left > section {
@@ -33,8 +35,6 @@ section.wrap {
   margin-right: 1rem;
   margin-left: 0;
 }
-
-/* ****** iframe ****** */
 
 iframe {
   display: block;
@@ -96,6 +96,15 @@ iframe[src*="youtube"] {
 
 iframe[src*="knightlab.com"] {
   width: 100%;
+}
+
+/* larger screens */
+@media (min-width: 600px) {
+  .wrap > iframe, .wrap > p > img, .wrap > section {
+    float: right;
+    margin-left: 1rem;
+    width: 33%;
+  }
 }
 
 /* ****** End iframe ****** */
@@ -275,3 +284,24 @@ a.trigger:hover {
   .page-content { padding-top: 0; }
   article.post { margin-top: 0; }
 }
+
+/* ****** Dialog ****** */
+
+sl-dialog::part(panel) {
+  width: 100dvw;
+    max-height: 100vh;
+    max-width: 100vh;
+}
+
+sl-dialog::part(body) {
+  height: 100dvh;
+  padding: 0;
+}
+sl-dialog::part(footer) {
+  padding: 0.5rem;
+}
+sl-dialog > iframe {
+  background-color: #ccc;;
+}
+
+/* ****** End Dialog ****** */

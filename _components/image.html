@@ -221,7 +221,8 @@
         .map(([key, value]) => [key, value ? decodeURIComponent(value.replace(/\+/g, ' ')) : true])
       )
     };
-    ['rotation', 'seq'].forEach(prop => props[prop] = parseInt(props[prop]) || props[prop]) // convert to number if possible
+    ['rotation', 'seq'].forEach(prop => props[prop] = parseInt(props[prop]) || props[prop]); // convert to number if possible
+    ['cover', 'iiif', 'nocaption', 'refresh'].forEach(prop => props[prop] = props[prop] === true || props[prop] === 'true'); // convert to boolean if possible
     console.log(props)
 
     let id;
@@ -1077,7 +1078,7 @@
       viewer = OpenSeadragon({
         id: 'osd',
         prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
-        homeFillsViewer: props.cover,
+        homeFillsViewer: false,
         tileSources,
         crossOriginPolicy: 'Anonymous',
         sequenceMode: tileSources.length > 1,
