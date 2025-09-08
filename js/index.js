@@ -428,11 +428,12 @@ const makeDetails = (rootEl) => {
     }
   })
   // Add sl-copy-button to each example
-  rootEl.querySelectorAll('pre').forEach((el, idx) => {
+  rootEl.querySelectorAll('.copy').forEach((el, idx) => {
     el.style.position = 'relative'
     el.id = `cb-${idx}`
     let cb = document.createElement('sl-copy-button')
     cb.setAttribute('from', el.id)
+    cb.setAttribute('style', 'position: absolute; top: 0px; right: 0px; z-index: 1;')
     el.appendChild(cb)
   })
 }
