@@ -4,9 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--
-    <script id="loader" src="https://www.juncture-digital.io/js/juncture.js" data-ghbase="{{site.github.owner_name}}/{{site.github.repository_name}}/{{site.github.source.branch}}/{{page.path}}"></script>
-    -->
+    <link href="https://www.juncture-digital.io/css/juncture.css" rel="stylesheet">
     <script>
       (function() {
         window.jekyll = {site:{baseurl:'{{site.baseurl}}', contentSelector:'{{site.contentSelector}}', github:{owner_name:'{{site.github.owner_name}}',repository_name:'{{site.github.repository_name}}',source:{branch:'{{site.github.source.branch}}'}}},page:{path:'{{page.path}}',dir:'{{page.dir}}',name:'{{page.name}}',contentSelector:'{{page.contentSelector}}'}}
@@ -17,6 +15,10 @@
         window.dynamicBaseUrl = baseUrl;
       })();
     </script>
+    <style>
+      body { opacity: 0; transition: opacity 0.5s ease-in-out; }
+    </style>
+
   </head>
 
   <body>
