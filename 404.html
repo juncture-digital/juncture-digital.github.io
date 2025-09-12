@@ -1,22 +1,21 @@
 <!DOCTYPE html>
-<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
+<html lang="en">
 
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://www.juncture-digital.io/css/juncture.css" rel="stylesheet">
+
     <script>
       (function() {
-        window.jekyll = {site:{baseurl:'{{site.baseurl}}', contentSelector:'{{site.contentSelector}}', github:{owner_name:'{{site.github.owner_name}}',repository_name:'{{site.github.repository_name}}',source:{branch:'{{site.github.source.branch}}'}}},page:{path:'{{page.path}}',dir:'{{page.dir}}',name:'{{page.name}}',contentSelector:'{{page.contentSelector}}'}}
-        var baseUrl = (window.location.port === '4200')
-          ? 'http://localhost:4200'
-          : 'https://www.juncture-digital.io';
-        document.write('<link rel="stylesheet" href="' + baseUrl + '/css/index.css">');
-        window.dynamicBaseUrl = baseUrl;
+        var baseUrl = ['4000', '4200'].includes(window.location.port) ? `http://localhost:${window.location.port}` : 'https://www.juncture-digital.io';
+        document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: `${baseUrl}/css/juncture.css`} ))
+        document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: `${baseUrl}/css/index.css`} ))
+        window.dynamicBaseUrl = baseUrl;      
       })();
     </script>
+
     <style>
-      body { opacity: 0; transition: opacity 0.5s ease-in-out; }
+      body { opacity: 0; transition: opacity 0.5s ease-in-out; max-width: 1000px; margin: auto; }
     </style>
 
   </head>
@@ -36,6 +35,28 @@
 <script src="https://cdn.jsdelivr.net/npm/markdown-it-footnote@4.0.0/dist/markdown-it-footnote.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it-deflist@3.0.0/dist/markdown-it-deflist.min.js"></script>
 <script type="module">
+
+  const addScript = async () => {
+    var baseUrl = (window.location.port === '4200') ? 'http://localhost:4200' : 'https://www.juncture-digital.io';
+
+    let [owner, repo, ...rest] = location.pathname.split('/').filter(p => p)
+    rest = rest.filter(p => p !== 'undefined')
+    let branch
+    if (rest[0] === 'main' || rest[0] === 'master') branch = rest.shift()
+    else {
+      const repoBranches = await branches(owner, repo)
+      if (repoBranches?.length === 1) branch = repoBranches[0]
+      else branch = await defaultBranch(owner, repo)
+    }
+    let path = rest ? rest.join('/') : ''
+
+    window.jekyll = {github: { owner_name: owner, repository_name: repo, source: { branch: branch } } }
+    let ghbase = `${owner}/${repo}/${branch}`
+    const scriptEl = Object.assign(document.createElement('script'), { id: 'loader', src: `${baseUrl}/js/juncture.js`} );
+    
+    scriptEl.dataset.ghbase = ghbase;
+    document.body.append(scriptEl);
+  }
 
   const branches = async (acct, repo) => {
     let resp = await fetch(`https://api.github.com/repos/${acct}/${repo}/branches`, {headers: { Accept: 'application/vnd.github+json' } })
@@ -85,8 +106,8 @@
       return resp.content
     } else {
       let promises = [
-        getGhFile(owner, repo, branch, path ? `${path}/README.md` : 'README.md'),
-        getGhFile(owner, repo, branch, path ? `${path}/index.md` : 'index.md')
+        getGhFile(owner, repo, branch, path ? `${path}/index.md` : 'index.md'),
+        getGhFile(owner, repo, branch, path ? `${path}/README.md` : 'README.md')
       ]
       if (path) promises.push(getGhFile(owner, repo, branch, `${path}.md`))
       return await Promise.all(promises).then(resp => { 
@@ -114,6 +135,7 @@
   let main = document.querySelector('main')
 
   let [owner, repo, ...rest] = location.pathname.split('/').filter(p => p)
+  rest = rest.filter(p => p !== 'undefined')
   let branch
   if (rest[0] === 'main' || rest[0] === 'master') {
     branch = rest.shift()
@@ -122,7 +144,11 @@
     if (repoBranches?.length === 1) branch = repoBranches[0]
     else branch = await defaultBranch(owner, repo)
   }
-  let path = rest.join('/')
+  let path = rest ? rest.join('/') : ''
+  window.jekyll = {github:{owner_name:owner,repository_name:repo,source:{branch:branch}}}
+
+  console.log(`404: owner=${owner}, repo=${repo}, branch=${branch}, rest=${rest}, path=${path}`)
+  history.pushState({}, '', path ? `/${owner}/${repo}/${branch}/${path}` : `/${owner}/${repo}/${branch}`);
 
   let markdown = await getGhMarkdown(owner, repo, branch, path)
   if (!markdown) markdown = await getLocalMarkdown()
@@ -167,13 +193,17 @@
 
     main.setAttribute('style', 'padding:0 1em;' + (frontMatter['max-width'] ? ` max-width:${frontMatter['max-width']}; margin:0 auto;` : ''))
     main.innerHTML = (style ? `${style.outerHTML}\n` : '') + body.innerHTML
+
+    addScript()
     
+    /*
     let junctureScript = document.createElement('script')
     junctureScript.id = 'junctureScript';
     junctureScript.src = `${window.dynamicBaseUrl}/js/index.js`
     junctureScript.dataset.ghbase = `${owner}/${repo}/${branch}/${path}`
     junctureScript.type = 'module'
     document.body.appendChild(junctureScript)
+    */
 
   } else {
     main.innerHTML = `<div class="container">
