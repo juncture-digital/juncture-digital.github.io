@@ -31,6 +31,13 @@ Many of the image-specific attributes used in the ve-image viewer are based on t
 
 **[nocaption](#basic-examples)** (_boolean_):  This property inhibits the display of the caption at the bottom of the image.
 
+**[base](#basic-examples)** (_url_):  Base URL for resolving relative `src` or `annos` references.
+
+**[ghbase](#basic-examples)** (_string_):  GitHub base reference used when resolving relative paths for GitHub-hosted content.
+
+**[format](#basic-examples)** (_string_):  File format for the returned image. Common values include `jpg`, `png`, `tif`, and `webp`. Default is `jpg`.
+
+
 **[options](#basic-examples)** (_string_):  The _options_ property combines the `region`, `size`, `rotation`, `quality`, and `format` attributes into a single value.  
 
 **[quality](#basic-examples)** (_string_):  The quality property determines whether the image is delivered in color, grayscale or black and white.  Recognized values for this property are `color`, `gray`, `bitonal`, `default`.  The default value used by the Juncture IIIF image server is `color`.
@@ -107,7 +114,13 @@ Many of the image-specific attributes used in the ve-image viewer are based on t
 
 ## Smart Links
 
-**zoomto** - The `zoomto` Smart Link repositions the image viewport to a cropped region specified in the first argument following the image id and action in the Smart Link URL.  The cropped region to display is defined using the usual image `region` property syntax.
+Smart Links let you control the image viewer interactively.
+
+- **zoomto** - Repositions the image viewport to a cropped region specified in the first argument following the image id and action in the Smart Link URL.  The cropped region to display is defined using the usual image `region` property syntax.
+- **gotopage** - Jumps to a specific image/page in a multi-image manifest (by sequence number).
+- **gotopageid** - Jumps to a specific image/page in a multi-image manifest (by page label/id).
+- **getimageurl** - Returns the current image URL being displayed.
+
 
 ## Examples
 
