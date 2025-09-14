@@ -954,10 +954,11 @@ document.querySelectorAll('.post-image').forEach((el) => {
   }
 });
 
-let selectors = ['.post-content', '.page-content', 'body']
+let selectors = ['.post-content', '.page-content']
 if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
 for (let selector of selectors) {
   let el = document.querySelector(selector)
+  console.log(el)
   if (el) {
     // document.body.style.opacity = 0;
     // document.body.style.transition = 'opacity 0.5s ease-in-out';
