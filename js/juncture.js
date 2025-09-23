@@ -9,6 +9,7 @@ if (!selector) { // infer selector if not provided
   if (parentElement?.id) selector = `#${parentElement.id}`;
   else if (parentElement?.className) {
     const classes = parentElement.className.trim().split(/\s+/).join('.');
+    console.log(classes)
     selector += `.${classes}`;
   }
 }
@@ -18,7 +19,8 @@ const addScript = () => {
     const scriptEl = Object.assign(document.createElement('script'), { id: 'junctureScript', src: `${baseUrl}/js/index.js`, type: 'module' } );
     if (ghbase) scriptEl.dataset.ghbase = ghbase;
     if (selector) scriptEl.dataset.selector = selector;
-    document.body.appendChild(scriptEl);
+    // document.body.appendChild(scriptEl);
+    document.write(scriptEl)
     added = true;
   }
 }
