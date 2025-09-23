@@ -7,6 +7,7 @@ if (!selector) { // infer selector if not provided
   if (parentNode?.id) selector = `#${parentNode.id}`;
   else if (parentNode?.className) selector = `.${parentNode.className.trim().split(/\s+/).join('.')}`;
 }
+console.log(`selector=${selector}`)
 let added = false;
 const addTags = () => {
   if (!added) { 
@@ -14,6 +15,7 @@ const addTags = () => {
     const scriptEl = Object.assign(document.createElement('script'), { id: 'junctureScript', src: `${baseUrl}/js/index.js`, type: 'module' } );
     if (ghbase) scriptEl.dataset.ghbase = ghbase;
     if (selector) scriptEl.dataset.selector = selector;
+    console.log(scriptEl)
     parentNode.insertBefore(scriptEl, me);
     parentNode.insertBefore(styleEl, me);
     added = true
