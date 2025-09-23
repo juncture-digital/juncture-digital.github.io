@@ -2,6 +2,18 @@ var baseUrl = (window.location.port === '4100') ? 'http://localhost:3000' : ['42
 document.write(`<link rel="stylesheet" href="${baseUrl}/css/juncture.css">`);
 const ghbase = document.currentScript.dataset.ghbase;
 const selector = document.currentScript.dataset.selector;
+
+if (!selector) { // infer selector if not provided
+  let parentElement = document.currentScript?.parentElement
+  console.log(parentElement)
+  if (parentElement?.id) selector = `#${parentElement.id}`;
+  else if (parentElement?.className) {
+    const classes = el.className.trim().split(/\s+/).join('.');
+    selector += `.${classes}`;
+  }
+}
+console.log(selector)
+
 let added = false;
 const addScript = () => {
   if (!added) { 
