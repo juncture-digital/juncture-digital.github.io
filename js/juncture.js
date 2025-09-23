@@ -5,6 +5,7 @@ let selector = document.currentScript.dataset.selector;
 
 if (!selector) { // infer selector if not provided
   let parentElement = document.currentScript?.parentElement
+  console.log(parentElement)
   if (parentElement?.id) selector = `#${parentElement.id}`;
   else if (parentElement?.className) {
     const classes = parentElement.className.trim().split(/\s+/).join('.');
