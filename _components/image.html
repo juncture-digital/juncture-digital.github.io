@@ -409,14 +409,14 @@
 
     const showDialog = () => {
       let parsed = parseManifest()
-      let source = props.source || parsed.metadata.find((item) => item.label == 'source_url' || item.label == 'source')?.value[0]
+      let source = props.source || parsed?.metadata.find((item) => item.label == 'source_url' || item.label == 'source')?.value[0]
       let isInternetArchiveResource = source?.indexOf('https://archive.org/') === 0
       let tag = isInternetArchiveResource ? 'iframe' : 'image'
       let aspect = isInternetArchiveResource ? 1 : imageAspect
       let kwargs = isInternetArchiveResource
         ? { tag, aspect, src: source }
         : { ...Object.fromEntries(Object.entries(props).filter(([_, value]) => value !== null && value !== false)),
-            ...{aspect, tag, iiif: true, cover: true } }
+            ...{aspect, tag, iiif: parsed !== undefined, cover: true } }
       window.parent.postMessage({ type: 'showDialog', props: { kwargs } }, '*');
     }
 
@@ -497,8 +497,13 @@
       let imgUrl
       if (props.src.indexOf('http') === 0) {
         props.url = props.src
-        imgUrl = `${imageServiceUrl}/${encodeURIComponent(props.src)}`
-        props.manifest = `${iiifServiceUrl}/${encodeURIComponent(props.src)}/manifest.json`
+        let parsedUrl = new URL(props.src)
+        if (['127.0.0.1', '::1', 'localhost'].includes(parsedUrl.hostname)) {
+          imgUrl = props.src
+        } else {
+          imgUrl = `${imageServiceUrl}/${encodeURIComponent(props.src)}`
+          props.manifest = `${iiifServiceUrl}/${encodeURIComponent(props.src)}/manifest.json`
+        }
       } else if (props.src.indexOf('wc:') === 0 || props.src.indexOf('wikimedia.org') > -1 || props.src.indexOf('wikipedia.org') > -1 && props.src.indexOf('/media/File:') > -1) {
         let mwFile = props.src.replace(/^wc:/,'').replace(/Special:FilePath\//, 'File:').split('File:').pop()
         props.url = `wc:${mwFile}`
@@ -535,7 +540,7 @@
         }
       }
       if (!props.iiif && !props.region) loadImage(imgUrl)
-      loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
+      if (props.manifest) loadManifest(props.manifest).then(_ => { if (props.iiif) initViewer() })
     
     } else if (props.manifest) {
       if (!props.manifest.startsWith('http')) {
@@ -554,7 +559,8 @@
 
     setCaption()
 
-    const parseManifest = () =>{
+    const parseManifest = () => {
+      if (!iiifManifest) return
       const valueOf = (langObj, language) => {
         language = language || props.language
         return typeof langObj === 'object' && !Array.isArray(langObj)
