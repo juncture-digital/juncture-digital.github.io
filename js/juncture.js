@@ -20,8 +20,16 @@ const addScript = () => {
     if (ghbase) scriptEl.dataset.ghbase = ghbase;
     if (selector) scriptEl.dataset.selector = selector;
     // document.body.appendChild(scriptEl);
-    document.write(scriptEl)
+    document.currentScript.insertAdjacentElement('afterend', scriptEl);
+
+    /*
+    let scriptTag = `<script id="junctureScript" src="${baseUrl}/js/index.js" type="module"`
+    if (ghbase) scriptTag += ` data-ghbase="${ghbase}"`
+    if (selector) scriptTag += ` data-selector="${selector}"`
+    scriptTag += '></script>'
+    document.write(scriptTag)
     added = true;
+    */
   }
 }
 if (document.readyState !== 'loading') addScript();
