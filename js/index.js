@@ -954,21 +954,9 @@ document.querySelectorAll('.post-image').forEach((el) => {
   }
 });
 
-let selector = document.getElementById('junctureScript')?.dataset.selector;
-console.log(selector)
-
-// let selectors = ['.post-content', '.page-content', 'article']
-// if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
-// for (let selector of selectors) {
-  let el = document.querySelector(selector)
-  if (el) {
-    console.log(el)
-    // document.body.style.opacity = 0;
-    // document.body.style.transition = 'opacity 0.5s ease-in-out';
-    processPage(el)
-    document.body.style.opacity = 1
-    // break
-  }
-// }
-
-// document.querySelectorAll('[id$="-csv"],[id$="-tsv"]').forEach(el => { console.log(el.textContent) })
+let el = document.querySelector(document.getElementById('junctureScript')?.dataset.selector)
+if (el) {
+  console.log(el)
+  processPage(el)
+  document.body.style.opacity = 1
+}
