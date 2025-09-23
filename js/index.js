@@ -197,7 +197,7 @@ const restructureMarkdownToSections = (contentEl) => {
         // Determine the heading level (e.g., "H2" -> 2)
         const headingLevel = parseInt(node.tagName[1], 10);
         
-        // Pop sections from the stack until we find one with a lower level.
+      // Pop sections from the stack until we find one with a lower level.
         while (stack.length > 0 && stack[stack.length - 1].level >= headingLevel) {
           stack.pop();
         }
@@ -206,7 +206,7 @@ const restructureMarkdownToSections = (contentEl) => {
         const section = document.createElement('section');
         
         // Transfer any id, class, and style attributes from the heading to the section.
-        ['id', 'class', 'style', 'click', 'target'].forEach(attr => {
+        ['id', 'class', 'style', 'click', 'href', 'target'].forEach(attr => {
           if (node.hasAttribute(attr)) {
             section.setAttribute(attr, node.getAttribute(attr));
             node.removeAttribute(attr);
@@ -284,24 +284,25 @@ const makeCards = (rootEl) => {
 
       // --- Card Header ---
       const subHeading = sub.querySelector('h1, h2, h3, h4, h5, h6');
-      const firstLink = sub.querySelector('a[href]');
-      const title = firstLink?.innerHTML || `<strong>${subHeading.textContent}</strong>`
-
-      if (subHeading) {
-        const header = document.createElement('div');
-        header.setAttribute('slot', 'header');
+      const title = subHeading.textContent
+      const href = sub.getAttribute('href')
         
-        if (firstLink) {
-          const link = document.createElement('a');
-          link.href = firstLink.getAttribute('href');
-          link.innerHTML = title;
-          header.appendChild(link);
-          firstLink.parentElement.remove()
-        } else {
-          header.innerHTML = title;
-        }
-        card.appendChild(header);
+      const header = document.createElement('div');
+      header.setAttribute('slot', 'header');
+      header.innerHTML = title;
+
+      if (href) {
+        card.dataset.href = href
+        card.dataset.target = sub.getAttribute('target') || ''
+        card.style.cursor = 'pointer'
+        card.addEventListener('click', (e) => {
+          let href = e.target.closest('[data-href]')?.dataset.href
+          let target = e.target.closest('[data-href]')?.dataset.target
+          if (target === '_blank') window.open(href)
+          else location.href = href
+        })
       }
+      card.appendChild(header);
 
       // --- Card Image ---
       const image = sub.querySelector('img');
@@ -317,23 +318,9 @@ const makeCards = (rootEl) => {
       // Create a container for any paragraphs or lists.
       const contentWrapper = document.createElement('div');
       // Gather any paragraphs or lists (skip headings and images)
-      const contentElements = Array.from(sub.children).filter(el => {
-        return !/^H[1-6]$/.test(el.tagName) && el.tagName.toLowerCase() !== 'img';
-      });
-      if (contentElements.length > 1) {
-        let details = document.createElement('details')
-        contentWrapper.appendChild(details)
-        let summary = document.createElement('summary')
-        summary.innerHTML = contentElements[0].innerHTML
-        details.appendChild(summary)
-        for (let i = 1; i < contentElements.length; i++) {
-          details.appendChild(contentElements[i].cloneNode(true))
-        }
-      } else {
-        contentElements.forEach(el => {
-          contentWrapper.appendChild(el.cloneNode(true));
-        });      
-      }
+      Array.from(sub.children)
+        .filter(el => { return !/^H[1-6]$/.test(el.tagName) && el.textContent; })
+        .forEach(el => contentWrapper.appendChild(el))
       card.appendChild(contentWrapper);
 
       // Add the card to the grid.
@@ -404,10 +391,19 @@ const makeTabs = (rootEl) => {
 }
 
 const makeDetails = (rootEl) => {
-  rootEl.querySelectorAll('.details, .example').forEach(el => {
+  rootEl.querySelectorAll('.details').forEach(el => {
+    const childText = Array.from(el.childNodes).map(c => c.innerHTML || c.nodeValue).filter(text => text?.trim())
+    let details = document.createElement('details')
+    details.addEventListener('click', (e) => e.stopPropagation());
+    details.innerHTML = `
+      <summary>${childText[0]}</summary
+      <div class="details-content">${childText.slice(1).join('\n')}</div>`
+    el.replaceWith(details)
+  })
+  rootEl.querySelectorAll('.example').forEach(el => {
     let details = document.createElement('details')
     // details.setAttribute('markdown', '1')
-    if (el.className.indexOf('example') >= 0) details.classList.add('example')
+    details.classList.add('example')
     if (el.tagName === 'SECTION') {
       details.innerHTML = el.innerHTML
         .replace(/<h[1-6]>/,'<summary>')
