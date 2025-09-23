@@ -954,21 +954,21 @@ document.querySelectorAll('.post-image').forEach((el) => {
   }
 });
 
-console.log(document.currentScript.parentElement);
 let selector = document.getElementById('junctureScript')?.dataset.selector;
 if (!selector) { // infer selector if not provided
-  if (parentElement.id) selector = `#${parentElement.id}`;
-  else if (parentElement.className) {
+  console.log(document.currentScript);
+  let parentElement = document.currentScript?.parentElement
+  if (parentElement?.id) selector = `#${parentElement.id}`;
+  else if (parentElement?.className) {
     const classes = el.className.trim().split(/\s+/).join('.');
     selector += `.${classes}`;
   }
 }
 console.log(selector)
 
-// let selectors = definedSelector ? [definedSelector] : ['.post-content', '.page-content', fallbackSelector]
-// let selectors = ['.post-content', '.page-content', 'article']
-// if (selector) selectors = [selector, ...selectors]
-// for (let selector of selectors) {
+let selectors = ['.post-content', '.page-content', 'article']
+if (document.getElementById('junctureScript')?.dataset.selector) selectors = [document.getElementById('junctureScript').dataset.selector, ...selectors]
+for (let selector of selectors) {
   let el = document.querySelector(selector)
   if (el) {
     console.log(el)
@@ -976,8 +976,8 @@ console.log(selector)
     // document.body.style.transition = 'opacity 0.5s ease-in-out';
     processPage(el)
     document.body.style.opacity = 1
-    // break
+    break
   }
-// }
+}
 
 // document.querySelectorAll('[id$="-csv"],[id$="-tsv"]').forEach(el => { console.log(el.textContent) })
