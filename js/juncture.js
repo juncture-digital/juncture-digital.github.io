@@ -1,11 +1,8 @@
-const myScriptTag = document.currentScript;
-console.log(myScriptTag.src);  // the URL of the loaded file
-console.log(myScriptTag.dataset);  // access data-* attributes
-
 var baseUrl = (window.location.port === '4100') ? 'http://localhost:3000' : ['4200'].includes(window.location.port) ? `http://localhost:${window.location.port}` : 'https://www.juncture-digital.io';
 document.write(`<link rel="stylesheet" href="${baseUrl}/css/juncture.css">`);
-const ghbase = document.getElementById('loader')?.dataset.ghbase || '{{site.github.owner_name}}/{{site.github.repository_name}}/{{site.github.source.branch}}/{{page.path}}';
-const selector = document.getElementById('loader')?.dataset.selector;
+const ghbase = document.currentScript.dataset.ghbase || '{{site.github.owner_name}}/{{site.github.repository_name}}/{{site.github.source.branch}}/{{page.path}}';
+const selector = document.currentScript.dataset.selector;
+console.log(`ghbase=${ghbase} selector=#${selector}`)
 let added = false;
 const addScript = () => {
   if (!added) { 
