@@ -14,10 +14,8 @@ const addTags = () => {
     const scriptEl = Object.assign(document.createElement('script'), { id: 'junctureScript', src: `${baseUrl}/js/index.js`, type: 'module' } );
     if (ghbase) scriptEl.dataset.ghbase = ghbase;
     if (selector) scriptEl.dataset.selector = selector;
-    
     parentNode.insertBefore(styleEl, me.nextSibling);
-    parentNode.insertBefore(scriptEl, styleEl);
-
+    parentNode.insertBefore(scriptEl, styleEl.nextSibling);
     added = true
   }
 }
