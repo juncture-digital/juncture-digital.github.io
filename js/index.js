@@ -954,7 +954,7 @@ document.querySelectorAll('.post-image').forEach((el) => {
   }
 });
 
-let selectors = document.getElementById('junctureScript')?.dataset.selector.split() || [];
+let selectors = document.getElementById('junctureScript')?.dataset.selector?.split() || [];
 for (let i = 0; i < selectors.length; i++) {
   let el = document.querySelector(selector)
   if (el) {
