@@ -232,6 +232,7 @@
       
       window.parent.postMessage(JSON.stringify({ type: 'getId' }), '*');
       window.addEventListener('message', (event) => {
+        console.log(event.data)
         if (!event.data) return;
         let eventData = JSON.parse(event.data)
         let action = eventData.action?.toLowerCase()

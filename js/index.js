@@ -515,27 +515,31 @@ const addActionLinks = (rootEl) => {
     if (!iframe.id) return
     rootEl.querySelectorAll('a').forEach(a => {
       let href = a.href || a.getAttribute('data-href')
-      let path = href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
-      const targetIdx = path?.findIndex(p => p == iframe.id)
-      if (targetIdx >= 0) {
-        if (isStatic) {
+      let target, action, args, text
+      let actionAttribute = Array.from(a.attributes).filter(attr => !['href', 'class', 'id', 'target'].includes(attr.name)).pop()
+      if (actionAttribute) {
+        action = actionAttribute.name;
+        [target, ...args] = actionAttribute.value.split('/').filter(p => p)
+        if (iframe.id !== target) return
+      } else {
+        let path = href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
+        const targetIdx = path?.findIndex(p => p == iframe.id);
+        if (!targetIdx > -1) return
+        [target, action, ...args] = path.slice(targetIdx).slice('/')
+      }
+      if (isStatic) {
+        a.removeAttribute('href')
+        a.style.color = 'inherit'
+      } else{
+        if (a.href) {
+          a.setAttribute('data-href', href)
+          a.classList.add('trigger')
           a.removeAttribute('href')
-          a.style.color = 'inherit'
-        } else{
-          path = path.slice(targetIdx)
-          let action = path[1]
-          let args = path.slice(2)
-          let text = a.getAttribute('label') || a.dataset.label || a.textContent
-          if (a.href) {
-            a.setAttribute('data-href', href)
-            a.classList.add('trigger')
-            a.removeAttribute('href')
-            a.style.cursor = 'pointer'
-            a.addEventListener('click', () => {
-              let msg = { event: 'action', action, text, args }
-              document.getElementById(iframe.id)?.contentWindow.postMessage(JSON.stringify(msg), '*')
-            })
-          }
+          a.style.cursor = 'pointer'
+          a.addEventListener('click', () => {
+            let msg = { event: 'action', action, text, args }
+            document.getElementById(iframe.id)?.contentWindow.postMessage(JSON.stringify(msg), '*')
+          })
         }
       }
     })
@@ -807,8 +811,11 @@ export async function imageDataUrl(url, region, dest) {
 const makeEntityPopups = async () => {
   let qids = new Set()
   Array.from(document.body.querySelectorAll('a')).forEach(async a => {
-    let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
-    let qid = path?.find(p => /Q\d+$/.test(p))?.split('#').pop()
+    let qid = a.getAttribute('qid')
+    if (!qid) {
+      let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
+      qid = path?.find(p => /Q\d+$/.test(p))?.split('#').pop()
+    }
     if (qid) {
       if (isStatic) {
         a.removeAttribute('href')
@@ -819,8 +826,11 @@ const makeEntityPopups = async () => {
   })
   let entities = await getEntityData(Array.from(qids), 'en')
   Array.from(document.body.querySelectorAll('a')).forEach(async a => {
-    let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
-    let qid = path?.find(p => /Q\d+$/.test(p))?.split('#').pop()
+    let qid = a.getAttribute('qid')
+    if (!qid) {
+      let path = a.href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
+      qid = path?.find(p => /Q\d+$/.test(p))?.split('#').pop()
+    }
     let entity = entities[qid]
     if (!entity) return
     let dd = document.createElement('sl-dropdown')
