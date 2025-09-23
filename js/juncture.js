@@ -1,14 +1,15 @@
+const me = document.currentScript
+const parentNode = me?.parentNode
+console.log(parentNode)
 var baseUrl = (window.location.port === '4100') ? 'http://localhost:3000' : ['4200'].includes(window.location.port) ? `http://localhost:${window.location.port}` : 'https://www.juncture-digital.io';
 document.write(`<link rel="stylesheet" href="${baseUrl}/css/juncture.css">`);
 const ghbase = document.currentScript.dataset.ghbase;
 let selector = document.currentScript.dataset.selector;
 
 if (!selector) { // infer selector if not provided
-  let parentElement = document.currentScript?.parentElement
-  console.log(parentElement)
-  if (parentElement?.id) selector = `#${parentElement.id}`;
-  else if (parentElement?.className) {
-    const classes = parentElement.className.trim().split(/\s+/).join('.');
+  if (parentNode?.id) selector = `#${parentNode.id}`;
+  else if (parentNode?.className) {
+    const classes = parentNode.className.trim().split(/\s+/).join('.');
     console.log(classes)
     selector += `.${classes}`;
   }
@@ -20,8 +21,7 @@ const addScript = () => {
     if (ghbase) scriptEl.dataset.ghbase = ghbase;
     if (selector) scriptEl.dataset.selector = selector;
     // document.body.appendChild(scriptEl);
-    document.currentScript.insertAdjacentElement('afterend', scriptEl);
-
+    parentNode.insertBefore(scriptEl, me);
     /*
     let scriptTag = `<script id="junctureScript" src="${baseUrl}/js/index.js" type="module"`
     if (ghbase) scriptTag += ` data-ghbase="${ghbase}"`
