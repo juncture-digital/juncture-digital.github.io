@@ -955,8 +955,5 @@ document.querySelectorAll('.post-image').forEach((el) => {
 });
 
 let el = document.querySelector(document.getElementById('junctureScript')?.dataset.selector)
-if (el) {
-  console.log(el)
-  processPage(el)
-  document.body.style.opacity = 1
-}
+if (el) processPage(el)
+document.body.style.opacity = 1
