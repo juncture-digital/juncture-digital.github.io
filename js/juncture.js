@@ -2,7 +2,6 @@ var baseUrl = (window.location.port === '4100') ? 'http://localhost:3000' : ['42
 document.write(`<link rel="stylesheet" href="${baseUrl}/css/juncture.css">`);
 const ghbase = document.currentScript.dataset.ghbase;
 const selector = document.currentScript.dataset.selector;
-console.log(`ghbase=${ghbase} selector=${selector}`)
 let added = false;
 const addScript = () => {
   if (!added) { 
