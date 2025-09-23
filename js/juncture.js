@@ -8,7 +8,7 @@ if (!selector) { // infer selector if not provided
   console.log(parentElement)
   if (parentElement?.id) selector = `#${parentElement.id}`;
   else if (parentElement?.className) {
-    const classes = el.className.trim().split(/\s+/).join('.');
+    const classes = parentElement.className.trim().split(/\s+/).join('.');
     selector += `.${classes}`;
   }
 }
