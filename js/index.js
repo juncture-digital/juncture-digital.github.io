@@ -520,7 +520,8 @@ const addActionLinks = (rootEl) => {
       } else {
         let path = href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
         const targetIdx = path?.findIndex(p => p == iframe.id);
-        if (!targetIdx > -1) return
+        console.log(targetIdx);
+        if (targetIdx < 0) return
         [target, action, ...args] = path.slice(targetIdx).slice('/')
       }
       if (isStatic) {
