@@ -961,8 +961,10 @@ document.querySelectorAll('.post-image').forEach((el) => {
   }
 });
 
-let selectors = document.getElementById('junctureScript')?.dataset.selector?.split() || [];
+let selectors = document.getElementById('junctureScript')?.dataset.selector?.split() || ['main.page-content'];
+console.log('Using selector(s):', selectors);
 for (let i = 0; i < selectors.length; i++) {
+  let selector = selectors[i]
   let el = document.querySelector(selector)
   if (el) {
     processPage(el)
