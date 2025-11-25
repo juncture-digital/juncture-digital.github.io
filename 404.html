@@ -49,9 +49,10 @@
       else branch = await defaultBranch(owner, repo)
     }
     let path = rest ? rest.join('/') : ''
+    console.log(`addScript: owner=${owner}, repo=${repo}, branch=${branch}, rest=${rest}, path=${path}`)
 
     window.jekyll = {github: { owner_name: owner, repository_name: repo, source: { branch: branch } } }
-    let ghbase = `${owner}/${repo}/${branch}`
+    let ghbase = `${owner}/${repo}/${branch}/${path}`
     const scriptEl = Object.assign(document.createElement('script'), { id: 'loader', src: `${baseUrl}/js/juncture.js`} );
     
     scriptEl.dataset.ghbase = ghbase;
