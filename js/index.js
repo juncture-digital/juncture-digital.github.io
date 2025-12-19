@@ -520,7 +520,6 @@ const addActionLinks = (rootEl) => {
       } else {
         let path = href?.split('/').slice(3).filter(p => p !== '#' && p !== '')
         const targetIdx = path?.findIndex(p => p == iframe.id);
-        console.log(targetIdx);
         if (targetIdx < 0) return
         [target, action, ...args] = path.slice(targetIdx).slice('/')
       }
@@ -915,6 +914,7 @@ const processPage = (content) => {
   document.querySelectorAll('.flex-grid').forEach(container => {
     packIframes(Array.from(container.children), content.clientWidth, 8, container.dataset?.target || (isMobile ? 160 : 200))
   })
+  return content;
 }
 
 // Handle drag-and-drop and copy/paste URLs from GitHub.  This provides a convenient way to view Juncture pages using a GitHub source.
@@ -967,7 +967,8 @@ for (let i = 0; i < selectors.length; i++) {
   let selector = selectors[i]
   let el = document.querySelector(selector)
   if (el) {
-    processPage(el)
+    const content = processPage(el);
+    try { callback(content); } catch (e) {}
     break
   }
 }
