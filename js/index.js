@@ -678,7 +678,7 @@ async function getEntityData(qids, language) {
 
       # BIND(NOW() AS ?timestamp)  # Forces fresh evaluation
 
-      ?item rdfs:label ?label . FILTER (LANG(?label) = "en")
+      OPTIONAL { ?item rdfs:label ?label . FILTER (LANG(?label) = "en") }
       OPTIONAL { ?item schema:description ?description . FILTER (LANG(?description) = "en") }
       OPTIONAL { ?item skos:altLabel ?alias . FILTER (LANG(?alias) = "en") }
       OPTIONAL { ?item wdt:P625 ?coords . }
@@ -702,7 +702,7 @@ async function getEntityData(qids, language) {
     let sparqlResp = await resp.json()
     sparqlResp.results.bindings.forEach(rec => {
       let qid = rec.item.value.split('/').pop()
-      let _entityData = {id: qid, label: rec.label.value}
+      let _entityData = {id: qid}
       if (rec.description) _entityData.description = rec.description.value
       if (rec.alias) _entityData.aliases = [rec.alias.value]
       if (rec.coords) _entityData.coords = rec.coords.value.slice(6,-1).split(' ').reverse().join(',')
